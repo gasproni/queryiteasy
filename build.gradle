@@ -1,0 +1,9 @@
+repositories {
+    mavenCentral()
+}
+
+apply plugin: 'java'
+
+dependencies {
+    testCompile 'junit:junit:4.12', 'org.mockito:mockito-all:1.10.19'
+}
