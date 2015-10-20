@@ -7,11 +7,14 @@ public class TransactionExecutor {
     private DataSource dataSource;
 
     public TransactionExecutor(DataSource dataSource) {
+        if (dataSource == null) {
+            throw new NullPointerException("dataSource cannot be null");
+        }
         this.dataSource = dataSource;
     }
 
     public void executeUpdate(UpdateTransaction transaction) {
-        SQLException.wrapException(() -> {
+        RuntimeSQLException.wrapException(() -> {
                     try (WrappedJDBCConnection connection = new WrappedJDBCConnection(dataSource.getConnection())) {
                         transaction.execute(connection);
                         connection.commit();
@@ -22,7 +25,7 @@ public class TransactionExecutor {
 
 
     public <ResultType> ResultType executeQuery(QueryTransaction<ResultType> transaction) {
-        return SQLException.wrapExceptionAndReturnResult(() -> {
+        return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
                     try (WrappedJDBCConnection connection = new WrappedJDBCConnection(dataSource.getConnection())) {
                         ResultType result = transaction.execute(connection);
                         connection.commit();

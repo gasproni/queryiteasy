@@ -54,9 +54,9 @@ public class TransactionExecutorTest {
             fail("Runtime exception expected");
         } catch (RuntimeException ignored) {
             InOrder order = inOrder(jdbcConnection);
+            order.verify(jdbcConnection, times(0)).commit();
             order.verify(jdbcConnection, times(1)).rollback();
             order.verify(jdbcConnection, times(1)).close();
-            order.verify(jdbcConnection, times(0)).commit();
         }
     }
 
@@ -74,7 +74,7 @@ public class TransactionExecutorTest {
     @Test
     public void returns_correct_query_result_list() throws java.sql.SQLException {
 
-        final List<Integer> result = Arrays.asList(1, 2, 3, 4);
+        final ArrayList<Integer> result = new ArrayList<>(Arrays.asList(1, 2, 3, 4));
 
         List<Integer> queryResult = transactionExecutor.executeQuery(connection -> result);
 

@@ -5,17 +5,17 @@ public class WrappedJDBCConnection implements CommittableConnection {
 
     public WrappedJDBCConnection(java.sql.Connection connection) {
         this.connection = connection;
-        SQLException.wrapException(() -> this.connection.setAutoCommit(false));
+        RuntimeSQLException.wrapException(() -> this.connection.setAutoCommit(false));
     }
 
     @Override
     public void commit() {
-        SQLException.wrapException(connection::commit);
+        RuntimeSQLException.wrapException(connection::commit);
     }
 
     @Override
     public void close() {
-        SQLException.wrapException(() -> {
+        RuntimeSQLException.wrapException(() -> {
             connection.rollback();
             connection.close();
         });
