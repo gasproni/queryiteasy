@@ -1,6 +1,9 @@
-package com.asprotunity.queryiteasy;
+package com.asprotunity.queryiteasy.internal;
 
-public class WrappedJDBCConnection implements CommittableConnection {
+import com.asprotunity.queryiteasy.connection.Connection;
+import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
+
+public class WrappedJDBCConnection implements Connection, AutoCloseable {
     private java.sql.Connection connection;
 
     public WrappedJDBCConnection(java.sql.Connection connection) {
@@ -8,7 +11,6 @@ public class WrappedJDBCConnection implements CommittableConnection {
         RuntimeSQLException.wrapException(() -> this.connection.setAutoCommit(false));
     }
 
-    @Override
     public void commit() {
         RuntimeSQLException.wrapException(connection::commit);
     }

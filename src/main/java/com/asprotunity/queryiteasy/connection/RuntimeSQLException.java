@@ -1,4 +1,4 @@
-package com.asprotunity.queryiteasy;
+package com.asprotunity.queryiteasy.connection;
 
 public class RuntimeSQLException extends RuntimeException {
     public RuntimeSQLException(java.sql.SQLException e) {
@@ -23,12 +23,12 @@ public class RuntimeSQLException extends RuntimeException {
 
     @FunctionalInterface
     public interface CodeBlock<ResultType> {
-        public ResultType executeAndReturnResult() throws java.sql.SQLException;
+        ResultType executeAndReturnResult() throws java.sql.SQLException;
     }
 
     @FunctionalInterface
     public interface VoidCodeBlock {
-        public void execute() throws java.sql.SQLException;
+        void execute() throws java.sql.SQLException;
     }
 
 }

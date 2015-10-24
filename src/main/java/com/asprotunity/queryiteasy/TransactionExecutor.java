@@ -1,5 +1,8 @@
 package com.asprotunity.queryiteasy;
 
+import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
+import com.asprotunity.queryiteasy.internal.WrappedJDBCConnection;
+
 import javax.sql.DataSource;
 
 public class TransactionExecutor {
