@@ -1,5 +1,6 @@
 package com.asprotunity.queryiteasy;
 
+import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -29,6 +30,12 @@ public class TransactionExecutorTest {
         when(dataSource.getConnection()).thenReturn(jdbcConnection);
         transactionExecutor = new TransactionExecutor(dataSource);
 
+    }
+
+
+    @Test(expected = NullPointerException.class)
+    public void throws_exception_when_datasource_is_null() {
+        new TransactionExecutor(null);
     }
 
     @Test
