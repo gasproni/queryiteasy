@@ -15,7 +15,7 @@ import static com.asprotunity.queryiteasy.connection.PositionalBinder.bind;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
-public class InsertionAndUpdateTest {
+public class ValuesAreInsertedInDBCorrectlyTest {
 
 
     private JDBCDataSource dataSource;
@@ -40,7 +40,7 @@ public class InsertionAndUpdateTest {
 
 
     @Test
-    public void creates_table_and_inserts_correctly_no_bind_values() throws SQLException {
+    public void inserts_correctly_with_no_bind_values() throws SQLException {
 
         TransactionExecutor executor = new TransactionExecutor(dataSource);
 
@@ -56,7 +56,7 @@ public class InsertionAndUpdateTest {
 
 
     @Test
-    public void creates_table_and_inserts_correctly_with_one_bind_value() throws SQLException {
+    public void inserts_correctly_with_some_bind_values() throws SQLException {
 
         TransactionExecutor executor = new TransactionExecutor(dataSource);
 
@@ -74,6 +74,27 @@ public class InsertionAndUpdateTest {
         assertThat(expectedValues.get(0).name, is("aname"));
     }
 
+
+    @Test
+    public void queries_correctly_with_no_bind_values() throws SQLException {
+
+        TransactionExecutor executor = new TransactionExecutor(dataSource);
+
+        executor.executeUpdate(connection -> {
+            connection.executeUpdate("CREATE TABLE testtable (index INTEGER NOT NULL)");
+            connection.executeUpdate("INSERT INTO testtable (index) VALUES (10)");
+            connection.executeUpdate("INSERT INTO testtable (index) VALUES (11)");
+        });
+
+        List<Integer> result = executor.executeQuery(connection ->
+                        connection.executeQuery("SELECT index FROM testtable ORDER BY index ASC", row -> row.getInt("index"))
+        );
+
+
+        assertThat(result.size(), is(2));
+        assertThat(result.get(0), is(10));
+        assertThat(result.get(1), is(11));
+    }
 
     private <ResultType> List<ResultType> query(String sql, ResultSetMapper<ResultType> mapper) throws SQLException {
 

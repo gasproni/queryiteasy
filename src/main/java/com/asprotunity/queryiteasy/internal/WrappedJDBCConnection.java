@@ -1,9 +1,8 @@
 package com.asprotunity.queryiteasy.internal;
 
-import com.asprotunity.queryiteasy.connection.PositionalBinder;
-import com.asprotunity.queryiteasy.connection.Connection;
-import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
-import com.asprotunity.queryiteasy.connection.Statement;
+import com.asprotunity.queryiteasy.connection.*;
+
+import java.util.List;
 
 public class WrappedJDBCConnection implements Connection, AutoCloseable {
     private java.sql.Connection connection;
@@ -26,15 +25,17 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     }
 
     @Override
-    public void executeUpdate(String sql, PositionalBinder...binders) {
-        RuntimeSQLException.wrapException(() ->
-                {
-                    Statement statement = new WrappedPreparedStatement(connection.prepareStatement(sql));
-                    for (int index = 0; index < binders.length; ++index) {
-                        binders[index].apply(statement, index + 1);
-                    }
-                    statement.execute();
-                }
-        );
+    public void executeUpdate(String sql, PositionalBinder... binders) {
+        Statement statement = new WrappedPreparedStatement(connection, sql);
+        for (int index = 0; index < binders.length; ++index) {
+            binders[index].apply(statement, index + 1);
+        }
+        statement.execute();
+    }
+
+    @Override
+    public <ResultType> List<ResultType> executeQuery(String sql, RowMapper<ResultType> rowMapper) {
+        Statement statement = new WrappedPreparedStatement(connection, sql);
+        return statement.executeQuery(rowMapper);
     }
 }
