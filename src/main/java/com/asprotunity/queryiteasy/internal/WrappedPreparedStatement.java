@@ -24,7 +24,8 @@ public class WrappedPreparedStatement implements Statement {
     }
 
     @Override
-    public void executeBatch(Batch[] batches) {
+    public void executeBatch(Batch firstBatch, Batch...batches) {
+        addBatch(firstBatch);
         for (Batch batch : batches) {
             addBatch(batch);
         }

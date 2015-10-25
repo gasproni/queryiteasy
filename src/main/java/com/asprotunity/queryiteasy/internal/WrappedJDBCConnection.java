@@ -31,9 +31,9 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     }
 
     @Override
-    public void executeBatchUpdate(String sql, Batch... batches) {
+    public void executeBatchUpdate(String sql, Batch firstBatch, Batch... batches) {
         Statement statement = new WrappedPreparedStatement(connection, sql);
-        statement.executeBatch(batches);
+        statement.executeBatch(firstBatch, batches);
     }
 
     @Override

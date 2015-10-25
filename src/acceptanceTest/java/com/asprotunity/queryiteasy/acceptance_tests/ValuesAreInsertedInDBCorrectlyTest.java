@@ -108,13 +108,14 @@ public class ValuesAreInsertedInDBCorrectlyTest {
         executor.executeUpdate(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (index INTEGER NOT NULL, name VARCHAR(20) NOT NULL)");
 
-            Batch[] batches = new Batch[3];
-            for (int index = 0; index < 3; ++index) {
-                int value = index + 10;
+            Batch firstBatch = batch(bind(10), bind("aname10"));
+            Batch[] batches = new Batch[2];
+            for (int index = 0; index < 2; ++index) {
+                int value = index + 11;
                 batches[index] = batch(bind(value), bind("aname" + value));
             }
 
-            connection.executeBatchUpdate("INSERT INTO testtable (index, name) VALUES (?, ?)", batches);
+            connection.executeBatchUpdate("INSERT INTO testtable (index, name) VALUES (?, ?)", firstBatch, batches);
         });
 
         List<TestTableFields> expectedValues = query("SELECT * FROM testtable",
@@ -134,9 +135,10 @@ public class ValuesAreInsertedInDBCorrectlyTest {
 
         executor.executeUpdate(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (index INTEGER NOT NULL)");
-            connection.executeUpdate("INSERT INTO testtable (index) VALUES (10)");
-            connection.executeUpdate("INSERT INTO testtable (index) VALUES (11)");
-        });
+            connection.executeBatchUpdate("INSERT INTO testtable (index) VALUES (?)",
+                    batch(bind(10)),
+                    batch(bind(11)));
+            });
 
         List<Integer> result = executor.executeQuery(connection ->
                         connection.executeQuery("SELECT index FROM testtable ORDER BY index ASC", row -> row.getInt("index"))
@@ -156,11 +158,9 @@ public class ValuesAreInsertedInDBCorrectlyTest {
         executor.executeUpdate(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (index INTEGER NOT NULL, name VARCHAR(20) NOT NULL)");
 
-            for (int index = 10; index < 12; ++index) {
-                connection.executeUpdate("INSERT INTO testtable (index, name) VALUES (?, ?)",
-                        bind(index),
-                        bind("aname" + index));
-            }
+            connection.executeBatchUpdate("INSERT INTO testtable (index, name) VALUES (?, ?)",
+                    batch(bind(10), bind("aname10")),
+                    batch(bind(11), bind("aname11")));
         });
 
         List<TestTableFields> result = executor.executeQuery(connection ->
