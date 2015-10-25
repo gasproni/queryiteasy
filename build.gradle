@@ -3,8 +3,54 @@ repositories {
 }
 
 apply plugin: 'java'
+apply plugin: 'idea'
 apply plugin: 'findbugs'
+
+sourceSets {
+    acceptanceTest {
+        java {
+            'src/acceptanceTest/java'
+        }
+        resources {
+            'src/acceptanceTest/resources'
+        }
+        compileClasspath += main.output
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+task acceptanceTest(type: Test) {
+    description = 'Runs the acceptance tests'
+    group = 'verification'
+    testClassesDir = sourceSets.acceptanceTest.output.classesDir
+    classpath = sourceSets.acceptanceTest.runtimeClasspath
+    reports.junitXml.destination = '$buildDir/acceptance-test-results'
+    reports.html.destination = '$buildDir/reports/acceptanceTest'
+    dependsOn(test)
+}
+
+check {
+    dependsOn(acceptanceTest)
+}
+
+
+findbugs {
+    toolVersion = "3.0.1"
+    sourceSets = [sourceSets.main]
+    ignoreFailures = false
+    reportsDir = file("$project.buildDir/findbugsReports")
+    effort = "max"
+    reportLevel = "high"
+}
+
 
 dependencies {
     testCompile 'junit:junit:4.12', 'org.mockito:mockito-all:1.10.19'
+    acceptanceTestCompile 'junit:junit:4.12', 'org.hsqldb:hsqldb:2.3.3'
+}
+
+idea {
+    module {
+        scopes.TEST.plus += [configurations.acceptanceTestCompile]
+    }
 }

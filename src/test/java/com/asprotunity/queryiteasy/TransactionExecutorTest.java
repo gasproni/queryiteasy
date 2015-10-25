@@ -1,6 +1,5 @@
 package com.asprotunity.queryiteasy;
 
-import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -29,7 +28,6 @@ public class TransactionExecutorTest {
         jdbcConnection = Mockito.mock(java.sql.Connection.class);
         when(dataSource.getConnection()).thenReturn(jdbcConnection);
         transactionExecutor = new TransactionExecutor(dataSource);
-
     }
 
 
