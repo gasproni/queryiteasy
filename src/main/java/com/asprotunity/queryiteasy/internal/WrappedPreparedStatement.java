@@ -33,7 +33,8 @@ public class WrappedPreparedStatement implements Statement {
     }
 
     @Override
-    public <ResultType> List<ResultType> executeQuery(RowMapper<ResultType> rowMapper) {
+    public <ResultType> List<ResultType> executeQuery(RowMapper<ResultType> rowMapper, PositionalBinder...binders) {
+        applyBinders(binders);
         return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
             try (ResultSet rs = preparedStatement.executeQuery()) {
                 List<ResultType> result = new ArrayList<>();

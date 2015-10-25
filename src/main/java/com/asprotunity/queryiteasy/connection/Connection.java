@@ -5,6 +5,5 @@ import java.util.List;
 public interface Connection {
     void executeUpdate(String sql, PositionalBinder...binders);
     void executeBatchUpdate(String sql, Batch firstBatch, Batch...batches);
-
     <ResultType> List<ResultType> executeQuery(String sql, RowMapper<ResultType> rowMapper, PositionalBinder... binders);
 }

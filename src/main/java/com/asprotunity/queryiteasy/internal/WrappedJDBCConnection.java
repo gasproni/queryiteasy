@@ -39,9 +39,6 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     @Override
     public <ResultType> List<ResultType> executeQuery(String sql, RowMapper<ResultType> rowMapper, PositionalBinder... binders) {
         Statement statement = new WrappedPreparedStatement(connection, sql);
-        for (int index = 0; index < binders.length; ++index) {
-            binders[index].apply(statement, index + 1);
-        }
-        return statement.executeQuery(rowMapper);
+        return statement.executeQuery(rowMapper, binders);
     }
 }
