@@ -31,7 +31,7 @@ public class WrappedPreparedStatement implements Statement {
                 List<ResultType> result = new ArrayList<>();
 
                 while (rs.next()) {
-                    result.add(rowMapper.apply(new WrappedResultSet(rs)));
+                    result.add(rowMapper.map(new WrappedResultSet(rs)));
                 }
 
                 return result;

@@ -40,7 +40,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
 
 
     @Test
-    public void inserts_correctly_with_no_bind_values() throws SQLException {
+    public void inserts_with_no_bind_values() throws SQLException {
 
         TransactionExecutor executor = new TransactionExecutor(dataSource);
 
@@ -56,7 +56,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
 
 
     @Test
-    public void inserts_correctly_with_some_bind_values() throws SQLException {
+    public void inserts_with_some_bind_values() throws SQLException {
 
         TransactionExecutor executor = new TransactionExecutor(dataSource);
 
@@ -76,7 +76,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
 
 
     @Test
-    public void queries_correctly_with_no_bind_values() throws SQLException {
+    public void queries_with_no_bind_values() throws SQLException {
 
         TransactionExecutor executor = new TransactionExecutor(dataSource);
 
@@ -94,6 +94,34 @@ public class ValuesAreInsertedInDBCorrectlyTest {
         assertThat(result.size(), is(2));
         assertThat(result.get(0), is(10));
         assertThat(result.get(1), is(11));
+    }
+
+    @Test
+    public void queries_with_bind_values() throws SQLException {
+
+        TransactionExecutor executor = new TransactionExecutor(dataSource);
+
+        executor.executeUpdate(connection -> {
+            connection.executeUpdate("CREATE TABLE testtable (index INTEGER NOT NULL, name VARCHAR(20) NOT NULL)");
+
+            for (int index = 10; index < 12; ++index) {
+                connection.executeUpdate("INSERT INTO testtable (index, name) VALUES (?, ?)",
+                        bind(index),
+                        bind("aname" + index));
+            }
+        });
+
+        List<TestTableFields> result = executor.executeQuery(connection ->
+                        connection.executeQuery("SELECT index, name FROM testtable WHERE index = ? AND name = ?",
+                                row -> new TestTableFields(row.getInt("index"), row.getString("name")),
+                                bind(10),
+                                bind("aname10"))
+        );
+
+
+        assertThat(result.size(), is(1));
+        assertThat(result.get(0).index, is(10));
+        assertThat(result.get(0).name, is("aname10"));
     }
 
     private <ResultType> List<ResultType> query(String sql, ResultSetMapper<ResultType> mapper) throws SQLException {

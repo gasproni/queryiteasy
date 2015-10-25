@@ -1,11 +1,11 @@
 package com.asprotunity.queryiteasy.internal;
 
 import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
-import com.asprotunity.queryiteasy.connection.TableRow;
+import com.asprotunity.queryiteasy.connection.Row;
 
 import java.sql.ResultSet;
 
-public class WrappedResultSet implements TableRow {
+public class WrappedResultSet implements Row {
 
 
     private final ResultSet resultSet;
@@ -15,7 +15,12 @@ public class WrappedResultSet implements TableRow {
     }
 
     @Override
-    public int getInt(String rowName) {
-        return RuntimeSQLException.wrapExceptionAndReturnResult(() -> this.resultSet.getInt(rowName));
+    public int getInt(String columnName) {
+        return RuntimeSQLException.wrapExceptionAndReturnResult(() -> this.resultSet.getInt(columnName));
+    }
+
+    @Override
+    public String getString(String columnName) {
+        return RuntimeSQLException.wrapExceptionAndReturnResult(() -> this.resultSet.getString(columnName));
     }
 }
