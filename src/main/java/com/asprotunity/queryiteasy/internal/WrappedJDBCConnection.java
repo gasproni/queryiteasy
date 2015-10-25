@@ -27,10 +27,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     @Override
     public void executeUpdate(String sql, PositionalBinder... binders) {
         Statement statement = new WrappedPreparedStatement(connection, sql);
-        for (int index = 0; index < binders.length; ++index) {
-            binders[index].apply(statement, index + 1);
-        }
-        statement.execute();
+        statement.execute(binders);
     }
 
     @Override

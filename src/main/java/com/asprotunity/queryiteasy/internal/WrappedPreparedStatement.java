@@ -1,10 +1,7 @@
 package com.asprotunity.queryiteasy.internal;
 
 
-import com.asprotunity.queryiteasy.connection.Batch;
-import com.asprotunity.queryiteasy.connection.RowMapper;
-import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
-import com.asprotunity.queryiteasy.connection.Statement;
+import com.asprotunity.queryiteasy.connection.*;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,7 +18,8 @@ public class WrappedPreparedStatement implements Statement {
     }
 
     @Override
-    public void execute() {
+    public void execute(PositionalBinder... binders) {
+        applyBinders(binders);
         RuntimeSQLException.wrapException(preparedStatement::execute);
     }
 
@@ -67,9 +65,13 @@ public class WrappedPreparedStatement implements Statement {
     }
 
     private void addBatch(Batch batch) {
-        for (int position = 0; position < batch.binders.length; ++position) {
-            batch.binders[position].apply(this, position + 1);
-        }
+        applyBinders(batch.binders);
         RuntimeSQLException.wrapException(preparedStatement::addBatch);
+    }
+
+    private void applyBinders(PositionalBinder[] binders) {
+        for (int position = 0; position < binders.length; ++position) {
+            binders[position].apply(this, position + 1);
+        }
     }
 }
