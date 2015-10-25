@@ -1,6 +1,7 @@
 package com.asprotunity.queryiteasy.internal;
 
 
+import com.asprotunity.queryiteasy.connection.Batch;
 import com.asprotunity.queryiteasy.connection.RowMapper;
 import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
 import com.asprotunity.queryiteasy.connection.Statement;
@@ -22,6 +23,14 @@ public class WrappedPreparedStatement implements Statement {
     @Override
     public void execute() {
         RuntimeSQLException.wrapException(preparedStatement::execute);
+    }
+
+    @Override
+    public void executeBatch(Batch[] batches) {
+        for (Batch batch : batches) {
+            addBatch(batch);
+        }
+        RuntimeSQLException.wrapException(preparedStatement::executeBatch);
     }
 
     @Override
@@ -55,5 +64,12 @@ public class WrappedPreparedStatement implements Statement {
     public void setDouble(int position, double value) {
         RuntimeSQLException.wrapException(() ->
                 preparedStatement.setDouble(position, value));
+    }
+
+    private void addBatch(Batch batch) {
+        for (int position = 0; position < batch.binders.length; ++position) {
+            batch.binders[position].apply(this, position + 1);
+        }
+        RuntimeSQLException.wrapException(preparedStatement::addBatch);
     }
 }

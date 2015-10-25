@@ -34,6 +34,12 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     }
 
     @Override
+    public void executeBatchUpdate(String sql, Batch... batches) {
+        Statement statement = new WrappedPreparedStatement(connection, sql);
+        statement.executeBatch(batches);
+    }
+
+    @Override
     public <ResultType> List<ResultType> executeQuery(String sql, RowMapper<ResultType> rowMapper, PositionalBinder... binders) {
         Statement statement = new WrappedPreparedStatement(connection, sql);
         for (int index = 0; index < binders.length; ++index) {
