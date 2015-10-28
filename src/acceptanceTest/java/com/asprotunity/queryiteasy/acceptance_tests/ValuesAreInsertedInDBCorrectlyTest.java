@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
-import static com.asprotunity.queryiteasy.connection.PositionalBinder.bind;
+import static com.asprotunity.queryiteasy.connection.StatementParameter.bind;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 

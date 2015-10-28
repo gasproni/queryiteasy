@@ -8,7 +8,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WrappedPreparedStatement implements Statement {
+public class WrappedPreparedStatement {
 
     private PreparedStatement preparedStatement;
 
@@ -17,13 +17,11 @@ public class WrappedPreparedStatement implements Statement {
 
     }
 
-    @Override
-    public void execute(PositionalBinder... binders) {
-        applyBinders(binders);
+    public void execute(StatementParameter... parameters) {
+        bindParameters(parameters);
         RuntimeSQLException.wrapException(preparedStatement::execute);
     }
 
-    @Override
     public void executeBatch(Batch firstBatch, Batch...batches) {
         addBatch(firstBatch);
         for (Batch batch : batches) {
@@ -32,9 +30,8 @@ public class WrappedPreparedStatement implements Statement {
         RuntimeSQLException.wrapException(preparedStatement::executeBatch);
     }
 
-    @Override
-    public <ResultType> List<ResultType> executeQuery(RowMapper<ResultType> rowMapper, PositionalBinder...binders) {
-        applyBinders(binders);
+    public <ResultType> List<ResultType> executeQuery(RowMapper<ResultType> rowMapper, StatementParameter...parameters) {
+        bindParameters(parameters);
         return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
             try (ResultSet rs = preparedStatement.executeQuery()) {
                 List<ResultType> result = new ArrayList<>();
@@ -48,32 +45,50 @@ public class WrappedPreparedStatement implements Statement {
         });
     }
 
-    @Override
-    public void setString(int position, String value) {
-        RuntimeSQLException.wrapException(() ->
-                preparedStatement.setString(position, value));
-    }
-
-    @Override
-    public void setInt(int position, int value) {
-        RuntimeSQLException.wrapException(() ->
-                preparedStatement.setInt(position, value));
-    }
-
-    @Override
-    public void setDouble(int position, double value) {
-        RuntimeSQLException.wrapException(() ->
-                preparedStatement.setDouble(position, value));
-    }
-
     private void addBatch(Batch batch) {
-        applyBinders(batch.binders);
+        bindParameters(batch.parameters);
         RuntimeSQLException.wrapException(preparedStatement::addBatch);
     }
 
-    private void applyBinders(PositionalBinder[] binders) {
-        for (int position = 0; position < binders.length; ++position) {
-            binders[position].apply(this, position + 1);
+    private void bindParameters(StatementParameter[] parameters) {
+        PositionalParameterBinder.bind(parameters, preparedStatement);
+    }
+
+    static class PositionalParameterBinder implements StatementParameterReader {
+
+        private PreparedStatement statement;
+        private int position;
+
+        private PositionalParameterBinder(PreparedStatement statement) {
+            this.statement = statement;
+            this.position = 1;
+        }
+
+        public static void bind(StatementParameter[] parameters, PreparedStatement preparedStatement) {
+            PositionalParameterBinder binder = new PositionalParameterBinder(preparedStatement);
+            binder.bind(parameters);
+        }
+
+        @Override
+        public void setString(String value) {
+            RuntimeSQLException.wrapException(() -> statement.setString(this.position, value));
+        }
+
+        @Override
+        public void setInt(int value) {
+            RuntimeSQLException.wrapException(()->statement.setInt(this.position, value));
+        }
+
+        @Override
+        public void setDouble(double value) {
+            RuntimeSQLException.wrapException(()->statement.setDouble(this.position, value));
+        }
+
+        private void bind(StatementParameter[] parameters) {
+            for (int index = 0; index < parameters.length; ++index) {
+                parameters[index].readValue(this);
+                position += index + 1;
+            }
         }
     }
 }

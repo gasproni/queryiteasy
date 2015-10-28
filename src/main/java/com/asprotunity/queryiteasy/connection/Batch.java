@@ -2,15 +2,15 @@ package com.asprotunity.queryiteasy.connection;
 
 public class Batch {
 
-    public final PositionalBinder[] binders;
+    public final StatementParameter[] parameters;
 
-    public static Batch batch(PositionalBinder binder, PositionalBinder... binders) {
+    public static Batch batch(StatementParameter binder, StatementParameter... binders) {
         return new Batch(binder, binders);
     }
 
-    private Batch(PositionalBinder binder, PositionalBinder[] binders) {
-        this.binders = new PositionalBinder[binders.length + 1];
-        this.binders[0] = binder;
-        System.arraycopy(binders, 0, this.binders, 1, binders.length);
+    private Batch(StatementParameter parameter, StatementParameter[] parameters) {
+        this.parameters = new StatementParameter[parameters.length + 1];
+        this.parameters[0] = parameter;
+        System.arraycopy(parameters, 0, this.parameters, 1, parameters.length);
     }
 }

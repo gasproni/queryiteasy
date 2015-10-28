@@ -25,20 +25,20 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     }
 
     @Override
-    public void executeUpdate(String sql, PositionalBinder... binders) {
-        Statement statement = new WrappedPreparedStatement(connection, sql);
-        statement.execute(binders);
+    public void executeUpdate(String sql, StatementParameter... parameters) {
+        WrappedPreparedStatement statement = new WrappedPreparedStatement(connection, sql);
+        statement.execute(parameters);
     }
 
     @Override
     public void executeBatchUpdate(String sql, Batch firstBatch, Batch... batches) {
-        Statement statement = new WrappedPreparedStatement(connection, sql);
+        WrappedPreparedStatement statement = new WrappedPreparedStatement(connection, sql);
         statement.executeBatch(firstBatch, batches);
     }
 
     @Override
-    public <ResultType> List<ResultType> executeQuery(String sql, RowMapper<ResultType> rowMapper, PositionalBinder... binders) {
-        Statement statement = new WrappedPreparedStatement(connection, sql);
-        return statement.executeQuery(rowMapper, binders);
+    public <ResultType> List<ResultType> executeQuery(String sql, RowMapper<ResultType> rowMapper, StatementParameter... parameters) {
+        WrappedPreparedStatement statement = new WrappedPreparedStatement(connection, sql);
+        return statement.executeQuery(rowMapper, parameters);
     }
 }
