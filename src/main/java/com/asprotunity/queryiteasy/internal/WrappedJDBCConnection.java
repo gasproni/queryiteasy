@@ -2,6 +2,9 @@ package com.asprotunity.queryiteasy.internal;
 
 import com.asprotunity.queryiteasy.connection.*;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.List;
 
 public class WrappedJDBCConnection implements Connection, AutoCloseable {
@@ -26,19 +29,88 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
 
     @Override
     public void executeUpdate(String sql, StatementParameter... parameters) {
-        WrappedPreparedStatement statement = new WrappedPreparedStatement(connection, sql);
-        statement.execute(parameters);
+        RuntimeSQLException.wrapException(() -> {
+                    PreparedStatement statement = connection.prepareStatement(sql);
+                    bindParameters(parameters, statement);
+                    statement.execute();
+                }
+        );
     }
 
     @Override
     public void executeBatchUpdate(String sql, Batch firstBatch, Batch... batches) {
-        WrappedPreparedStatement statement = new WrappedPreparedStatement(connection, sql);
-        statement.executeBatch(firstBatch, batches);
+        RuntimeSQLException.wrapException(() -> {
+                    PreparedStatement statement = connection.prepareStatement(sql);
+                    addBatch(firstBatch, statement);
+                    for (Batch batch : batches) {
+                        addBatch(batch, statement);
+                    }
+                    statement.executeBatch();
+                }
+        );
     }
 
     @Override
     public <ResultType> List<ResultType> executeQuery(String sql, RowMapper<ResultType> rowMapper, StatementParameter... parameters) {
-        WrappedPreparedStatement statement = new WrappedPreparedStatement(connection, sql);
-        return statement.executeQuery(rowMapper, parameters);
+        return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            bindParameters(parameters, statement);
+            try (ResultSet rs = statement.executeQuery()) {
+                List<ResultType> result = new ArrayList<>();
+
+                while (rs.next()) {
+                    result.add(rowMapper.map(new WrappedResultSet(rs)));
+                }
+
+                return result;
+            }
+        });
+    }
+
+    private void addBatch(Batch batch, PreparedStatement preparedStatement) {
+        bindParameters(batch.parameters, preparedStatement);
+        RuntimeSQLException.wrapException(preparedStatement::addBatch);
+    }
+
+    private void bindParameters(StatementParameter[] parameters, PreparedStatement preparedStatement) {
+        PositionalParameterBinder.bind(parameters, preparedStatement);
+    }
+
+    static class PositionalParameterBinder implements StatementParameterReader {
+
+        private PreparedStatement statement;
+        private int position;
+
+        private PositionalParameterBinder(PreparedStatement statement) {
+            this.statement = statement;
+            this.position = 1;
+        }
+
+        public static void bind(StatementParameter[] parameters, PreparedStatement preparedStatement) {
+            PositionalParameterBinder binder = new PositionalParameterBinder(preparedStatement);
+            binder.bind(parameters);
+        }
+
+        @Override
+        public void setString(String value) {
+            RuntimeSQLException.wrapException(() -> statement.setString(this.position, value));
+        }
+
+        @Override
+        public void setInt(int value) {
+            RuntimeSQLException.wrapException(() -> statement.setInt(this.position, value));
+        }
+
+        @Override
+        public void setDouble(double value) {
+            RuntimeSQLException.wrapException(() -> statement.setDouble(this.position, value));
+        }
+
+        private void bind(StatementParameter[] parameters) {
+            for (int index = 0; index < parameters.length; ++index) {
+                parameters[index].readValue(this);
+                position += index + 1;
+            }
+        }
     }
 }
