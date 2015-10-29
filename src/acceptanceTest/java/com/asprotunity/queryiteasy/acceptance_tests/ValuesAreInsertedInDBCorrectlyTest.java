@@ -14,6 +14,7 @@ import java.util.List;
 
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
 import static com.asprotunity.queryiteasy.connection.StatementParameter.bind;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
@@ -21,6 +22,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
 
 
     private JDBCDataSource dataSource;
+    private TransactionExecutor executor;
 
     @Before
     public void setUp() {
@@ -28,6 +30,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
         dataSource.setDatabase("jdbc:hsqldb:mem:testdb");
         dataSource.setUser("sa");
         dataSource.setPassword("");
+        executor = new TransactionExecutor(dataSource);
     }
 
     @After
@@ -44,8 +47,6 @@ public class ValuesAreInsertedInDBCorrectlyTest {
     @Test
     public void inserts_with_no_bind_values() throws SQLException {
 
-        TransactionExecutor executor = new TransactionExecutor(dataSource);
-
         executor.executeUpdate(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (index INTEGER NOT NULL)");
             connection.executeUpdate("INSERT INTO testtable (index) VALUES (10)");
@@ -60,13 +61,10 @@ public class ValuesAreInsertedInDBCorrectlyTest {
     @Test
     public void inserts_with_some_bind_values() throws SQLException {
 
-        TransactionExecutor executor = new TransactionExecutor(dataSource);
-
         executor.executeUpdate(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (index INTEGER NOT NULL, name VARCHAR(20) NOT NULL)");
             connection.executeUpdate("INSERT INTO testtable (index, name) VALUES (?, ?)",
-                    bind(10),
-                    bind("aname"));
+                    bind(10), bind("aname"));
         });
 
         List<TestTableFields> expectedValues = query("SELECT * FROM testtable",
@@ -76,11 +74,26 @@ public class ValuesAreInsertedInDBCorrectlyTest {
         assertThat(expectedValues.get(0).name, is("aname"));
     }
 
+    @Test
+    public void inserts_null_integers_as_bind_values() throws SQLException {
+
+        executor.executeUpdate(connection -> {
+            connection.executeUpdate("CREATE TABLE testtable (index INTEGER NULL, name VARCHAR(20) NOT NULL)");
+            connection.executeUpdate("INSERT INTO testtable (index, name) VALUES (?, ?)",
+                    bind((Integer)null), bind("aname"));
+        });
+
+        List<TestTableFields> expectedValues = query("SELECT * FROM testtable",
+                rs -> new TestTableFields(rs.getInt("index") == 0 && rs.wasNull() ? null : 0,
+                        rs.getString("name")));
+        assertThat(expectedValues.size(), is(1));
+        assertThat(expectedValues.get(0).index, is(nullValue()));
+        assertThat(expectedValues.get(0).name, is("aname"));
+    }
+
 
     @Test
     public void can_do_batch_inserts() throws SQLException {
-
-        TransactionExecutor executor = new TransactionExecutor(dataSource);
 
         executor.executeUpdate(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (index INTEGER NOT NULL, name VARCHAR(20) NOT NULL)");
@@ -101,9 +114,6 @@ public class ValuesAreInsertedInDBCorrectlyTest {
 
     @Test
     public void can_do_batch_inserts_with_batch_array() throws SQLException {
-
-        TransactionExecutor executor = new TransactionExecutor(dataSource);
-
 
         executor.executeUpdate(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (index INTEGER NOT NULL, name VARCHAR(20) NOT NULL)");
@@ -129,19 +139,18 @@ public class ValuesAreInsertedInDBCorrectlyTest {
 
 
     @Test
-    public void queries_with_no_bind_values() throws SQLException {
-
-        TransactionExecutor executor = new TransactionExecutor(dataSource);
+    public void can_query_with_no_bind_values() throws SQLException {
 
         executor.executeUpdate(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (index INTEGER NOT NULL)");
             connection.executeBatchUpdate("INSERT INTO testtable (index) VALUES (?)",
                     batch(bind(10)),
                     batch(bind(11)));
-            });
+        });
 
         List<Integer> result = executor.executeQuery(connection ->
-                        connection.executeQuery("SELECT index FROM testtable ORDER BY index ASC", row -> row.getInt("index"))
+                        connection.executeQuery("SELECT index FROM testtable ORDER BY index ASC",
+                                row -> row.getInteger("index"))
         );
 
 
@@ -151,9 +160,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
     }
 
     @Test
-    public void queries_with_bind_values() throws SQLException {
-
-        TransactionExecutor executor = new TransactionExecutor(dataSource);
+    public void can_query_with_bind_values() throws SQLException {
 
         executor.executeUpdate(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (index INTEGER NOT NULL, name VARCHAR(20) NOT NULL)");
@@ -165,7 +172,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
 
         List<TestTableFields> result = executor.executeQuery(connection ->
                         connection.executeQuery("SELECT index, name FROM testtable WHERE index = ? AND name = ?",
-                                row -> new TestTableFields(row.getInt("index"), row.getString("name")),
+                                row -> new TestTableFields(row.getInteger("index"), row.getString("name")),
                                 bind(10),
                                 bind("aname10"))
         );
@@ -176,8 +183,27 @@ public class ValuesAreInsertedInDBCorrectlyTest {
         assertThat(result.get(0).name, is("aname10"));
     }
 
-    private <ResultType> List<ResultType> query(String sql, ResultSetMapper<ResultType> mapper) throws SQLException {
+    @Test
+    public void can_query_null_integer_values() throws SQLException {
 
+        executor.executeUpdate(connection -> {
+            connection.executeUpdate("CREATE TABLE testtable (index INTEGER NULL, name VARCHAR(20) NOT NULL)");
+
+            connection.executeUpdate("INSERT INTO testtable (index, name) VALUES (null, 'aname')");
+        });
+
+        List<TestTableFields> result = executor.executeQuery(connection ->
+                        connection.executeQuery("SELECT index, name FROM testtable WHERE index is NULL",
+                                row -> new TestTableFields(row.getInteger("index"), row.getString("name")))
+        );
+
+
+        assertThat(result.size(), is(1));
+        assertThat(result.get(0).index, is(nullValue()));
+        assertThat(result.get(0).name, is("aname"));
+    }
+
+    private <ResultType> List<ResultType> query(String sql, ResultSetMapper<ResultType> mapper) throws SQLException {
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet rs = statement.executeQuery()) {
@@ -192,10 +218,10 @@ public class ValuesAreInsertedInDBCorrectlyTest {
 
 
     static class TestTableFields {
-        public final int index;
+        public final Integer index;
         public final String name;
 
-        public TestTableFields(int index, String name) {
+        public TestTableFields(Integer index, String name) {
             this.index = index;
             this.name = name;
         }

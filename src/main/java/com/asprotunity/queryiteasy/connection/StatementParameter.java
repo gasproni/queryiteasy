@@ -9,8 +9,8 @@ public interface StatementParameter {
         return valueReader -> valueReader.setString(value);
     }
 
-    static StatementParameter bind(int value) {
-        return valueReader -> valueReader.setInt(value);
+    static StatementParameter bind(Integer value) {
+        return valueReader -> valueReader.setInteger(value);
     }
 
     static StatementParameter bind(double value) {

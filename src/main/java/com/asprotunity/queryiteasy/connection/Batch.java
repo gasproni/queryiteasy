@@ -4,8 +4,8 @@ public class Batch {
 
     public final StatementParameter[] parameters;
 
-    public static Batch batch(StatementParameter binder, StatementParameter... binders) {
-        return new Batch(binder, binders);
+    public static Batch batch(StatementParameter firstParameter, StatementParameter... parameters) {
+        return new Batch(firstParameter, parameters);
     }
 
     private Batch(StatementParameter parameter, StatementParameter[] parameters) {

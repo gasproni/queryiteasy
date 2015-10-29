@@ -15,8 +15,14 @@ public class WrappedResultSet implements Row {
     }
 
     @Override
-    public int getInt(String columnName) {
-        return RuntimeSQLException.wrapExceptionAndReturnResult(() -> this.resultSet.getInt(columnName));
+    public Integer getInteger(String columnName) {
+        return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
+            int result = this.resultSet.getInt(columnName);
+            if (this.resultSet.wasNull()) {
+                return null;
+            }
+            return result;
+        });
     }
 
     @Override

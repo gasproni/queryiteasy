@@ -4,6 +4,7 @@ import com.asprotunity.queryiteasy.connection.*;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,8 +98,16 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         }
 
         @Override
-        public void setInt(int value) {
-            RuntimeSQLException.wrapException(() -> statement.setInt(this.position, value));
+        public void setInteger(Integer value) {
+            RuntimeSQLException.wrapException(() -> {
+                if (value != null) {
+                    statement.setInt(this.position, value);
+                }
+                else {
+                    statement.setNull(this.position, Types.INTEGER);
+                }
+
+            });
         }
 
         @Override
