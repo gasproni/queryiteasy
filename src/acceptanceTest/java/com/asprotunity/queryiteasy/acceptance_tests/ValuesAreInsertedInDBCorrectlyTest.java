@@ -106,9 +106,9 @@ public class ValuesAreInsertedInDBCorrectlyTest {
         List<TestTableFields> expectedValues = query("SELECT * FROM testtable",
                 rs -> new TestTableFields(rs.getInt("index"), rs.getString("name")));
         assertThat(expectedValues.size(), is(3));
-        for (int index = 10; index < expectedValues.size(); ++index) {
-            assertThat(expectedValues.get(index).index, is(index));
-            assertThat(expectedValues.get(index).name, is("aname" + index));
+        for (int index = 0; index < expectedValues.size(); ++index) {
+            assertThat(expectedValues.get(index).index, is(index + 10));
+            assertThat(expectedValues.get(index).name, is("aname" + (index + 10)));
         }
     }
 
@@ -177,7 +177,6 @@ public class ValuesAreInsertedInDBCorrectlyTest {
                                 bind("aname10"))
         );
 
-
         assertThat(result.size(), is(1));
         assertThat(result.get(0).index, is(10));
         assertThat(result.get(0).name, is("aname10"));
@@ -188,7 +187,6 @@ public class ValuesAreInsertedInDBCorrectlyTest {
 
         executor.executeUpdate(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (index INTEGER NULL, name VARCHAR(20) NOT NULL)");
-
             connection.executeUpdate("INSERT INTO testtable (index, name) VALUES (null, 'aname')");
         });
 
@@ -196,7 +194,6 @@ public class ValuesAreInsertedInDBCorrectlyTest {
                         connection.executeQuery("SELECT index, name FROM testtable WHERE index is NULL",
                                 row -> new TestTableFields(row.getInteger("index"), row.getString("name")))
         );
-
 
         assertThat(result.size(), is(1));
         assertThat(result.get(0).index, is(nullValue()));
