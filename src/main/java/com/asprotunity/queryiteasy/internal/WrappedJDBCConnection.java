@@ -111,7 +111,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         }
 
         @Override
-        public void setDouble(double value) {
+        public void setDouble(Double value) {
             RuntimeSQLException.wrapException(() -> statement.setDouble(this.position, value));
         }
 

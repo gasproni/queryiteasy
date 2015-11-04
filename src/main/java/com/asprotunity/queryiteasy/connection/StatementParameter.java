@@ -13,7 +13,7 @@ public interface StatementParameter {
         return valueReader -> valueReader.setInteger(value);
     }
 
-    static StatementParameter bind(double value) {
+    static StatementParameter bind(Double value) {
         return valueReader -> valueReader.setDouble(value);
     }
 }

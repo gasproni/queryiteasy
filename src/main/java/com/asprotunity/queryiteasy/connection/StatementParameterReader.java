@@ -5,5 +5,5 @@ public interface StatementParameterReader {
 
     void setInteger(Integer value);
 
-    void setDouble(double value);
+    void setDouble(Double value);
 }
