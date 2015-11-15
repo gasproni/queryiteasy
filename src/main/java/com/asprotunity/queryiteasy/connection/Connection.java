@@ -1,5 +1,7 @@
 package com.asprotunity.queryiteasy.connection;
 
+import com.asprotunity.queryiteasy.userprovided.RowMapper;
+
 import java.util.List;
 
 public interface Connection {

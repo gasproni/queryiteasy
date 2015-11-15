@@ -1,6 +1,8 @@
 package com.asprotunity.queryiteasy.internal;
 
 import com.asprotunity.queryiteasy.connection.*;
+import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
+import com.asprotunity.queryiteasy.userprovided.RowMapper;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -81,7 +83,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
                 parameter.apply(new PositionalParameterAction(position + 1, preparedStatement));
     }
 
-    static class PositionalParameterAction implements StatementParameterAction {
+    static class PositionalParameterAction implements StatementParameterFunction {
 
         private PreparedStatement statement;
         private int position;

@@ -3,7 +3,7 @@ package com.asprotunity.queryiteasy.connection;
 @FunctionalInterface
 public interface StatementParameter {
 
-    void apply(StatementParameterAction action);
+    void apply(StatementParameterFunction action);
 
     static StatementParameter bind(String value) {
         return action -> action.applyTo(value);

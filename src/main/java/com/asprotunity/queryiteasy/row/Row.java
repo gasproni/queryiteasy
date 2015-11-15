@@ -1,4 +1,4 @@
-package com.asprotunity.queryiteasy.connection;
+package com.asprotunity.queryiteasy.row;
 
 
 public interface Row {

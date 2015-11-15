@@ -1,4 +1,4 @@
-package com.asprotunity.queryiteasy.connection;
+package com.asprotunity.queryiteasy.exception;
 
 public class RuntimeSQLException extends RuntimeException {
     public RuntimeSQLException(java.sql.SQLException e) {

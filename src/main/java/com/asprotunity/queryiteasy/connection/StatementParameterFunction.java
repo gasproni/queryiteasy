@@ -1,6 +1,6 @@
 package com.asprotunity.queryiteasy.connection;
 
-public interface StatementParameterAction {
+public interface StatementParameterFunction {
     void applyTo(String value);
 
     void applyTo(Integer value);

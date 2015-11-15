@@ -1,7 +1,7 @@
 package com.asprotunity.queryiteasy.internal;
 
-import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
-import com.asprotunity.queryiteasy.connection.Row;
+import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
+import com.asprotunity.queryiteasy.row.Row;
 
 import java.sql.ResultSet;
 
