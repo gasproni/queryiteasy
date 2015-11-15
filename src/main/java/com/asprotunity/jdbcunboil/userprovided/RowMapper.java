@@ -1,7 +1,7 @@
-package com.asprotunity.queryiteasy.userprovided;
+package com.asprotunity.jdbcunboil.userprovided;
 
 
-import com.asprotunity.queryiteasy.row.Row;
+import com.asprotunity.jdbcunboil.row.Row;
 
 @FunctionalInterface
 public interface RowMapper<ResultType> {

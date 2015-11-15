@@ -1,4 +1,4 @@
-package com.asprotunity.queryiteasy.row;
+package com.asprotunity.jdbcunboil.row;
 
 
 public interface Row {

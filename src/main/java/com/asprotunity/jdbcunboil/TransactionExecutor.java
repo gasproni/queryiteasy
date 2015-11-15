@@ -1,7 +1,7 @@
-package com.asprotunity.queryiteasy;
+package com.asprotunity.jdbcunboil;
 
-import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
-import com.asprotunity.queryiteasy.internal.WrappedJDBCConnection;
+import com.asprotunity.jdbcunboil.exception.RuntimeSQLException;
+import com.asprotunity.jdbcunboil.internal.WrappedJDBCConnection;
 
 import javax.sql.DataSource;
 

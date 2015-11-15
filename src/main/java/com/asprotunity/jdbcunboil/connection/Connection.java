@@ -1,6 +1,6 @@
-package com.asprotunity.queryiteasy.connection;
+package com.asprotunity.jdbcunboil.connection;
 
-import com.asprotunity.queryiteasy.userprovided.RowMapper;
+import com.asprotunity.jdbcunboil.userprovided.RowMapper;
 
 import java.util.List;
 

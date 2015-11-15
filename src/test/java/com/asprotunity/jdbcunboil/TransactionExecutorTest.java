@@ -1,4 +1,4 @@
-package com.asprotunity.queryiteasy;
+package com.asprotunity.jdbcunboil;
 
 import org.junit.Before;
 import org.junit.Test;

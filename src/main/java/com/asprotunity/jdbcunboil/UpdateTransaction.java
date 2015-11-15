@@ -1,7 +1,7 @@
-package com.asprotunity.queryiteasy;
+package com.asprotunity.jdbcunboil;
 
 
-import com.asprotunity.queryiteasy.connection.Connection;
+import com.asprotunity.jdbcunboil.connection.Connection;
 
 @FunctionalInterface
 public interface UpdateTransaction {

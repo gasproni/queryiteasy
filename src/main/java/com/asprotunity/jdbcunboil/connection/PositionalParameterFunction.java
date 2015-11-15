@@ -1,4 +1,4 @@
-package com.asprotunity.queryiteasy.connection;
+package com.asprotunity.jdbcunboil.connection;
 
 @FunctionalInterface
 public interface PositionalParameterFunction {

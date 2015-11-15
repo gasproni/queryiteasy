@@ -1,8 +1,8 @@
-package com.asprotunity.queryiteasy.internal;
+package com.asprotunity.jdbcunboil.internal;
 
-import com.asprotunity.queryiteasy.connection.*;
-import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
-import com.asprotunity.queryiteasy.userprovided.RowMapper;
+import com.asprotunity.jdbcunboil.connection.*;
+import com.asprotunity.jdbcunboil.exception.RuntimeSQLException;
+import com.asprotunity.jdbcunboil.userprovided.RowMapper;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
