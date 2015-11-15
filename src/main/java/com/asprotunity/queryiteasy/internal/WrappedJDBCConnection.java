@@ -31,79 +31,77 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     @Override
     public void executeUpdate(String sql, StatementParameter... parameters) {
         RuntimeSQLException.wrapException(() -> {
-                    PreparedStatement statement = connection.prepareStatement(sql);
-                    bindParameters(parameters, statement);
-                    statement.execute();
-                }
-        );
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                bindParameters(parameters, statement);
+                statement.execute();
+            }
+        });
     }
 
     @Override
-    public void executeBatchUpdate(String sql, Batch firstBatch, Batch... batches) {
+    public void executeUpdate(String sql, Batch firstBatch, Batch... batches) {
         RuntimeSQLException.wrapException(() -> {
-                    PreparedStatement statement = connection.prepareStatement(sql);
-                    addBatch(firstBatch, statement);
-                    for (Batch batch : batches) {
-                        addBatch(batch, statement);
-                    }
-                    statement.executeBatch();
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                addBatch(firstBatch, statement);
+                for (Batch batch : batches) {
+                    addBatch(batch, statement);
                 }
-        );
+                statement.executeBatch();
+            }
+        });
     }
 
     @Override
     public <ResultType> List<ResultType> executeQuery(String sql, RowMapper<ResultType> rowMapper, StatementParameter... parameters) {
         return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
-            PreparedStatement statement = connection.prepareStatement(sql);
-            bindParameters(parameters, statement);
-            try (ResultSet rs = statement.executeQuery()) {
-                List<ResultType> result = new ArrayList<>();
-
-                while (rs.next()) {
-                    result.add(rowMapper.map(new WrappedResultSet(rs)));
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                bindParameters(parameters, statement);
+                try (ResultSet rs = statement.executeQuery()) {
+                    List<ResultType> result = new ArrayList<>();
+                    while (rs.next()) {
+                        result.add(rowMapper.map(new WrappedResultSet(rs)));
+                    }
+                    return result;
                 }
-
-                return result;
             }
         });
     }
 
     private void addBatch(Batch batch, PreparedStatement preparedStatement) {
-        bindParameters(batch.parameters, preparedStatement);
+        batch.forEachParameter(positionalParameterAction(preparedStatement));
         RuntimeSQLException.wrapException(preparedStatement::addBatch);
     }
 
     private void bindParameters(StatementParameter[] parameters, PreparedStatement preparedStatement) {
-        PositionalParameterBinder.bind(parameters, preparedStatement);
+        Batch.forEachParameter(parameters, positionalParameterAction(preparedStatement));
     }
 
-    static class PositionalParameterBinder implements StatementParameterReader {
+    private PositionalParameterFunction positionalParameterAction(PreparedStatement preparedStatement) {
+        return (parameter, position) ->
+                parameter.apply(new PositionalParameterAction(position + 1, preparedStatement));
+    }
+
+    static class PositionalParameterAction implements StatementParameterAction {
 
         private PreparedStatement statement;
         private int position;
 
-        private PositionalParameterBinder(PreparedStatement statement) {
+        private PositionalParameterAction(int position, PreparedStatement statement) {
             this.statement = statement;
-            this.position = 1;
-        }
-
-        public static void bind(StatementParameter[] parameters, PreparedStatement preparedStatement) {
-            PositionalParameterBinder binder = new PositionalParameterBinder(preparedStatement);
-            binder.bind(parameters);
+            this.position = position;
         }
 
         @Override
-        public void setString(String value) {
+        public void applyTo(String value) {
             RuntimeSQLException.wrapException(() -> statement.setString(this.position, value));
         }
 
         @Override
-        public void setInteger(Integer value) {
+        public void applyTo(Integer value) {
             RuntimeSQLException.wrapException(() -> {
                 if (value != null) {
                     statement.setInt(this.position, value);
-                }
-                else {
+                } else {
                     statement.setNull(this.position, Types.INTEGER);
                 }
 
@@ -111,15 +109,10 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         }
 
         @Override
-        public void setDouble(Double value) {
+        public void applyTo(Double value) {
             RuntimeSQLException.wrapException(() -> statement.setDouble(this.position, value));
         }
 
-        private void bind(StatementParameter[] parameters) {
-            for (int index = 0; index < parameters.length; ++index) {
-                parameters[index].readValue(this);
-                position += index + 1;
-            }
-        }
     }
+
 }

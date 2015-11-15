@@ -3,17 +3,17 @@ package com.asprotunity.queryiteasy.connection;
 @FunctionalInterface
 public interface StatementParameter {
 
-    void readValue(StatementParameterReader valueReader);
+    void apply(StatementParameterAction action);
 
     static StatementParameter bind(String value) {
-        return valueReader -> valueReader.setString(value);
+        return action -> action.applyTo(value);
     }
 
     static StatementParameter bind(Integer value) {
-        return valueReader -> valueReader.setInteger(value);
+        return action -> action.applyTo(value);
     }
 
     static StatementParameter bind(Double value) {
-        return valueReader -> valueReader.setDouble(value);
+        return action -> action.applyTo(value);
     }
 }

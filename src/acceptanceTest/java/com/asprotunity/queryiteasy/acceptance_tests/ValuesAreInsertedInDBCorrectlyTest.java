@@ -97,7 +97,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
 
         executor.executeUpdate(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (index INTEGER NOT NULL, name VARCHAR(20) NOT NULL)");
-            connection.executeBatchUpdate("INSERT INTO testtable (index, name) VALUES (?, ?)",
+            connection.executeUpdate("INSERT INTO testtable (index, name) VALUES (?, ?)",
                     batch(bind(10), bind("aname10")),
                     batch(bind(11), bind("aname11")),
                     batch(bind(12), bind("aname12")));
@@ -125,7 +125,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
                 batches[index] = batch(bind(value), bind("aname" + value));
             }
 
-            connection.executeBatchUpdate("INSERT INTO testtable (index, name) VALUES (?, ?)", firstBatch, batches);
+            connection.executeUpdate("INSERT INTO testtable (index, name) VALUES (?, ?)", firstBatch, batches);
         });
 
         List<TestTableFields> expectedValues = query("SELECT * FROM testtable",
@@ -143,7 +143,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
 
         executor.executeUpdate(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (index INTEGER NOT NULL)");
-            connection.executeBatchUpdate("INSERT INTO testtable (index) VALUES (?)",
+            connection.executeUpdate("INSERT INTO testtable (index) VALUES (?)",
                     batch(bind(10)),
                     batch(bind(11)));
         });
@@ -165,7 +165,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
         executor.executeUpdate(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (index INTEGER NOT NULL, name VARCHAR(20) NOT NULL)");
 
-            connection.executeBatchUpdate("INSERT INTO testtable (index, name) VALUES (?, ?)",
+            connection.executeUpdate("INSERT INTO testtable (index, name) VALUES (?, ?)",
                     batch(bind(10), bind("aname10")),
                     batch(bind(11), bind("aname11")));
         });
