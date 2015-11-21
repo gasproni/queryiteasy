@@ -1,9 +1,12 @@
 package com.asprotunity.jdbcunboil;
 
+import com.asprotunity.jdbcunboil.connection.Connection;
 import com.asprotunity.jdbcunboil.exception.RuntimeSQLException;
 import com.asprotunity.jdbcunboil.internal.WrappedJDBCConnection;
 
 import javax.sql.DataSource;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class TransactionExecutor {
 
@@ -16,10 +19,10 @@ public class TransactionExecutor {
         this.dataSource = dataSource;
     }
 
-    public void executeUpdate(UpdateTransaction transaction) {
+    public void executeUpdate(Consumer<Connection> transaction) {
         RuntimeSQLException.wrapException(() -> {
                     try (WrappedJDBCConnection connection = new WrappedJDBCConnection(dataSource.getConnection())) {
-                        transaction.execute(connection);
+                        transaction.accept(connection);
                         connection.commit();
                     }
                 }
@@ -27,10 +30,10 @@ public class TransactionExecutor {
     }
 
 
-    public <ResultType> ResultType executeQuery(QueryTransaction<ResultType> transaction) {
+    public <ResultType> ResultType executeQuery(Function<Connection, ResultType> transaction) {
         return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
                     try (WrappedJDBCConnection connection = new WrappedJDBCConnection(dataSource.getConnection())) {
-                        ResultType result = transaction.execute(connection);
+                        ResultType result = transaction.apply(connection);
                         connection.commit();
                         return result;
                     }

@@ -2,13 +2,14 @@ package com.asprotunity.jdbcunboil.internal;
 
 import com.asprotunity.jdbcunboil.connection.*;
 import com.asprotunity.jdbcunboil.exception.RuntimeSQLException;
-import com.asprotunity.jdbcunboil.userprovided.RowMapper;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 public class WrappedJDBCConnection implements Connection, AutoCloseable {
     private java.sql.Connection connection;
@@ -54,14 +55,14 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     }
 
     @Override
-    public <ResultType> List<ResultType> executeQuery(String sql, RowMapper<ResultType> rowMapper, StatementParameter... parameters) {
+    public <ResultType> List<ResultType> executeQuery(String sql, Function<Row, ResultType> rowMapper, StatementParameter... parameters) {
         return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 bindParameters(parameters, statement);
                 try (ResultSet rs = statement.executeQuery()) {
                     List<ResultType> result = new ArrayList<>();
                     while (rs.next()) {
-                        result.add(rowMapper.map(new WrappedResultSet(rs)));
+                        result.add(rowMapper.apply(new WrappedResultSet(rs)));
                     }
                     return result;
                 }
@@ -78,7 +79,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         Batch.forEachParameter(parameters, positionalParameterAction(preparedStatement));
     }
 
-    private PositionalParameterFunction positionalParameterAction(PreparedStatement preparedStatement) {
+    private BiConsumer<StatementParameter, Integer> positionalParameterAction(PreparedStatement preparedStatement) {
         return (parameter, position) ->
                 parameter.apply(new PositionalParameterAction(position + 1, preparedStatement));
     }

@@ -1,5 +1,7 @@
 package com.asprotunity.jdbcunboil.connection;
 
+import java.util.function.BiConsumer;
+
 public class Batch {
 
     private final StatementParameter[] parameters;
@@ -8,13 +10,13 @@ public class Batch {
         return new Batch(firstParameter, parameters);
     }
 
-    public void forEachParameter(PositionalParameterFunction function) {
+    public void forEachParameter(BiConsumer<StatementParameter, Integer> function) {
         forEachParameter(parameters, function);
     }
 
-    public static void forEachParameter(StatementParameter[] parameters, PositionalParameterFunction function) {
+    public static void forEachParameter(StatementParameter[] parameters, BiConsumer<StatementParameter, Integer> function) {
         for (int position = 0; position < parameters.length; ++position) {
-            function.apply(parameters[position], position);
+            function.accept(parameters[position], position);
         }
 
     }
