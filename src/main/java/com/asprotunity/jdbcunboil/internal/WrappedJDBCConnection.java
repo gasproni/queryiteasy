@@ -1,11 +1,13 @@
 package com.asprotunity.jdbcunboil.internal;
 
-import com.asprotunity.jdbcunboil.connection.*;
+import com.asprotunity.jdbcunboil.connection.Batch;
+import com.asprotunity.jdbcunboil.connection.Connection;
+import com.asprotunity.jdbcunboil.connection.Row;
+import com.asprotunity.jdbcunboil.connection.StatementParameter;
 import com.asprotunity.jdbcunboil.exception.RuntimeSQLException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -55,12 +57,12 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     }
 
     @Override
-    public <ResultType> List<ResultType> executeQuery(String sql, Function<Row, ResultType> rowMapper, StatementParameter... parameters) {
+    public <MappedType> List<MappedType> executeQuery(String sql, Function<Row, MappedType> rowMapper, StatementParameter... parameters) {
         return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 bindParameters(parameters, statement);
                 try (ResultSet rs = statement.executeQuery()) {
-                    List<ResultType> result = new ArrayList<>();
+                    List<MappedType> result = new ArrayList<>();
                     while (rs.next()) {
                         result.add(rowMapper.apply(new WrappedResultSet(rs)));
                     }
@@ -71,51 +73,17 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     }
 
     private void addBatch(Batch batch, PreparedStatement preparedStatement) {
-        batch.forEachParameter(positionalParameterAction(preparedStatement));
+        batch.forEachParameter(bindTo(preparedStatement));
         RuntimeSQLException.wrapException(preparedStatement::addBatch);
     }
 
     private void bindParameters(StatementParameter[] parameters, PreparedStatement preparedStatement) {
-        Batch.forEachParameter(parameters, positionalParameterAction(preparedStatement));
+        Batch.forEachParameter(parameters, bindTo(preparedStatement));
     }
 
-    private BiConsumer<StatementParameter, Integer> positionalParameterAction(PreparedStatement preparedStatement) {
+    private BiConsumer<StatementParameter, Integer> bindTo(PreparedStatement preparedStatement) {
         return (parameter, position) ->
-                parameter.apply(new PositionalParameterAction(position + 1, preparedStatement));
-    }
-
-    static class PositionalParameterAction implements StatementParameterFunction {
-
-        private PreparedStatement statement;
-        private int position;
-
-        private PositionalParameterAction(int position, PreparedStatement statement) {
-            this.statement = statement;
-            this.position = position;
-        }
-
-        @Override
-        public void applyTo(String value) {
-            RuntimeSQLException.wrapException(() -> statement.setString(this.position, value));
-        }
-
-        @Override
-        public void applyTo(Integer value) {
-            RuntimeSQLException.wrapException(() -> {
-                if (value != null) {
-                    statement.setInt(this.position, value);
-                } else {
-                    statement.setNull(this.position, Types.INTEGER);
-                }
-
-            });
-        }
-
-        @Override
-        public void applyTo(Double value) {
-            RuntimeSQLException.wrapException(() -> statement.setDouble(this.position, value));
-        }
-
+                parameter.accept(new PositionalParameterBinder(position + 1, preparedStatement));
     }
 
 }
