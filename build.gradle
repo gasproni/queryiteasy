@@ -19,6 +19,10 @@ sourceSets {
     }
 }
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.9'
+}
+
 task acceptanceTest(type: Test) {
     description = 'Runs the acceptance tests'
     group = 'verification'
