@@ -19,7 +19,7 @@ public class TransactionExecutor {
         this.dataSource = dataSource;
     }
 
-    public void executeUpdate(Consumer<Connection> transaction) {
+    public void execute(Consumer<Connection> transaction) {
         RuntimeSQLException.wrapException(() -> {
                     try (WrappedJDBCConnection connection = new WrappedJDBCConnection(dataSource.getConnection())) {
                         transaction.accept(connection);

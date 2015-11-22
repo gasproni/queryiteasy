@@ -47,7 +47,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
     @Test
     public void inserts_with_no_bind_values() throws SQLException {
 
-        executor.executeUpdate(connection -> {
+        executor.execute(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (first INTEGER NOT NULL)");
             connection.executeUpdate("INSERT INTO testtable (first) VALUES (10)");
         });
@@ -61,7 +61,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
     @Test
     public void inserts_with_some_bind_values() throws SQLException {
 
-        executor.executeUpdate(connection -> {
+        executor.execute(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
             connection.executeUpdate("INSERT INTO testtable (first, second) VALUES (?, ?)",
                     bind(10), bind("asecond"));
@@ -77,7 +77,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
     @Test
     public void inserts_null_integers_as_bind_values() throws SQLException {
 
-        executor.executeUpdate(connection -> {
+        executor.execute(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (first INTEGER NULL, second VARCHAR(20) NOT NULL)");
             connection.executeUpdate("INSERT INTO testtable (first, second) VALUES (?, ?)",
                     bind((Integer)null), bind("asecond"));
@@ -94,7 +94,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
     @Test
     public void can_do_batch_inserts() throws SQLException {
 
-        executor.executeUpdate(connection -> {
+        executor.execute(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
             connection.executeUpdate("INSERT INTO testtable (first, second) VALUES (?, ?)",
                     batch(bind(10), bind("asecond10")),
@@ -114,7 +114,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
     @Test
     public void can_do_batch_inserts_with_batch_array() throws SQLException {
 
-        executor.executeUpdate(connection -> {
+        executor.execute(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
 
             Batch firstBatch = batch(bind(10), bind("asecond10"));
@@ -140,7 +140,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
     @Test
     public void can_query_with_no_bind_values() throws SQLException {
 
-        executor.executeUpdate(connection -> {
+        executor.execute(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (first INTEGER NOT NULL)");
             connection.executeUpdate("INSERT INTO testtable (first) VALUES (?)",
                     batch(bind(10)),
@@ -161,7 +161,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
     @Test
     public void can_query_with_bind_values() throws SQLException {
 
-        executor.executeUpdate(connection -> {
+        executor.execute(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
 
             connection.executeUpdate("INSERT INTO testtable (first, second) VALUES (?, ?)",
@@ -184,7 +184,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
     @Test
     public void can_query_null_integer_values() throws SQLException {
 
-        executor.executeUpdate(connection -> {
+        executor.execute(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (first INTEGER NULL, second VARCHAR(20) NOT NULL)");
             connection.executeUpdate("INSERT INTO testtable (first, second) VALUES (null, 'asecond')");
         });
@@ -203,7 +203,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
     @Test
     public void inserts_null_double_as_bind_values() throws SQLException {
 
-        executor.executeUpdate(connection -> {
+        executor.execute(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (first DOUBLE NULL, second VARCHAR(20) NOT NULL)");
             connection.executeUpdate("INSERT INTO testtable (first, second) VALUES (?, ?)",
                     bind((Double)null), bind("asecond"));
@@ -219,7 +219,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
     @Test
     public void inserts_double_as_bind_values() throws SQLException {
 
-        executor.executeUpdate(connection -> {
+        executor.execute(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (first DOUBLE NULL, second VARCHAR(20) NOT NULL)");
             connection.executeUpdate("INSERT INTO testtable (first, second) VALUES (?, ?)",
                     bind(1.7d), bind("asecond"));
@@ -235,7 +235,7 @@ public class ValuesAreInsertedInDBCorrectlyTest {
     @Test
     public void can_query_null_double_values() throws SQLException {
 
-        executor.executeUpdate(connection -> {
+        executor.execute(connection -> {
             connection.executeUpdate("CREATE TABLE testtable (first DOUBLE NULL, second VARCHAR(20) NOT NULL)");
             connection.executeUpdate("INSERT INTO testtable (first, second) VALUES (null, 'asecond')");
         });

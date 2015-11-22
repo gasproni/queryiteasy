@@ -38,33 +38,34 @@ public class TransactionExecutorTest {
 
     @Test
     public void commits_rollbacks_and_closes_transaction_in_this_order() throws java.sql.SQLException {
-
-        transactionExecutor.executeUpdate(connection -> {
+        transactionExecutor.execute(connection -> {
         });
-
-        InOrder order = inOrder(jdbcConnection);
-        order.verify(jdbcConnection, times(1)).commit();
-        order.verify(jdbcConnection, times(1)).rollback();
-        order.verify(jdbcConnection, times(1)).close();
+        assertCommitRollbackAndCloseCalledInThisOrder();
     }
 
 
     @Test
-    public void when_exception_thrown_rollbacks_and_closes_transaction_in_this_order_and_doesnt_commit() throws java.sql.SQLException {
-
-        try {
-            transactionExecutor.executeUpdate(connection -> {
-                throw new RuntimeException();
-            });
-            fail("Runtime exception expected");
-        } catch (RuntimeException ignored) {
-            InOrder order = inOrder(jdbcConnection);
-            order.verify(jdbcConnection, times(0)).commit();
-            order.verify(jdbcConnection, times(1)).rollback();
-            order.verify(jdbcConnection, times(1)).close();
-        }
+    public void commits_rollbacks_and_closes_transaction_in_this_order_for_query() throws java.sql.SQLException {
+        transactionExecutor.executeQuery(connection -> 1);
+        assertCommitRollbackAndCloseCalledInThisOrder();
     }
 
+    @Test
+    public void when_exception_thrown_rollbacks_and_closes_transaction_in_this_order_and_doesnt_commit()
+            throws java.sql.SQLException {
+        assertRollbackAndCloseCalledInThisOrderAndCommitNeverCalled(() -> transactionExecutor.execute(connection -> {
+            throw new RuntimeException();
+        }));
+    }
+
+    @Test
+    public void when_exception_thrown_rollbacks_and_closes_transaction_in_this_order_and_doesnt_commit_query()
+            throws java.sql.SQLException {
+        assertRollbackAndCloseCalledInThisOrderAndCommitNeverCalled(() -> transactionExecutor.executeQuery(connection -> {
+            throw new RuntimeException();
+        }));
+
+    }
 
     @Test
     public void returns_correct_query_result_primitive_type() throws java.sql.SQLException {
@@ -77,12 +78,36 @@ public class TransactionExecutorTest {
     }
 
     @Test
-    public void returns_correct_query_result_list() throws java.sql.SQLException {
+    public void returns_correct_query_result_class_type() throws java.sql.SQLException {
 
         final ArrayList<Integer> result = new ArrayList<>(Arrays.asList(1, 2, 3, 4));
 
         List<Integer> queryResult = transactionExecutor.executeQuery(connection -> result);
 
         assertThat(queryResult, is(result));
+    }
+
+    private void assertCommitRollbackAndCloseCalledInThisOrder() throws SQLException {
+        InOrder order = inOrder(jdbcConnection);
+        order.verify(jdbcConnection, times(1)).commit();
+        order.verify(jdbcConnection, times(1)).rollback();
+        order.verify(jdbcConnection, times(1)).close();
+    }
+
+    @FunctionalInterface
+    public interface VoidCodeBlock {
+        void execute();
+    }
+
+    private void assertRollbackAndCloseCalledInThisOrderAndCommitNeverCalled(VoidCodeBlock codeBlock) throws SQLException {
+        try {
+            codeBlock.execute();
+            fail("Runtime exception expected");
+        } catch (RuntimeException ignored) {
+            verify(jdbcConnection, times(0)).commit();
+            InOrder order = inOrder(jdbcConnection);
+            order.verify(jdbcConnection, times(1)).rollback();
+            order.verify(jdbcConnection, times(1)).close();
+        }
     }
 }
