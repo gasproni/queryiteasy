@@ -35,7 +35,13 @@ class PositionalParameterBinder implements StatementParameterBinder {
 
     @Override
     public void bind(Double value) {
-        RuntimeSQLException.wrapException(() -> statement.setDouble(this.position, value));
+        RuntimeSQLException.wrapException(() -> {
+            if (value != null) {
+                statement.setDouble(this.position, value);
+            } else {
+                statement.setNull(this.position, Types.DOUBLE);
+            }
+        });
     }
 
 }

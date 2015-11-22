@@ -29,4 +29,15 @@ public class WrappedResultSet implements Row {
     public String getString(String columnName) {
         return RuntimeSQLException.wrapExceptionAndReturnResult(() -> this.resultSet.getString(columnName));
     }
+
+    @Override
+    public Double getDouble(String columnName) {
+        return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
+            double result = this.resultSet.getDouble(columnName);
+            if (this.resultSet.wasNull()) {
+                return null;
+            }
+            return result;
+        });
+    }
 }

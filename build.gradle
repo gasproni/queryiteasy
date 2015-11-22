@@ -9,13 +9,13 @@ apply plugin: 'findbugs'
 sourceSets {
     acceptanceTest {
         java {
-            'src/acceptanceTest/java'
+            srcDir 'src/acceptanceTest/java'
         }
         resources {
-            'src/acceptanceTest/resources'
+            srcDir 'src/acceptanceTest/resources'
         }
-        compileClasspath += main.output
-        runtimeClasspath += output + compileClasspath
+        compileClasspath += sourceSets.main.runtimeClasspath + sourceSets.test.compileClasspath
+        runtimeClasspath += compileClasspath
     }
 }
 
@@ -23,9 +23,9 @@ task acceptanceTest(type: Test) {
     description = 'Runs the acceptance tests'
     group = 'verification'
     testClassesDir = sourceSets.acceptanceTest.output.classesDir
-    classpath = sourceSets.acceptanceTest.runtimeClasspath
-    reports.junitXml.destination = '$buildDir/acceptance-test-results'
-    reports.html.destination = '$buildDir/reports/acceptanceTest'
+    classpath += sourceSets.acceptanceTest.runtimeClasspath
+    reports.junitXml.destination = 'build/acceptance-test-results'
+    reports.html.destination = 'build/reports/acceptanceTest'
     dependsOn(test)
 }
 
@@ -45,11 +45,15 @@ findbugs {
 
 
 dependencies {
-    testCompile 'junit:junit:4.12', 'org.mockito:mockito-all:1.10.19'
-    acceptanceTestCompile 'junit:junit:4.12', 'org.hsqldb:hsqldb:2.3.3'
+    testCompile 'org.hamcrest:hamcrest-all:1.3', 'junit:junit:4.12', 'org.mockito:mockito-all:1.10.19'
+    acceptanceTestCompile 'org.hsqldb:hsqldb:2.3.3'
 }
 
 idea {
+    project {
+        jdkName = '1.8'
+        languageLevel = '1.8'
+    }
     module {
         scopes.TEST.plus += [configurations.acceptanceTestCompile]
     }
