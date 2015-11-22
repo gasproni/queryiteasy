@@ -4,6 +4,7 @@ import com.asprotunity.jdbcunboil.connection.Row;
 import com.asprotunity.jdbcunboil.exception.RuntimeSQLException;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class WrappedResultSet implements Row {
 
@@ -15,29 +16,27 @@ public class WrappedResultSet implements Row {
     }
 
     @Override
-    public Integer getInteger(String columnName) {
-        return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
-            int result = this.resultSet.getInt(columnName);
-            if (this.resultSet.wasNull()) {
-                return null;
-            }
-            return result;
-        });
+    public String getString(String columnName) {
+        return RuntimeSQLException.wrapExceptionAndReturnResult(() ->
+                resultSet.getString(columnName));
     }
 
     @Override
-    public String getString(String columnName) {
-        return RuntimeSQLException.wrapExceptionAndReturnResult(() -> this.resultSet.getString(columnName));
+    public Integer getInteger(String columnName) {
+        return RuntimeSQLException.wrapExceptionAndReturnResult(() ->
+                returnResultOrNull(resultSet.getInt(columnName)));
     }
 
     @Override
     public Double getDouble(String columnName) {
-        return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
-            double result = this.resultSet.getDouble(columnName);
-            if (this.resultSet.wasNull()) {
-                return null;
-            }
-            return result;
-        });
+        return RuntimeSQLException.wrapExceptionAndReturnResult(() ->
+                returnResultOrNull(resultSet.getDouble(columnName)));
+    }
+
+    private <ReturnType> ReturnType returnResultOrNull(ReturnType result) throws SQLException {
+        if (this.resultSet.wasNull()) {
+            return null;
+        }
+        return result;
     }
 }
