@@ -59,4 +59,30 @@ public class PositionalParameterBinderTest {
         parameterBinder.bind((Double) null);
         verify(preparedStatement, times(1)).setNull(position, Types.DOUBLE);
     }
+
+    @Test
+    public void binds_valid_floats_correctly() throws Exception {
+        float value = 10;
+        parameterBinder.bind(value);
+        verify(preparedStatement, times(1)).setFloat(position, value);
+    }
+
+    @Test
+    public void binds_null_floats_correctly() throws Exception {
+        parameterBinder.bind((Float) null);
+        verify(preparedStatement, times(1)).setNull(position, Types.FLOAT);
+    }
+
+    @Test
+    public void binds_valid_bytes_correctly() throws Exception {
+        byte value = 10;
+        parameterBinder.bind(value);
+        verify(preparedStatement, times(1)).setByte(position, value);
+    }
+
+    @Test
+    public void binds_null_bytes_correctly() throws Exception {
+        parameterBinder.bind((Byte) null);
+        verify(preparedStatement, times(1)).setNull(position, Types.TINYINT);
+    }
 }

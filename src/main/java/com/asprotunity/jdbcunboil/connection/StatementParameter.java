@@ -16,4 +16,12 @@ public interface StatementParameter {
     static StatementParameter bind(Double value) {
         return binder -> binder.bind(value);
     }
+
+    static StatementParameter bind(Float value) {
+        return binder -> binder.bind(value);
+    }
+
+    static StatementParameter bind(Byte value) {
+        return binder -> binder.bind(value);
+    }
 }

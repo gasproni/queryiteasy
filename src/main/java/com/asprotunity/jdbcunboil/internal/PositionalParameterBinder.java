@@ -44,4 +44,26 @@ class PositionalParameterBinder implements StatementParameterBinder {
         });
     }
 
+    @Override
+    public void bind(Float value) {
+        RuntimeSQLException.wrapException(() -> {
+            if (value != null) {
+                statement.setFloat(this.position, value);
+            } else {
+                statement.setNull(this.position, Types.FLOAT);
+            }
+        });
+    }
+
+    @Override
+    public void bind(Byte value) {
+        RuntimeSQLException.wrapException(() -> {
+            if (value != null) {
+                statement.setByte(this.position, value);
+            } else {
+                statement.setNull(this.position, Types.TINYINT);
+            }
+        });
+    }
+
 }

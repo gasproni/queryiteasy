@@ -33,8 +33,20 @@ public class WrappedResultSet implements Row {
                 returnResultOrNull(resultSet.getDouble(columnName)));
     }
 
+    @Override
+    public Float getFloat(String columnName) {
+        return RuntimeSQLException.wrapExceptionAndReturnResult(() ->
+                returnResultOrNull(resultSet.getFloat(columnName)));
+    }
+
+    @Override
+    public Byte getByte(String columnName) {
+        return RuntimeSQLException.wrapExceptionAndReturnResult(() ->
+                returnResultOrNull(resultSet.getByte(columnName)));
+    }
+
     private <ReturnType> ReturnType returnResultOrNull(ReturnType result) throws SQLException {
-        if (this.resultSet.wasNull()) {
+        if (resultSet.wasNull()) {
             return null;
         }
         return result;

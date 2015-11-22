@@ -6,4 +6,8 @@ public interface StatementParameterBinder {
     void bind(Integer value);
 
     void bind(Double value);
+
+    void bind(Float value);
+
+    void bind(Byte value);
 }
