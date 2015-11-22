@@ -13,7 +13,6 @@ import java.util.List;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 public class TransactionExecutorTest {
@@ -102,12 +101,12 @@ public class TransactionExecutorTest {
     private void assertRollbackAndCloseCalledInThisOrderAndCommitNeverCalled(VoidCodeBlock codeBlock) throws SQLException {
         try {
             codeBlock.execute();
-            fail("Runtime exception expected");
-        } catch (RuntimeException ignored) {
-            verify(jdbcConnection, times(0)).commit();
-            InOrder order = inOrder(jdbcConnection);
-            order.verify(jdbcConnection, times(1)).rollback();
-            order.verify(jdbcConnection, times(1)).close();
+        } catch (Exception ignored) {
         }
+
+        verify(jdbcConnection, times(0)).commit();
+        InOrder order = inOrder(jdbcConnection);
+        order.verify(jdbcConnection, times(1)).rollback();
+        order.verify(jdbcConnection, times(1)).close();
     }
 }
