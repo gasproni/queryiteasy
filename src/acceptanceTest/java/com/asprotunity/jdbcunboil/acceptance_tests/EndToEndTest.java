@@ -19,7 +19,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.Assert.assertThat;
 
-public class ValuesAreInsertedInDBCorrectlyTest {
+public class EndToEndTest {
 
     private JDBCDataSource dataSource;
     private TransactionExecutor executor;
