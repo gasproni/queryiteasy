@@ -32,6 +32,8 @@ task acceptanceTest(type: Test, dependsOn: test) {
     reports.html.destination = buildDir.path +'/reports/acceptanceTest'
 }
 
+// Generates some dummy dirs necessary for the testJar task to work.
+// Not sure how to avoid that.
 task makeDummyDirs << {
     mkdir(buildDir.path +'/resources/acceptanceTest')
     mkdir(buildDir.path +'/resources/test')
@@ -70,7 +72,6 @@ check {
     dependsOn(acceptanceTest)
 }
 
-
 findbugs {
     toolVersion = "3.0.1"
     sourceSets = [sourceSets.main]
@@ -79,7 +80,6 @@ findbugs {
     effort = "max"
     reportLevel = "high"
 }
-
 
 dependencies {
     testCompile 'org.hamcrest:hamcrest-all:1.3', 'junit:junit:4.12', 'org.mockito:mockito-all:1.10.19'
