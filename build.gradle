@@ -23,14 +23,47 @@ task wrapper(type: Wrapper) {
     gradleVersion = '2.9'
 }
 
-task acceptanceTest(type: Test) {
+task acceptanceTest(type: Test, dependsOn: test) {
     description = 'Runs the acceptance tests'
     group = 'verification'
     testClassesDir = sourceSets.acceptanceTest.output.classesDir
     classpath += sourceSets.acceptanceTest.runtimeClasspath
-    reports.junitXml.destination = 'build/acceptance-test-results'
-    reports.html.destination = 'build/reports/acceptanceTest'
-    dependsOn(test)
+    reports.junitXml.destination = buildDir.path +'/acceptance-test-results'
+    reports.html.destination = buildDir.path +'/reports/acceptanceTest'
+}
+
+task makeDummyDirs << {
+    mkdir(buildDir.path +'/resources/acceptanceTest')
+    mkdir(buildDir.path +'/resources/test')
+    mkdir(buildDir.path +'/resources/main')
+}
+
+task testJar(type: Jar, dependsOn: [build, makeDummyDirs, acceptanceTest]) {
+    manifest.from jar.manifest
+    classifier = 'test'
+    from {
+        configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
+    } {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+    from fileTree(
+            sourceSets.acceptanceTest.output.classesDir
+    ) {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+
+    }
+    from {
+        sourceSets.acceptanceTest.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    } {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+    with jar
 }
 
 check {
