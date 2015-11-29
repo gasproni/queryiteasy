@@ -1,5 +1,6 @@
 package com.asprotunity.jdbcunboil;
 
+import com.asprotunity.jdbcunboil.exception.InvalidArgumentException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -30,7 +31,7 @@ public class TransactionExecutorTest {
     }
 
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = InvalidArgumentException.class)
     public void throws_exception_when_datasource_is_null() {
         new TransactionExecutor(null);
     }

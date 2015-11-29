@@ -1,6 +1,7 @@
 package com.asprotunity.jdbcunboil;
 
 import com.asprotunity.jdbcunboil.connection.Connection;
+import com.asprotunity.jdbcunboil.exception.InvalidArgumentException;
 import com.asprotunity.jdbcunboil.exception.RuntimeSQLException;
 import com.asprotunity.jdbcunboil.internal.WrappedJDBCConnection;
 
@@ -14,7 +15,7 @@ public class TransactionExecutor {
 
     public TransactionExecutor(DataSource dataSource) {
         if (dataSource == null) {
-            throw new NullPointerException("dataSource cannot be null");
+            throw new InvalidArgumentException("dataSource cannot be null");
         }
         this.dataSource = dataSource;
     }

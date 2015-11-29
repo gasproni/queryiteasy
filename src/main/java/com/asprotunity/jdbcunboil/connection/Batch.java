@@ -1,5 +1,7 @@
 package com.asprotunity.jdbcunboil.connection;
 
+import com.asprotunity.jdbcunboil.exception.InvalidArgumentException;
+
 import java.util.function.BiConsumer;
 
 public class Batch {
@@ -7,6 +9,14 @@ public class Batch {
     private final StatementParameter[] parameters;
 
     public static Batch batch(StatementParameter firstParameter, StatementParameter... parameters) {
+        if (firstParameter == null || parameters == null) {
+            throw new InvalidArgumentException("Arguments cannot be null.");
+        }
+        for (int position = 0; position < parameters.length; ++position) {
+            if (parameters[position] == null) {
+                throw new InvalidArgumentException("Arguments cannot be null: null parameter at position " + position + 2);
+            }
+        }
         return new Batch(firstParameter, parameters);
     }
 
