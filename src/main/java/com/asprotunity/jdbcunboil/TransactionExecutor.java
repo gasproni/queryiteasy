@@ -30,7 +30,7 @@ public class TransactionExecutor {
     }
 
 
-    public <ResultType> ResultType executeQuery(Function<Connection, ResultType> transaction) {
+    public <ResultType> ResultType executeWithResult(Function<Connection, ResultType> transaction) {
         return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
                     try (WrappedJDBCConnection connection = new WrappedJDBCConnection(dataSource.getConnection())) {
                         ResultType result = transaction.apply(connection);

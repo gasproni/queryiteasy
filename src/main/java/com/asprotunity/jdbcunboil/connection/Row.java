@@ -2,9 +2,9 @@ package com.asprotunity.jdbcunboil.connection;
 
 
 public interface Row {
-    String getString(String columnName);
-    Integer getInteger(String columnName);
-    Double getDouble(String columnName);
-    Float getFloat(String columnName);
-    Byte getByte(String columnName);
+    String asString(String columnName);
+    Integer asInteger(String columnName);
+    Double asDouble(String columnName);
+    Float asFloat(String columnName);
+    Byte asByte(String columnName);
 }

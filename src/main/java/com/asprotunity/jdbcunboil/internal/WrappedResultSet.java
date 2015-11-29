@@ -16,31 +16,31 @@ public class WrappedResultSet implements Row {
     }
 
     @Override
-    public String getString(String columnName) {
+    public String asString(String columnName) {
         return RuntimeSQLException.wrapExceptionAndReturnResult(() ->
                 resultSet.getString(columnName));
     }
 
     @Override
-    public Integer getInteger(String columnName) {
+    public Integer asInteger(String columnName) {
         return RuntimeSQLException.wrapExceptionAndReturnResult(() ->
                 returnResultOrNull(resultSet.getInt(columnName)));
     }
 
     @Override
-    public Double getDouble(String columnName) {
+    public Double asDouble(String columnName) {
         return RuntimeSQLException.wrapExceptionAndReturnResult(() ->
                 returnResultOrNull(resultSet.getDouble(columnName)));
     }
 
     @Override
-    public Float getFloat(String columnName) {
+    public Float asFloat(String columnName) {
         return RuntimeSQLException.wrapExceptionAndReturnResult(() ->
                 returnResultOrNull(resultSet.getFloat(columnName)));
     }
 
     @Override
-    public Byte getByte(String columnName) {
+    public Byte asByte(String columnName) {
         return RuntimeSQLException.wrapExceptionAndReturnResult(() ->
                 returnResultOrNull(resultSet.getByte(columnName)));
     }

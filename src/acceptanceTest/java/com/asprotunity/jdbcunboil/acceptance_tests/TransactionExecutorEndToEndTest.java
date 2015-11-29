@@ -19,7 +19,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.Assert.assertThat;
 
-public class EndToEndTest {
+public class TransactionExecutorEndToEndTest {
 
     private JDBCDataSource dataSource;
     private TransactionExecutor executor;
@@ -48,8 +48,8 @@ public class EndToEndTest {
     public void inserts_with_no_bind_values() throws SQLException {
 
         executor.execute(connection -> {
-            connection.executeUpdate("CREATE TABLE testtable (first INTEGER NOT NULL)");
-            connection.executeUpdate("INSERT INTO testtable (first) VALUES (10)");
+            connection.update("CREATE TABLE testtable (first INTEGER NOT NULL)");
+            connection.update("INSERT INTO testtable (first) VALUES (10)");
         });
 
         List<Integer> expectedValues = query("SELECT first FROM testtable", rs -> rs.getInt("first"));
@@ -62,13 +62,13 @@ public class EndToEndTest {
     public void inserts_with_some_bind_values() throws SQLException {
 
         executor.execute(connection -> {
-            connection.executeUpdate("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
-            connection.executeUpdate("INSERT INTO testtable (first, second) VALUES (?, ?)",
+            connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
+            connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
                     bind(10), bind("asecond"));
         });
 
         List<TestTableFields<Integer, String>> expectedValues = query("SELECT * FROM testtable",
-                rs -> make(getInteger(rs, "first"), getString(rs, "second")));
+                rs -> make(asInteger(rs, "first"), getString(rs, "second")));
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0).first, is(10));
         assertThat(expectedValues.get(0).second, is("asecond"));
@@ -78,13 +78,13 @@ public class EndToEndTest {
     public void inserts_null_integers_as_bind_values() throws SQLException {
 
         executor.execute(connection -> {
-            connection.executeUpdate("CREATE TABLE testtable (first INTEGER NULL, second VARCHAR(20) NOT NULL)");
-            connection.executeUpdate("INSERT INTO testtable (first, second) VALUES (?, ?)",
-                    bind((Integer)null), bind("asecond"));
+            connection.update("CREATE TABLE testtable (first INTEGER NULL, second VARCHAR(20) NOT NULL)");
+            connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
+                    bind((Integer) null), bind("asecond"));
         });
 
         List<TestTableFields> expectedValues = query("SELECT * FROM testtable",
-                rs -> make(getInteger(rs, "first"), getString(rs, "second")));
+                rs -> make(asInteger(rs, "first"), getString(rs, "second")));
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0).first, is(nullValue()));
         assertThat(expectedValues.get(0).second, is("asecond"));
@@ -92,18 +92,18 @@ public class EndToEndTest {
 
 
     @Test
-    public void can_do_batch_inserts() throws SQLException {
+    public void does_batch_inserts() throws SQLException {
 
         executor.execute(connection -> {
-            connection.executeUpdate("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
-            connection.executeUpdate("INSERT INTO testtable (first, second) VALUES (?, ?)",
+            connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
+            connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
                     batch(bind(10), bind("asecond10")),
                     batch(bind(11), bind("asecond11")),
                     batch(bind(12), bind("asecond12")));
         });
 
         List<TestTableFields> expectedValues = query("SELECT * FROM testtable ORDER BY first ASC",
-                rs -> make(getInteger(rs, "first"), getString(rs, "second")));
+                rs -> make(asInteger(rs, "first"), getString(rs, "second")));
         assertThat(expectedValues.size(), is(3));
         for (int first = 0; first < expectedValues.size(); ++first) {
             assertThat(expectedValues.get(first).first, is(first + 10));
@@ -112,10 +112,10 @@ public class EndToEndTest {
     }
 
     @Test
-    public void can_do_batch_inserts_with_batch_array() throws SQLException {
+    public void does_batch_inserts_with_batch_array() throws SQLException {
 
         executor.execute(connection -> {
-            connection.executeUpdate("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
+            connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
 
             Batch firstBatch = batch(bind(10), bind("asecond10"));
             Batch[] batches = new Batch[2];
@@ -124,11 +124,11 @@ public class EndToEndTest {
                 batches[first] = batch(bind(value), bind("asecond" + value));
             }
 
-            connection.executeUpdate("INSERT INTO testtable (first, second) VALUES (?, ?)", firstBatch, batches);
+            connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)", firstBatch, batches);
         });
 
         List<TestTableFields> expectedValues = query("SELECT * FROM testtable ORDER BY first ASC",
-                rs -> make(getInteger(rs, "first"), getString(rs, "second")));
+                rs -> make(asInteger(rs, "first"), getString(rs, "second")));
         assertThat(expectedValues.size(), is(3));
         for (int first = 10; first < expectedValues.size(); ++first) {
             assertThat(expectedValues.get(first).first, is(first));
@@ -138,20 +138,19 @@ public class EndToEndTest {
 
 
     @Test
-    public void can_query_with_no_bind_values() throws SQLException {
+    public void queries_with_no_bind_values() throws SQLException {
 
         executor.execute(connection -> {
-            connection.executeUpdate("CREATE TABLE testtable (first INTEGER NOT NULL)");
-            connection.executeUpdate("INSERT INTO testtable (first) VALUES (?)",
+            connection.update("CREATE TABLE testtable (first INTEGER NOT NULL)");
+            connection.update("INSERT INTO testtable (first) VALUES (?)",
                     batch(bind(10)),
                     batch(bind(11)));
         });
 
-        List<Integer> result = executor.executeQuery(connection ->
-                        connection.executeQuery("SELECT first FROM testtable ORDER BY first ASC",
-                                row -> row.getInteger("first"))
+        ArrayList<Integer> result = new ArrayList<>();
+        executor.execute(connection -> connection.select("SELECT first FROM testtable ORDER BY first ASC",
+                row -> result.add(row.asInteger("first")))
         );
-
 
         assertThat(result.size(), is(2));
         assertThat(result.get(0), is(10));
@@ -159,21 +158,20 @@ public class EndToEndTest {
     }
 
     @Test
-    public void can_query_with_bind_values() throws SQLException {
+    public void queries_with_bind_values() throws SQLException {
 
         executor.execute(connection -> {
-            connection.executeUpdate("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
-
-            connection.executeUpdate("INSERT INTO testtable (first, second) VALUES (?, ?)",
+            connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
+            connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
                     batch(bind(10), bind("asecond10")),
                     batch(bind(11), bind("asecond11")));
         });
 
-        List<TestTableFields> result = executor.executeQuery(connection ->
-                        connection.executeQuery("SELECT first, second FROM testtable WHERE first = ? AND second = ?",
-                                row -> make(row.getInteger("first"), row.getString("second")),
-                                bind(10),
-                                bind("asecond10"))
+        List<TestTableFields> result = new ArrayList<>();
+        executor.execute(connection ->
+                connection.select("SELECT first, second FROM testtable WHERE first = ? AND second = ?",
+                        row -> result.add(make(row.asInteger("first"), row.asString("second"))),
+                        bind(10), bind("asecond10"))
         );
 
         assertThat(result.size(), is(1));
@@ -182,16 +180,17 @@ public class EndToEndTest {
     }
 
     @Test
-    public void can_query_null_integer_values() throws SQLException {
+    public void queries_with_null_integer_values() throws SQLException {
 
         executor.execute(connection -> {
-            connection.executeUpdate("CREATE TABLE testtable (first INTEGER NULL, second VARCHAR(20) NOT NULL)");
-            connection.executeUpdate("INSERT INTO testtable (first, second) VALUES (null, 'asecond')");
+            connection.update("CREATE TABLE testtable (first INTEGER NULL, second VARCHAR(20) NOT NULL)");
+            connection.update("INSERT INTO testtable (first, second) VALUES (null, 'asecond')");
         });
 
-        List<TestTableFields> result = executor.executeQuery(connection ->
-                        connection.executeQuery("SELECT first, second FROM testtable WHERE first is NULL",
-                                row -> make(row.getInteger("first"), row.getString("second")))
+        List<TestTableFields> result = new ArrayList<>();
+        executor.execute(connection ->
+                connection.select("SELECT first, second FROM testtable WHERE first is NULL",
+                        row -> result.add(make(row.asInteger("first"), row.asString("second"))))
         );
 
         assertThat(result.size(), is(1));
@@ -204,13 +203,13 @@ public class EndToEndTest {
     public void inserts_null_double_as_bind_values() throws SQLException {
 
         executor.execute(connection -> {
-            connection.executeUpdate("CREATE TABLE testtable (first DOUBLE NULL, second VARCHAR(20) NOT NULL)");
-            connection.executeUpdate("INSERT INTO testtable (first, second) VALUES (?, ?)",
-                    bind((Double)null), bind("asecond"));
+            connection.update("CREATE TABLE testtable (first DOUBLE NULL, second VARCHAR(20) NOT NULL)");
+            connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
+                    bind((Double) null), bind("asecond"));
         });
 
         List<TestTableFields> expectedValues = query("SELECT * FROM testtable",
-                rs -> make(getDouble(rs, "first"), getString(rs, "second")));
+                rs -> make(asDouble(rs, "first"), getString(rs, "second")));
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0).first, is(nullValue()));
         assertThat(expectedValues.get(0).second, is("asecond"));
@@ -220,29 +219,30 @@ public class EndToEndTest {
     public void inserts_double_as_bind_values() throws SQLException {
 
         executor.execute(connection -> {
-            connection.executeUpdate("CREATE TABLE testtable (first DOUBLE NULL, second VARCHAR(20) NOT NULL)");
-            connection.executeUpdate("INSERT INTO testtable (first, second) VALUES (?, ?)",
+            connection.update("CREATE TABLE testtable (first DOUBLE NULL, second VARCHAR(20) NOT NULL)");
+            connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
                     bind(1.7d), bind("asecond"));
         });
 
         List<TestTableFields<Double, String>> expectedValues = query("SELECT * FROM testtable",
-                rs ->make(getDouble(rs, "first"), getString(rs, "second")));
+                rs -> make(asDouble(rs, "first"), getString(rs, "second")));
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0).first, is(closeTo(1.7d, 0.00000000001d)));
         assertThat(expectedValues.get(0).second, is("asecond"));
     }
 
     @Test
-    public void can_query_null_double_values() throws SQLException {
+    public void queries_with_null_double_values() throws SQLException {
 
         executor.execute(connection -> {
-            connection.executeUpdate("CREATE TABLE testtable (first DOUBLE NULL, second VARCHAR(20) NOT NULL)");
-            connection.executeUpdate("INSERT INTO testtable (first, second) VALUES (null, 'asecond')");
+            connection.update("CREATE TABLE testtable (first DOUBLE NULL, second VARCHAR(20) NOT NULL)");
+            connection.update("INSERT INTO testtable (first, second) VALUES (null, 'asecond')");
         });
 
-        List<TestTableFields> result = executor.executeQuery(connection ->
-                connection.executeQuery("SELECT first, second FROM testtable WHERE first is NULL",
-                        row -> make(row.getDouble("first"), row.getString("second")))
+        List<TestTableFields> result = new ArrayList<>();
+        executor.execute(connection ->
+                connection.select("SELECT first, second FROM testtable WHERE first is NULL",
+                        row -> result.add(make(row.asDouble("first"), row.asString("second"))))
         );
 
         assertThat(result.size(), is(1));
@@ -275,7 +275,7 @@ public class EndToEndTest {
 
     }
 
-    private static <Type1, Type2 > TestTableFields<Type1, Type2> make(Type1 val1, Type2 val2) {
+    private static <Type1, Type2> TestTableFields<Type1, Type2> make(Type1 val1, Type2 val2) {
         return new TestTableFields<>(val1, val2);
     }
 
@@ -285,7 +285,7 @@ public class EndToEndTest {
     }
 
 
-    private Double getDouble(ResultSet rs, String columnName) throws SQLException {
+    private Double asDouble(ResultSet rs, String columnName) throws SQLException {
         double result = rs.getDouble(columnName);
         if (rs.wasNull()) {
             return null;
@@ -293,7 +293,7 @@ public class EndToEndTest {
         return result;
     }
 
-    private Integer getInteger(ResultSet rs, String columnName) throws SQLException {
+    private Integer asInteger(ResultSet rs, String columnName) throws SQLException {
         int result = rs.getInt(columnName);
         if (rs.wasNull()) {
             return null;

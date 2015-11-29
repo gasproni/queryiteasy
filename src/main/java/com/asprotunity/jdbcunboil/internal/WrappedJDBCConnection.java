@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class WrappedJDBCConnection implements Connection, AutoCloseable {
@@ -34,7 +35,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     }
 
     @Override
-    public void executeUpdate(String sql, StatementParameter... parameters) {
+    public void update(String sql, StatementParameter... parameters) {
         RuntimeSQLException.wrapException(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 bindParameters(parameters, statement);
@@ -44,7 +45,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     }
 
     @Override
-    public void executeUpdate(String sql, Batch firstBatch, Batch... batches) {
+    public void update(String sql, Batch firstBatch, Batch... batches) {
         RuntimeSQLException.wrapException(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 addBatch(firstBatch, statement);
@@ -57,16 +58,14 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     }
 
     @Override
-    public <MappedType> List<MappedType> executeQuery(String sql, Function<Row, MappedType> rowMapper, StatementParameter... parameters) {
-        return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
+    public void select(String sql, Consumer<Row> rowConsumer, StatementParameter... parameters) {
+        RuntimeSQLException.wrapException(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 bindParameters(parameters, statement);
                 try (ResultSet rs = statement.executeQuery()) {
-                    List<MappedType> result = new ArrayList<>();
                     while (rs.next()) {
-                        result.add(rowMapper.apply(new WrappedResultSet(rs)));
+                        rowConsumer.accept(new WrappedResultSet(rs));
                     }
-                    return result;
                 }
             }
         });

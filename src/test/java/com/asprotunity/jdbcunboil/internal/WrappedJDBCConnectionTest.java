@@ -46,7 +46,7 @@ public class WrappedJDBCConnectionTest {
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(jdbcConnection.prepareStatement(sql)).thenReturn(preparedStatement);
 
-        wrappedJDBCConnection.executeUpdate(sql);
+        wrappedJDBCConnection.update(sql);
 
         InOrder order = inOrder(preparedStatement);
         order.verify(preparedStatement, times(1)).execute();
@@ -62,7 +62,7 @@ public class WrappedJDBCConnectionTest {
         when(preparedStatement.executeQuery()).thenReturn(rs);
         when(rs.next()).thenReturn(false);
 
-        wrappedJDBCConnection.executeQuery(sql, row -> "doesn't matter");
+        wrappedJDBCConnection.select(sql, row -> {});
 
         InOrder order = inOrder(preparedStatement, rs);
         order.verify(preparedStatement, times(1)).executeQuery();
@@ -76,7 +76,7 @@ public class WrappedJDBCConnectionTest {
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(jdbcConnection.prepareStatement(sql)).thenReturn(preparedStatement);
 
-        wrappedJDBCConnection.executeUpdate(sql, batch(bind(10)), batch(bind(20)));
+        wrappedJDBCConnection.update(sql, batch(bind(10)), batch(bind(20)));
 
         InOrder order = inOrder(preparedStatement);
         order.verify(preparedStatement, times(1)).setInt(1, 10);

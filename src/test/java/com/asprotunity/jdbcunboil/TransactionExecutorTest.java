@@ -45,7 +45,7 @@ public class TransactionExecutorTest {
 
     @Test
     public void commits_rollbacks_and_closes_transaction_in_this_order_for_query() throws java.sql.SQLException {
-        transactionExecutor.executeQuery(connection -> 1);
+        transactionExecutor.executeWithResult(connection -> 1);
         assertCommitRollbackAndCloseCalledInThisOrder();
     }
 
@@ -60,7 +60,7 @@ public class TransactionExecutorTest {
     @Test
     public void when_exception_thrown_rollbacks_and_closes_transaction_in_this_order_and_doesnt_commit_query()
             throws java.sql.SQLException {
-        assertRollbackAndCloseCalledInThisOrderAndCommitNeverCalled(() -> transactionExecutor.executeQuery(connection -> {
+        assertRollbackAndCloseCalledInThisOrderAndCommitNeverCalled(() -> transactionExecutor.executeWithResult(connection -> {
             throw new RuntimeException();
         }));
 
@@ -71,7 +71,7 @@ public class TransactionExecutorTest {
 
         final int result = 10;
 
-        int queryResult = transactionExecutor.executeQuery(connection -> result);
+        int queryResult = transactionExecutor.executeWithResult(connection -> result);
 
         assertThat(queryResult, is(result));
     }
@@ -81,7 +81,7 @@ public class TransactionExecutorTest {
 
         final ArrayList<Integer> result = new ArrayList<>(Arrays.asList(1, 2, 3, 4));
 
-        List<Integer> queryResult = transactionExecutor.executeQuery(connection -> result);
+        List<Integer> queryResult = transactionExecutor.executeWithResult(connection -> result);
 
         assertThat(queryResult, is(result));
     }
