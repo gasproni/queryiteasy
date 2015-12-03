@@ -4,9 +4,7 @@ package com.asprotunity.jdbcunboil.acceptance_tests;
 import com.asprotunity.jdbcunboil.TransactionExecutor;
 import com.asprotunity.jdbcunboil.connection.Batch;
 import org.hsqldb.jdbc.JDBCDataSource;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -21,11 +19,11 @@ import static org.junit.Assert.assertThat;
 
 public class TransactionExecutorEndToEndTest {
 
-    private JDBCDataSource dataSource;
-    private TransactionExecutor executor;
+    private static JDBCDataSource dataSource;
+    private static TransactionExecutor executor;
 
-    @Before
-    public void setUp() {
+    @BeforeClass
+    public static void setUp() {
         dataSource = new JDBCDataSource();
         dataSource.setDatabase("jdbc:hsqldb:mem:testdb");
         dataSource.setUser("sa");
@@ -37,7 +35,7 @@ public class TransactionExecutorEndToEndTest {
     public void tearDown() throws SQLException {
         Connection connection = dataSource.getConnection();
         Statement statement = connection.createStatement();
-        statement.execute("SHUTDOWN");
+        statement.execute("DROP TABLE testtable");
         statement.close();
         connection.commit();
         connection.close();
