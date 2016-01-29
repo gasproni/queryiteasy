@@ -1,4 +1,4 @@
-package com.asprotunity.jdbcunboil.connection;
+package com.asprotunity.jdbcunboiled.connection;
 
 
 public interface Row {

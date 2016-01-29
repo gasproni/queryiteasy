@@ -1,4 +1,4 @@
-package com.asprotunity.jdbcunboil.internal;
+package com.asprotunity.jdbcunboiled.internal;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -8,8 +8,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-import static com.asprotunity.jdbcunboil.connection.Batch.batch;
-import static com.asprotunity.jdbcunboil.connection.StatementParameter.bind;
+import static com.asprotunity.jdbcunboiled.connection.Batch.batch;
+import static com.asprotunity.jdbcunboiled.connection.StatementParameter.bind;
 import static org.mockito.Mockito.*;
 
 public class WrappedJDBCConnectionTest {

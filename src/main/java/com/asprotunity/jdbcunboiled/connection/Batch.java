@@ -1,6 +1,6 @@
-package com.asprotunity.jdbcunboil.connection;
+package com.asprotunity.jdbcunboiled.connection;
 
-import com.asprotunity.jdbcunboil.exception.InvalidArgumentException;
+import com.asprotunity.jdbcunboiled.exception.InvalidArgumentException;
 
 import java.util.function.BiConsumer;
 

@@ -1,4 +1,4 @@
-package com.asprotunity.jdbcunboil.connection;
+package com.asprotunity.jdbcunboiled.connection;
 
 public interface StatementParameterBinder {
     void bind(String value);

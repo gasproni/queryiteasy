@@ -1,7 +1,7 @@
-package com.asprotunity.jdbcunboil.internal;
+package com.asprotunity.jdbcunboiled.internal;
 
-import com.asprotunity.jdbcunboil.connection.Row;
-import com.asprotunity.jdbcunboil.exception.RuntimeSQLException;
+import com.asprotunity.jdbcunboiled.connection.Row;
+import com.asprotunity.jdbcunboiled.exception.RuntimeSQLException;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

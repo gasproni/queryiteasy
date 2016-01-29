@@ -1,6 +1,6 @@
-package com.asprotunity.jdbcunboil;
+package com.asprotunity.jdbcunboiled;
 
-import com.asprotunity.jdbcunboil.exception.InvalidArgumentException;
+import com.asprotunity.jdbcunboiled.exception.InvalidArgumentException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;

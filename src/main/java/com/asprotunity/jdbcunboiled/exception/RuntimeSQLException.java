@@ -1,4 +1,4 @@
-package com.asprotunity.jdbcunboil.exception;
+package com.asprotunity.jdbcunboiled.exception;
 
 public class RuntimeSQLException extends RuntimeException {
     public RuntimeSQLException(java.sql.SQLException e) {

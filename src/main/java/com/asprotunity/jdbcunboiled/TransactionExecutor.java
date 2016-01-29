@@ -1,9 +1,9 @@
-package com.asprotunity.jdbcunboil;
+package com.asprotunity.jdbcunboiled;
 
-import com.asprotunity.jdbcunboil.connection.Connection;
-import com.asprotunity.jdbcunboil.exception.InvalidArgumentException;
-import com.asprotunity.jdbcunboil.exception.RuntimeSQLException;
-import com.asprotunity.jdbcunboil.internal.WrappedJDBCConnection;
+import com.asprotunity.jdbcunboiled.connection.Connection;
+import com.asprotunity.jdbcunboiled.exception.InvalidArgumentException;
+import com.asprotunity.jdbcunboiled.exception.RuntimeSQLException;
+import com.asprotunity.jdbcunboiled.internal.WrappedJDBCConnection;
 
 import javax.sql.DataSource;
 import java.util.function.Consumer;

@@ -1,8 +1,8 @@
-package com.asprotunity.jdbcunboil.acceptance_tests;
+package com.asprotunity.jdbcunboiled.acceptance_tests;
 
 
-import com.asprotunity.jdbcunboil.TransactionExecutor;
-import com.asprotunity.jdbcunboil.connection.Batch;
+import com.asprotunity.jdbcunboiled.TransactionExecutor;
+import com.asprotunity.jdbcunboiled.connection.Batch;
 import org.hsqldb.jdbc.JDBCDataSource;
 import org.junit.*;
 
@@ -10,8 +10,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.asprotunity.jdbcunboil.connection.Batch.batch;
-import static com.asprotunity.jdbcunboil.connection.StatementParameter.bind;
+import static com.asprotunity.jdbcunboiled.connection.Batch.batch;
+import static com.asprotunity.jdbcunboiled.connection.StatementParameter.bind;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.number.IsCloseTo.closeTo;

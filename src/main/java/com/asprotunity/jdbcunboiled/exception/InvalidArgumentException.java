@@ -1,4 +1,4 @@
-package com.asprotunity.jdbcunboil.exception;
+package com.asprotunity.jdbcunboiled.exception;
 
 public class InvalidArgumentException extends RuntimeException {
     public InvalidArgumentException(String message) {

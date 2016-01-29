@@ -1,18 +1,15 @@
-package com.asprotunity.jdbcunboil.internal;
+package com.asprotunity.jdbcunboiled.internal;
 
-import com.asprotunity.jdbcunboil.connection.Batch;
-import com.asprotunity.jdbcunboil.connection.Connection;
-import com.asprotunity.jdbcunboil.connection.Row;
-import com.asprotunity.jdbcunboil.connection.StatementParameter;
-import com.asprotunity.jdbcunboil.exception.RuntimeSQLException;
+import com.asprotunity.jdbcunboiled.connection.Batch;
+import com.asprotunity.jdbcunboiled.connection.Connection;
+import com.asprotunity.jdbcunboiled.connection.Row;
+import com.asprotunity.jdbcunboiled.connection.StatementParameter;
+import com.asprotunity.jdbcunboiled.exception.RuntimeSQLException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class WrappedJDBCConnection implements Connection, AutoCloseable {
     private java.sql.Connection connection;

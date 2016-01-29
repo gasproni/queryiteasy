@@ -1,4 +1,4 @@
-package com.asprotunity.jdbcunboil.internal;
+package com.asprotunity.jdbcunboiled.internal;
 
 import org.junit.After;
 import org.junit.Before;

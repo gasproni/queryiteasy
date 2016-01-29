@@ -1,10 +1,9 @@
-package com.asprotunity.jdbcunboil.connection;
+package com.asprotunity.jdbcunboiled.connection;
 
-import com.asprotunity.jdbcunboil.exception.InvalidArgumentException;
+import com.asprotunity.jdbcunboiled.exception.InvalidArgumentException;
 import org.junit.Test;
 
-import static com.asprotunity.jdbcunboil.connection.StatementParameter.bind;
-import static org.junit.Assert.*;
+import static com.asprotunity.jdbcunboiled.connection.StatementParameter.bind;
 
 public class BatchTest {
 
