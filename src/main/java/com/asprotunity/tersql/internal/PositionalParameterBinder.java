@@ -1,7 +1,7 @@
-package com.asprotunity.jdbcunboiled.internal;
+package com.asprotunity.tersql.internal;
 
-import com.asprotunity.jdbcunboiled.connection.StatementParameterBinder;
-import com.asprotunity.jdbcunboiled.exception.RuntimeSQLException;
+import com.asprotunity.tersql.connection.StatementParameterBinder;
+import com.asprotunity.tersql.exception.RuntimeSQLException;
 
 import java.sql.PreparedStatement;
 import java.sql.Types;

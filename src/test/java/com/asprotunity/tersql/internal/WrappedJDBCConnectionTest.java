@@ -1,4 +1,4 @@
-package com.asprotunity.jdbcunboiled.internal;
+package com.asprotunity.tersql.internal;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -10,8 +10,8 @@ import java.sql.ResultSet;
 import java.sql.Types;
 import java.util.stream.Stream;
 
-import static com.asprotunity.jdbcunboiled.connection.Batch.batch;
-import static com.asprotunity.jdbcunboiled.connection.StatementParameter.bind;
+import static com.asprotunity.tersql.connection.Batch.batch;
+import static com.asprotunity.tersql.connection.StatementParameter.bind;
 import static org.mockito.Mockito.*;
 
 public class WrappedJDBCConnectionTest {
@@ -56,7 +56,7 @@ public class WrappedJDBCConnectionTest {
     }
 
     @Test
-    public void query_executes_and_closes_result_set_and_statement_in_the_right_order() throws Exception {
+    public void select_executes_and_closes_result_set_and_statement_in_the_right_order() throws Exception {
         String sql = "SELECT * FROM foo";
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(jdbcConnection.prepareStatement(sql)).thenReturn(preparedStatement);

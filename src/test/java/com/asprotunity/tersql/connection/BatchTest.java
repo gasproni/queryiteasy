@@ -1,9 +1,9 @@
-package com.asprotunity.jdbcunboiled.connection;
+package com.asprotunity.tersql.connection;
 
-import com.asprotunity.jdbcunboiled.exception.InvalidArgumentException;
+import com.asprotunity.tersql.exception.InvalidArgumentException;
 import org.junit.Test;
 
-import static com.asprotunity.jdbcunboiled.connection.StatementParameter.bind;
+import static com.asprotunity.tersql.connection.StatementParameter.bind;
 
 public class BatchTest {
 

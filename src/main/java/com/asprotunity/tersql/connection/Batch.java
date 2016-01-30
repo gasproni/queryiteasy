@@ -1,6 +1,6 @@
-package com.asprotunity.jdbcunboiled.connection;
+package com.asprotunity.tersql.connection;
 
-import com.asprotunity.jdbcunboiled.exception.InvalidArgumentException;
+import com.asprotunity.tersql.exception.InvalidArgumentException;
 
 import java.util.function.BiConsumer;
 import java.util.stream.IntStream;

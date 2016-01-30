@@ -1,4 +1,4 @@
-package com.asprotunity.jdbcunboiled.connection;
+package com.asprotunity.tersql.connection;
 
 
 public interface Row {

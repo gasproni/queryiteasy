@@ -1,10 +1,10 @@
-package com.asprotunity.jdbcunboiled.acceptance_tests;
+package com.asprotunity.tersql.acceptance_tests;
 
 
-import com.asprotunity.jdbcunboiled.TransactionExecutor;
-import com.asprotunity.jdbcunboiled.connection.Batch;
-import com.asprotunity.jdbcunboiled.connection.Row;
-import com.asprotunity.jdbcunboiled.internal.WrappedResultSet;
+import com.asprotunity.tersql.DataStore;
+import com.asprotunity.tersql.connection.Batch;
+import com.asprotunity.tersql.connection.Row;
+import com.asprotunity.tersql.internal.WrappedResultSet;
 import org.hsqldb.jdbc.JDBCDataSource;
 import org.junit.After;
 import org.junit.BeforeClass;
@@ -17,18 +17,18 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.asprotunity.jdbcunboiled.connection.Batch.batch;
-import static com.asprotunity.jdbcunboiled.connection.StatementParameter.bind;
+import static com.asprotunity.tersql.connection.Batch.batch;
+import static com.asprotunity.tersql.connection.StatementParameter.bind;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.Assert.assertThat;
 
-public class TransactionExecutorEndToEndTest {
+public class DataStoreEndToEndTest {
 
     private static JDBCDataSource dataSource;
-    private static TransactionExecutor executor;
+    private static DataStore dataStore;
 
     @BeforeClass
     public static void setUp() {
@@ -36,7 +36,7 @@ public class TransactionExecutorEndToEndTest {
         dataSource.setDatabase("jdbc:hsqldb:mem:testdb");
         dataSource.setUser("sa");
         dataSource.setPassword("");
-        executor = new TransactionExecutor(dataSource);
+        dataStore = new DataStore(dataSource);
     }
 
     @After
@@ -53,7 +53,7 @@ public class TransactionExecutorEndToEndTest {
     @Test
     public void inserts_with_no_bind_values() throws SQLException {
 
-        executor.execute(connection -> {
+        dataStore.execute(connection -> {
             connection.update("CREATE TABLE testtable (first INTEGER NOT NULL)");
             connection.update("INSERT INTO testtable (first) VALUES (10)");
         });
@@ -67,7 +67,7 @@ public class TransactionExecutorEndToEndTest {
     @Test
     public void inserts_with_some_bind_values() throws SQLException {
 
-        executor.execute(connection -> {
+        dataStore.execute(connection -> {
             connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
             connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
                     bind(10), bind("asecond"));
@@ -82,7 +82,7 @@ public class TransactionExecutorEndToEndTest {
     @Test
     public void inserts_null_integers_as_bind_values() throws SQLException {
 
-        executor.execute(connection -> {
+        dataStore.execute(connection -> {
             connection.update("CREATE TABLE testtable (first INTEGER NULL, second VARCHAR(20) NOT NULL)");
             connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
                     bind((Integer) null), bind("asecond"));
@@ -97,7 +97,7 @@ public class TransactionExecutorEndToEndTest {
     @Test
     public void does_batch_inserts() throws SQLException {
 
-        executor.execute(connection -> {
+        dataStore.execute(connection -> {
             connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
             connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
                     batch(bind(10), bind("asecond10")),
@@ -116,7 +116,7 @@ public class TransactionExecutorEndToEndTest {
     @Test
     public void does_batch_inserts_with_batch_array() throws SQLException {
 
-        executor.execute(connection -> {
+        dataStore.execute(connection -> {
             connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
 
             Batch firstBatch = batch(bind(10), bind("asecond10"));
@@ -145,7 +145,7 @@ public class TransactionExecutorEndToEndTest {
                 "INSERT INTO testtable (first) VALUES (10)",
                 "INSERT INTO testtable (first) VALUES (11)");
 
-        List<Integer> result = executor.executeWithResult(connection ->
+        List<Integer> result = dataStore.executeWithResult(connection ->
                 connection.select("SELECT first FROM testtable ORDER BY first ASC",
                         rowStream -> rowStream.map(row -> row.asInteger("first")).collect(toList()))
         );
@@ -162,7 +162,7 @@ public class TransactionExecutorEndToEndTest {
                 "INSERT INTO testtable (first, second) VALUES (10, 'asecond10')",
                 "INSERT INTO testtable (first, second) VALUES (11, 'asecond11')");
 
-        List<Row> result = executor.executeWithResult(connection ->
+        List<Row> result = dataStore.executeWithResult(connection ->
                 connection.select("SELECT first, second FROM testtable WHERE first = ? AND second = ?",
                         rowStream -> rowStream.collect(toList()),
                         bind(10), bind("asecond10"))
@@ -179,7 +179,7 @@ public class TransactionExecutorEndToEndTest {
         prepareExpectedData("CREATE TABLE testtable (first INTEGER NULL, second VARCHAR(20) NOT NULL)",
                 "INSERT INTO testtable (first, second) VALUES (null, 'asecond')");
 
-        List<Row> result = executor.executeWithResult(connection ->
+        List<Row> result = dataStore.executeWithResult(connection ->
                 connection.select("SELECT first, second FROM testtable WHERE first is NULL",
                         rowStream -> rowStream.collect(toList())
                 ));
@@ -192,7 +192,7 @@ public class TransactionExecutorEndToEndTest {
     @Test
     public void inserts_null_double_as_bind_values() throws SQLException {
 
-        executor.execute(connection -> {
+        dataStore.execute(connection -> {
             connection.update("CREATE TABLE testtable (first DOUBLE NULL, second VARCHAR(20) NOT NULL)");
             connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
                     bind((Double) null), bind("asecond"));
@@ -207,7 +207,7 @@ public class TransactionExecutorEndToEndTest {
     @Test
     public void inserts_double_as_bind_values() throws SQLException {
 
-        executor.execute(connection -> {
+        dataStore.execute(connection -> {
             connection.update("CREATE TABLE testtable (first DOUBLE NULL, second VARCHAR(20) NOT NULL)");
             connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
                     bind(1.7d), bind("asecond"));
@@ -225,7 +225,7 @@ public class TransactionExecutorEndToEndTest {
         prepareExpectedData("CREATE TABLE testtable (first DOUBLE NULL, second VARCHAR(20) NOT NULL)",
                 "INSERT INTO testtable (first, second) VALUES (null, 'asecond')");
 
-        List<Row> result = executor.executeWithResult(connection ->
+        List<Row> result = dataStore.executeWithResult(connection ->
                 connection.select("SELECT first, second FROM testtable WHERE first is NULL",
                         rowStream -> rowStream.collect(toList())
                 ));

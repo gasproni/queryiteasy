@@ -1,6 +1,5 @@
-package com.asprotunity.jdbcunboiled.connection;
+package com.asprotunity.tersql.connection;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 

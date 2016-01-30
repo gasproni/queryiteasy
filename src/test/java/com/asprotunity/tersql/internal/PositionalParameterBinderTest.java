@@ -1,4 +1,4 @@
-package com.asprotunity.jdbcunboiled.internal;
+package com.asprotunity.tersql.internal;
 
 import org.junit.After;
 import org.junit.Before;

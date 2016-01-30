@@ -1,6 +1,6 @@
-package com.asprotunity.jdbcunboiled;
+package com.asprotunity.tersql;
 
-import com.asprotunity.jdbcunboiled.exception.InvalidArgumentException;
+import com.asprotunity.tersql.exception.InvalidArgumentException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -16,29 +16,29 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
-public class TransactionExecutorTest {
+public class DataStoreTest {
 
 
     private java.sql.Connection jdbcConnection;
-    private TransactionExecutor transactionExecutor;
+    private DataStore dataStore;
 
     @Before
     public void setUp() throws SQLException {
         DataSource dataSource = Mockito.mock(DataSource.class);
         jdbcConnection = Mockito.mock(java.sql.Connection.class);
         when(dataSource.getConnection()).thenReturn(jdbcConnection);
-        transactionExecutor = new TransactionExecutor(dataSource);
+        dataStore = new DataStore(dataSource);
     }
 
 
     @Test(expected = InvalidArgumentException.class)
     public void throws_exception_when_datasource_is_null() {
-        new TransactionExecutor(null);
+        new DataStore(null);
     }
 
     @Test
     public void commits_rollbacks_and_closes_transaction_in_this_order() throws java.sql.SQLException {
-        transactionExecutor.execute(connection -> {
+        dataStore.execute(connection -> {
         });
         assertCommitRollbackAndCloseCalledInThisOrder();
     }
@@ -46,14 +46,14 @@ public class TransactionExecutorTest {
 
     @Test
     public void commits_rollbacks_and_closes_transaction_in_this_order_for_query() throws java.sql.SQLException {
-        transactionExecutor.executeWithResult(connection -> 1);
+        dataStore.executeWithResult(connection -> 1);
         assertCommitRollbackAndCloseCalledInThisOrder();
     }
 
     @Test
     public void when_exception_thrown_rollbacks_and_closes_transaction_in_this_order_and_doesnt_commit()
             throws java.sql.SQLException {
-        assertRollbackAndCloseCalledInThisOrderAndCommitNeverCalled(() -> transactionExecutor.execute(connection -> {
+        assertRollbackAndCloseCalledInThisOrderAndCommitNeverCalled(() -> dataStore.execute(connection -> {
             throw new RuntimeException();
         }));
     }
@@ -61,7 +61,7 @@ public class TransactionExecutorTest {
     @Test
     public void when_exception_thrown_rollbacks_and_closes_transaction_in_this_order_and_doesnt_commit_query()
             throws java.sql.SQLException {
-        assertRollbackAndCloseCalledInThisOrderAndCommitNeverCalled(() -> transactionExecutor.executeWithResult(connection -> {
+        assertRollbackAndCloseCalledInThisOrderAndCommitNeverCalled(() -> dataStore.executeWithResult(connection -> {
             throw new RuntimeException();
         }));
 
@@ -72,7 +72,7 @@ public class TransactionExecutorTest {
 
         final int result = 10;
 
-        int queryResult = transactionExecutor.executeWithResult(connection -> result);
+        int queryResult = dataStore.executeWithResult(connection -> result);
 
         assertThat(queryResult, is(result));
     }
@@ -82,7 +82,7 @@ public class TransactionExecutorTest {
 
         final ArrayList<Integer> result = new ArrayList<>(Arrays.asList(1, 2, 3, 4));
 
-        List<Integer> queryResult = transactionExecutor.executeWithResult(connection -> result);
+        List<Integer> queryResult = dataStore.executeWithResult(connection -> result);
 
         assertThat(queryResult, is(result));
     }

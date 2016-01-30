@@ -1,4 +1,4 @@
-package com.asprotunity.jdbcunboiled.exception;
+package com.asprotunity.tersql.exception;
 
 public class InvalidArgumentException extends RuntimeException {
     public InvalidArgumentException(String message) {

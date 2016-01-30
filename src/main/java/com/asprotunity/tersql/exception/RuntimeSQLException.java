@@ -1,4 +1,4 @@
-package com.asprotunity.jdbcunboiled.exception;
+package com.asprotunity.tersql.exception;
 
 public class RuntimeSQLException extends RuntimeException {
     public RuntimeSQLException(java.sql.SQLException e) {

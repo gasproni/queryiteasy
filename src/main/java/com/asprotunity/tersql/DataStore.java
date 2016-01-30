@@ -1,19 +1,19 @@
-package com.asprotunity.jdbcunboiled;
+package com.asprotunity.tersql;
 
-import com.asprotunity.jdbcunboiled.connection.Connection;
-import com.asprotunity.jdbcunboiled.exception.InvalidArgumentException;
-import com.asprotunity.jdbcunboiled.exception.RuntimeSQLException;
-import com.asprotunity.jdbcunboiled.internal.WrappedJDBCConnection;
+import com.asprotunity.tersql.connection.Connection;
+import com.asprotunity.tersql.exception.InvalidArgumentException;
+import com.asprotunity.tersql.exception.RuntimeSQLException;
+import com.asprotunity.tersql.internal.WrappedJDBCConnection;
 
 import javax.sql.DataSource;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class TransactionExecutor {
+public class DataStore {
 
     private DataSource dataSource;
 
-    public TransactionExecutor(DataSource dataSource) {
+    public DataStore(DataSource dataSource) {
         if (dataSource == null) {
             throw new InvalidArgumentException("dataSource cannot be null");
         }

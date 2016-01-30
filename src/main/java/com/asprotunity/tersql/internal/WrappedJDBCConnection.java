@@ -1,10 +1,10 @@
-package com.asprotunity.jdbcunboiled.internal;
+package com.asprotunity.tersql.internal;
 
-import com.asprotunity.jdbcunboiled.connection.Batch;
-import com.asprotunity.jdbcunboiled.connection.Connection;
-import com.asprotunity.jdbcunboiled.connection.Row;
-import com.asprotunity.jdbcunboiled.connection.StatementParameter;
-import com.asprotunity.jdbcunboiled.exception.RuntimeSQLException;
+import com.asprotunity.tersql.connection.Batch;
+import com.asprotunity.tersql.connection.Connection;
+import com.asprotunity.tersql.connection.Row;
+import com.asprotunity.tersql.connection.StatementParameter;
+import com.asprotunity.tersql.exception.RuntimeSQLException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

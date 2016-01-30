@@ -1,7 +1,7 @@
-package com.asprotunity.jdbcunboiled.internal;
+package com.asprotunity.tersql.internal;
 
-import com.asprotunity.jdbcunboiled.connection.Row;
-import com.asprotunity.jdbcunboiled.exception.RuntimeSQLException;
+import com.asprotunity.tersql.connection.Row;
+import com.asprotunity.tersql.exception.RuntimeSQLException;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
