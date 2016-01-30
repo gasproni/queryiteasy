@@ -94,7 +94,6 @@ public class TransactionExecutorEndToEndTest {
         assertThat(expectedValues.get(0).asString("second"), is("asecond"));
     }
 
-
     @Test
     public void does_batch_inserts() throws SQLException {
 
@@ -190,7 +189,6 @@ public class TransactionExecutorEndToEndTest {
         assertThat(result.get(0).asString("second"), is("asecond"));
     }
 
-
     @Test
     public void inserts_null_double_as_bind_values() throws SQLException {
 
@@ -249,7 +247,6 @@ public class TransactionExecutorEndToEndTest {
             return result;
         }
     }
-
 
     private void prepareExpectedData(String firstSqlStatement, String... otherSqlStatements) throws SQLException {
         try (Connection connection = dataSource.getConnection();

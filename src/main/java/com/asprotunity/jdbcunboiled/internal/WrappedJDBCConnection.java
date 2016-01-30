@@ -63,8 +63,9 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 bindParameters(parameters, statement);
-                try (ResultSet rs = statement.executeQuery()) {
-                    return rowProcessor.apply(StreamSupport.stream(new RowSpliterator(rs), false));
+                try (ResultSet rs = statement.executeQuery();
+                     Stream<Row> rowStream = StreamSupport.stream(new RowSpliterator(rs), false)) {
+                    return rowProcessor.apply(rowStream);
                 }
             }
         });
