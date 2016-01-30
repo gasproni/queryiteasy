@@ -8,10 +8,9 @@ import com.asprotunity.jdbcunboiled.exception.RuntimeSQLException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -77,7 +76,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     }
 
     private void bindParameters(StatementParameter[] parameters, PreparedStatement preparedStatement) {
-        Batch.forEachParameter(parameters, bindTo(preparedStatement));
+        IntStream.range(0, parameters.length).forEach(i -> bindTo(preparedStatement).accept(parameters[i], i));
     }
 
     private BiConsumer<StatementParameter, Integer> bindTo(PreparedStatement preparedStatement) {

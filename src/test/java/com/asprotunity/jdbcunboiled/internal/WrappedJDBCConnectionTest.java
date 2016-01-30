@@ -7,6 +7,7 @@ import org.mockito.InOrder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Types;
 import java.util.stream.Stream;
 
 import static com.asprotunity.jdbcunboiled.connection.Batch.batch;
@@ -80,9 +81,9 @@ public class WrappedJDBCConnectionTest {
         wrappedJDBCConnection.update(sql, batch(bind(10)), batch(bind(20)));
 
         InOrder order = inOrder(preparedStatement);
-        order.verify(preparedStatement, times(1)).setInt(1, 10);
+        order.verify(preparedStatement, times(1)).setObject(1, 10, Types.INTEGER);
         order.verify(preparedStatement, times(1)).addBatch();
-        order.verify(preparedStatement, times(1)).setInt(1, 20);
+        order.verify(preparedStatement, times(1)).setObject(1, 20, Types.INTEGER);
         order.verify(preparedStatement, times(1)).addBatch();
         order.verify(preparedStatement, times(1)).executeBatch();
         order.verify(preparedStatement, times(1)).close();

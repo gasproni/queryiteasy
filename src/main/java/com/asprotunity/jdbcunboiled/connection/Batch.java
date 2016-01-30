@@ -3,6 +3,7 @@ package com.asprotunity.jdbcunboiled.connection;
 import com.asprotunity.jdbcunboiled.exception.InvalidArgumentException;
 
 import java.util.function.BiConsumer;
+import java.util.stream.IntStream;
 
 public class Batch {
 
@@ -21,14 +22,7 @@ public class Batch {
     }
 
     public void forEachParameter(BiConsumer<StatementParameter, Integer> function) {
-        forEachParameter(parameters, function);
-    }
-
-    public static void forEachParameter(StatementParameter[] parameters, BiConsumer<StatementParameter, Integer> function) {
-        for (int position = 0; position < parameters.length; ++position) {
-            function.accept(parameters[position], position);
-        }
-
+        IntStream.range(0, parameters.length).forEach(i -> function.accept(parameters[i], i));
     }
 
     private Batch(StatementParameter parameter, StatementParameter[] parameters) {

@@ -23,47 +23,25 @@ class PositionalParameterBinder implements StatementParameterBinder {
 
     @Override
     public void bind(Integer value) {
-        RuntimeSQLException.wrapException(() -> {
-            if (value != null) {
-                statement.setInt(this.position, value);
-            } else {
-                statement.setNull(this.position, Types.INTEGER);
-            }
-
-        });
+        setValue(value, Types.INTEGER);
     }
 
     @Override
     public void bind(Double value) {
-        RuntimeSQLException.wrapException(() -> {
-            if (value != null) {
-                statement.setDouble(this.position, value);
-            } else {
-                statement.setNull(this.position, Types.DOUBLE);
-            }
-        });
+        setValue(value, Types.DOUBLE);
     }
 
     @Override
     public void bind(Float value) {
-        RuntimeSQLException.wrapException(() -> {
-            if (value != null) {
-                statement.setFloat(this.position, value);
-            } else {
-                statement.setNull(this.position, Types.FLOAT);
-            }
-        });
+        setValue(value, Types.REAL);
     }
 
     @Override
     public void bind(Byte value) {
-        RuntimeSQLException.wrapException(() -> {
-            if (value != null) {
-                statement.setByte(this.position, value);
-            } else {
-                statement.setNull(this.position, Types.TINYINT);
-            }
-        });
+        setValue(value, Types.TINYINT);
     }
 
+    private void setValue(Object value, int sqlType) {
+        RuntimeSQLException.wrapException(() -> statement.setObject(this.position, value, sqlType));
+    }
 }
