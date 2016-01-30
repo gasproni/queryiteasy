@@ -10,7 +10,10 @@ import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -139,12 +142,9 @@ public class TransactionExecutorEndToEndTest {
     @Test
     public void queries_with_no_bind_values() throws SQLException {
 
-        executor.execute(connection -> {
-            connection.update("CREATE TABLE testtable (first INTEGER NOT NULL)");
-            connection.update("INSERT INTO testtable (first) VALUES (?)",
-                    batch(bind(10)),
-                    batch(bind(11)));
-        });
+        prepareExpectedData("CREATE TABLE testtable (first INTEGER NOT NULL)",
+                "INSERT INTO testtable (first) VALUES (10)",
+                "INSERT INTO testtable (first) VALUES (11)");
 
         List<Integer> result = executor.executeWithResult(connection ->
                 connection.select("SELECT first FROM testtable ORDER BY first ASC",
@@ -159,12 +159,9 @@ public class TransactionExecutorEndToEndTest {
     @Test
     public void queries_with_bind_values() throws SQLException {
 
-        executor.execute(connection -> {
-            connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
-            connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
-                    batch(bind(10), bind("asecond10")),
-                    batch(bind(11), bind("asecond11")));
-        });
+        prepareExpectedData("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)",
+                "INSERT INTO testtable (first, second) VALUES (10, 'asecond10')",
+                "INSERT INTO testtable (first, second) VALUES (11, 'asecond11')");
 
         List<Row> result = executor.executeWithResult(connection ->
                 connection.select("SELECT first, second FROM testtable WHERE first = ? AND second = ?",
@@ -180,10 +177,8 @@ public class TransactionExecutorEndToEndTest {
     @Test
     public void queries_with_null_integer_values() throws SQLException {
 
-        executor.execute(connection -> {
-            connection.update("CREATE TABLE testtable (first INTEGER NULL, second VARCHAR(20) NOT NULL)");
-            connection.update("INSERT INTO testtable (first, second) VALUES (null, 'asecond')");
-        });
+        prepareExpectedData("CREATE TABLE testtable (first INTEGER NULL, second VARCHAR(20) NOT NULL)",
+                "INSERT INTO testtable (first, second) VALUES (null, 'asecond')");
 
         List<Row> result = executor.executeWithResult(connection ->
                 connection.select("SELECT first, second FROM testtable WHERE first is NULL",
@@ -229,10 +224,8 @@ public class TransactionExecutorEndToEndTest {
     @Test
     public void queries_with_null_double_values() throws SQLException {
 
-        executor.execute(connection -> {
-            connection.update("CREATE TABLE testtable (first DOUBLE NULL, second VARCHAR(20) NOT NULL)");
-            connection.update("INSERT INTO testtable (first, second) VALUES (null, 'asecond')");
-        });
+        prepareExpectedData("CREATE TABLE testtable (first DOUBLE NULL, second VARCHAR(20) NOT NULL)",
+                "INSERT INTO testtable (first, second) VALUES (null, 'asecond')");
 
         List<Row> result = executor.executeWithResult(connection ->
                 connection.select("SELECT first, second FROM testtable WHERE first is NULL",
@@ -246,14 +239,26 @@ public class TransactionExecutorEndToEndTest {
 
     private List<Row> query(String sql) throws SQLException {
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
-             ResultSet rs = statement.executeQuery()) {
+             Statement statement = connection.createStatement();
+             ResultSet rs = statement.executeQuery(sql)) {
             ArrayList<Row> result = new ArrayList<>();
             while (rs.next()) {
                 result.add(new WrappedResultSet(rs));
             }
             connection.commit();
             return result;
+        }
+    }
+
+
+    private void prepareExpectedData(String firstSqlStatement, String... otherSqlStatements) throws SQLException {
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+            statement.execute(firstSqlStatement);
+            for (String sql : otherSqlStatements) {
+                statement.execute(sql);
+            }
+            connection.commit();
         }
     }
 
