@@ -3,8 +3,12 @@ package com.asprotunity.jdbcunboiled.acceptance_tests;
 
 import com.asprotunity.jdbcunboiled.TransactionExecutor;
 import com.asprotunity.jdbcunboiled.connection.Batch;
+import com.asprotunity.jdbcunboiled.connection.Row;
+import com.asprotunity.jdbcunboiled.internal.WrappedResultSet;
 import org.hsqldb.jdbc.JDBCDataSource;
-import org.junit.*;
+import org.junit.After;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -50,9 +54,9 @@ public class TransactionExecutorEndToEndTest {
             connection.update("INSERT INTO testtable (first) VALUES (10)");
         });
 
-        List<Integer> expectedValues = query("SELECT first FROM testtable", rs -> rs.getInt("first"));
+        List<Row> expectedValues = query("SELECT first FROM testtable");
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0), is(10));
+        assertThat(expectedValues.get(0).asInteger("first"), is(10));
     }
 
 
@@ -65,11 +69,10 @@ public class TransactionExecutorEndToEndTest {
                     bind(10), bind("asecond"));
         });
 
-        List<TestTableFields<Integer, String>> expectedValues = query("SELECT * FROM testtable",
-                rs -> make(asInteger(rs, "first"), getString(rs, "second")));
+        List<Row> expectedValues = query("SELECT * FROM testtable");
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).first, is(10));
-        assertThat(expectedValues.get(0).second, is("asecond"));
+        assertThat(expectedValues.get(0).asInteger("first"), is(10));
+        assertThat(expectedValues.get(0).asString("second"), is("asecond"));
     }
 
     @Test
@@ -81,11 +84,10 @@ public class TransactionExecutorEndToEndTest {
                     bind((Integer) null), bind("asecond"));
         });
 
-        List<TestTableFields> expectedValues = query("SELECT * FROM testtable",
-                rs -> make(asInteger(rs, "first"), getString(rs, "second")));
+        List<Row> expectedValues = query("SELECT * FROM testtable");
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).first, is(nullValue()));
-        assertThat(expectedValues.get(0).second, is("asecond"));
+        assertThat(expectedValues.get(0).asInteger("first"), is(nullValue()));
+        assertThat(expectedValues.get(0).asString("second"), is("asecond"));
     }
 
 
@@ -100,12 +102,11 @@ public class TransactionExecutorEndToEndTest {
                     batch(bind(12), bind("asecond12")));
         });
 
-        List<TestTableFields> expectedValues = query("SELECT * FROM testtable ORDER BY first ASC",
-                rs -> make(asInteger(rs, "first"), getString(rs, "second")));
+        List<Row> expectedValues = query("SELECT * FROM testtable ORDER BY first ASC");
         assertThat(expectedValues.size(), is(3));
         for (int first = 0; first < expectedValues.size(); ++first) {
-            assertThat(expectedValues.get(first).first, is(first + 10));
-            assertThat(expectedValues.get(first).second, is("asecond" + (first + 10)));
+            assertThat(expectedValues.get(first).asInteger("first"), is(first + 10));
+            assertThat(expectedValues.get(first).asString("second"), is("asecond" + (first + 10)));
         }
     }
 
@@ -125,12 +126,11 @@ public class TransactionExecutorEndToEndTest {
             connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)", firstBatch, batches);
         });
 
-        List<TestTableFields> expectedValues = query("SELECT * FROM testtable ORDER BY first ASC",
-                rs -> make(asInteger(rs, "first"), getString(rs, "second")));
+        List<Row> expectedValues = query("SELECT * FROM testtable ORDER BY first ASC");
         assertThat(expectedValues.size(), is(3));
         for (int first = 10; first < expectedValues.size(); ++first) {
-            assertThat(expectedValues.get(first).first, is(first));
-            assertThat(expectedValues.get(first).second, is("asecond" + first));
+            assertThat(expectedValues.get(first).asInteger("first"), is(first));
+            assertThat(expectedValues.get(first).asString("second"), is("asecond" + first));
         }
     }
 
@@ -165,16 +165,16 @@ public class TransactionExecutorEndToEndTest {
                     batch(bind(11), bind("asecond11")));
         });
 
-        List<TestTableFields> result = new ArrayList<>();
+        List<Row> result = new ArrayList<>();
         executor.execute(connection ->
                 connection.select("SELECT first, second FROM testtable WHERE first = ? AND second = ?",
-                        row -> result.add(make(row.asInteger("first"), row.asString("second"))),
+                        result::add,
                         bind(10), bind("asecond10"))
         );
 
         assertThat(result.size(), is(1));
-        assertThat(result.get(0).first, is(10));
-        assertThat(result.get(0).second, is("asecond10"));
+        assertThat(result.get(0).asInteger("first"), is(10));
+        assertThat(result.get(0).asString("second"), is("asecond10"));
     }
 
     @Test
@@ -185,15 +185,15 @@ public class TransactionExecutorEndToEndTest {
             connection.update("INSERT INTO testtable (first, second) VALUES (null, 'asecond')");
         });
 
-        List<TestTableFields> result = new ArrayList<>();
+        List<Row> result = new ArrayList<>();
         executor.execute(connection ->
                 connection.select("SELECT first, second FROM testtable WHERE first is NULL",
-                        row -> result.add(make(row.asInteger("first"), row.asString("second"))))
-        );
+                        result::add
+                ));
 
         assertThat(result.size(), is(1));
-        assertThat(result.get(0).first, is(nullValue()));
-        assertThat(result.get(0).second, is("asecond"));
+        assertThat(result.get(0).asInteger("first"), is(nullValue()));
+        assertThat(result.get(0).asString("second"), is("asecond"));
     }
 
 
@@ -206,11 +206,10 @@ public class TransactionExecutorEndToEndTest {
                     bind((Double) null), bind("asecond"));
         });
 
-        List<TestTableFields> expectedValues = query("SELECT * FROM testtable",
-                rs -> make(asDouble(rs, "first"), getString(rs, "second")));
+        List<Row> expectedValues = query("SELECT * FROM testtable");
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).first, is(nullValue()));
-        assertThat(expectedValues.get(0).second, is("asecond"));
+        assertThat(expectedValues.get(0).asDouble("first"), is(nullValue()));
+        assertThat(expectedValues.get(0).asString("second"), is("asecond"));
     }
 
     @Test
@@ -222,11 +221,10 @@ public class TransactionExecutorEndToEndTest {
                     bind(1.7d), bind("asecond"));
         });
 
-        List<TestTableFields<Double, String>> expectedValues = query("SELECT * FROM testtable",
-                rs -> make(asDouble(rs, "first"), getString(rs, "second")));
+        List<Row> expectedValues = query("SELECT * FROM testtable");
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).first, is(closeTo(1.7d, 0.00000000001d)));
-        assertThat(expectedValues.get(0).second, is("asecond"));
+        assertThat(expectedValues.get(0).asDouble("first"), is(closeTo(1.7d, 0.00000000001d)));
+        assertThat(expectedValues.get(0).asString("second"), is("asecond"));
     }
 
     @Test
@@ -237,70 +235,29 @@ public class TransactionExecutorEndToEndTest {
             connection.update("INSERT INTO testtable (first, second) VALUES (null, 'asecond')");
         });
 
-        List<TestTableFields> result = new ArrayList<>();
+        List<Row> result = new ArrayList<>();
         executor.execute(connection ->
                 connection.select("SELECT first, second FROM testtable WHERE first is NULL",
-                        row -> result.add(make(row.asDouble("first"), row.asString("second"))))
-        );
+                        result::add
+                ));
 
         assertThat(result.size(), is(1));
-        assertThat(result.get(0).first, is(nullValue()));
-        assertThat(result.get(0).second, is("asecond"));
+        assertThat(result.get(0).asDouble("first"), is(nullValue()));
+        assertThat(result.get(0).asString("second"), is("asecond"));
     }
 
-    private <ResultType> List<ResultType> query(String sql, ResultSetMapper<ResultType> mapper) throws SQLException {
+    private List<Row> query(String sql) throws SQLException {
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet rs = statement.executeQuery()) {
-            ArrayList<ResultType> result = new ArrayList<>();
+            ArrayList<Row> result = new ArrayList<>();
             while (rs.next()) {
-                result.add(mapper.apply(rs));
+                result.add(new WrappedResultSet(rs));
             }
             connection.commit();
             return result;
         }
     }
 
-
-    private static class TestTableFields<Type1, Type2> {
-        public final Type1 first;
-        public final Type2 second;
-
-        public TestTableFields(Type1 first, Type2 second) {
-            this.first = first;
-            this.second = second;
-        }
-
-    }
-
-    private static <Type1, Type2> TestTableFields<Type1, Type2> make(Type1 val1, Type2 val2) {
-        return new TestTableFields<>(val1, val2);
-    }
-
-    @FunctionalInterface
-    interface ResultSetMapper<T> {
-        T apply(ResultSet rs) throws SQLException;
-    }
-
-
-    private Double asDouble(ResultSet rs, String columnName) throws SQLException {
-        double result = rs.getDouble(columnName);
-        if (rs.wasNull()) {
-            return null;
-        }
-        return result;
-    }
-
-    private Integer asInteger(ResultSet rs, String columnName) throws SQLException {
-        int result = rs.getInt(columnName);
-        if (rs.wasNull()) {
-            return null;
-        }
-        return result;
-    }
-
-    private String getString(ResultSet rs, String columnName) throws SQLException {
-        return rs.getString(columnName);
-    }
 
 }
