@@ -8,8 +8,11 @@ import com.asprotunity.jdbcunboiled.exception.RuntimeSQLException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class WrappedJDBCConnection implements Connection, AutoCloseable {
     private java.sql.Connection connection;
@@ -54,15 +57,18 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         });
     }
 
+
     @Override
-    public void select(String sql, Consumer<Row> rowConsumer, StatementParameter... parameters) {
-        RuntimeSQLException.wrapException(() -> {
+    public <ResultType> ResultType select(String sql, Function<Stream<Row>, ResultType> rowProcessor, StatementParameter... parameters) {
+        return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 bindParameters(parameters, statement);
                 try (ResultSet rs = statement.executeQuery()) {
+                    ArrayList<Row> rows = new ArrayList<>();
                     while (rs.next()) {
-                        rowConsumer.accept(new WrappedResultSet(rs));
+                        rows.add(new WrappedResultSet(rs));
                     }
+                    return rowProcessor.apply(rows.stream());
                 }
             }
         });

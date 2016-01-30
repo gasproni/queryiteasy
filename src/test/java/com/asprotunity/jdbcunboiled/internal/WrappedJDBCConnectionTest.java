@@ -7,6 +7,7 @@ import org.mockito.InOrder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.stream.Stream;
 
 import static com.asprotunity.jdbcunboiled.connection.Batch.batch;
 import static com.asprotunity.jdbcunboiled.connection.StatementParameter.bind;
@@ -62,7 +63,7 @@ public class WrappedJDBCConnectionTest {
         when(preparedStatement.executeQuery()).thenReturn(rs);
         when(rs.next()).thenReturn(false);
 
-        wrappedJDBCConnection.select(sql, row -> {});
+        wrappedJDBCConnection.select(sql, Stream::count);
 
         InOrder order = inOrder(preparedStatement, rs);
         order.verify(preparedStatement, times(1)).executeQuery();

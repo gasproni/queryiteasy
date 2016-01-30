@@ -16,6 +16,7 @@ import java.util.List;
 
 import static com.asprotunity.jdbcunboiled.connection.Batch.batch;
 import static com.asprotunity.jdbcunboiled.connection.StatementParameter.bind;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.number.IsCloseTo.closeTo;
@@ -145,9 +146,9 @@ public class TransactionExecutorEndToEndTest {
                     batch(bind(11)));
         });
 
-        ArrayList<Integer> result = new ArrayList<>();
-        executor.execute(connection -> connection.select("SELECT first FROM testtable ORDER BY first ASC",
-                row -> result.add(row.asInteger("first")))
+        List<Integer> result = executor.executeWithResult(connection ->
+                connection.select("SELECT first FROM testtable ORDER BY first ASC",
+                        rowStream -> rowStream.map(row -> row.asInteger("first")).collect(toList()))
         );
 
         assertThat(result.size(), is(2));
@@ -165,10 +166,9 @@ public class TransactionExecutorEndToEndTest {
                     batch(bind(11), bind("asecond11")));
         });
 
-        List<Row> result = new ArrayList<>();
-        executor.execute(connection ->
+        List<Row> result = executor.executeWithResult(connection ->
                 connection.select("SELECT first, second FROM testtable WHERE first = ? AND second = ?",
-                        result::add,
+                        rowStream -> rowStream.collect(toList()),
                         bind(10), bind("asecond10"))
         );
 
@@ -185,10 +185,9 @@ public class TransactionExecutorEndToEndTest {
             connection.update("INSERT INTO testtable (first, second) VALUES (null, 'asecond')");
         });
 
-        List<Row> result = new ArrayList<>();
-        executor.execute(connection ->
+        List<Row> result = executor.executeWithResult(connection ->
                 connection.select("SELECT first, second FROM testtable WHERE first is NULL",
-                        result::add
+                        rowStream -> rowStream.collect(toList())
                 ));
 
         assertThat(result.size(), is(1));
@@ -235,10 +234,9 @@ public class TransactionExecutorEndToEndTest {
             connection.update("INSERT INTO testtable (first, second) VALUES (null, 'asecond')");
         });
 
-        List<Row> result = new ArrayList<>();
-        executor.execute(connection ->
+        List<Row> result = executor.executeWithResult(connection ->
                 connection.select("SELECT first, second FROM testtable WHERE first is NULL",
-                        result::add
+                        rowStream -> rowStream.collect(toList())
                 ));
 
         assertThat(result.size(), is(1));
