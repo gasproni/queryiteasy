@@ -19,7 +19,7 @@ public class RowSpliterator implements Spliterator<Row> {
     public boolean tryAdvance(Consumer<? super Row> action) {
         return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
             if (resultSet.next()) {
-                action.accept(new WrappedResultSet(resultSet));
+                action.accept(new RowFromResultSet(resultSet));
                 return true;
             }
             return false;

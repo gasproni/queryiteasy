@@ -35,6 +35,19 @@ public class PositionalParameterBinderTest {
     }
 
     @Test
+    public void binds_valid_shorts_correctly() throws Exception {
+        short value = 10;
+        parameterBinder.bind(value);
+        verify(preparedStatement, times(1)).setObject(position, value, Types.SMALLINT);
+    }
+
+    @Test
+    public void binds_null_shorts_correctly() throws Exception {
+        parameterBinder.bind((Short) null);
+        verify(preparedStatement, times(1)).setObject(position, null, Types.SMALLINT);
+    }
+
+    @Test
     public void binds_valid_integers_correctly() throws Exception {
         int value = 10;
         parameterBinder.bind(value);
@@ -45,6 +58,19 @@ public class PositionalParameterBinderTest {
     public void binds_null_integers_correctly() throws Exception {
         parameterBinder.bind((Integer) null);
         verify(preparedStatement, times(1)).setObject(position, null, Types.INTEGER);
+    }
+
+    @Test
+    public void binds_valid_longs_correctly() throws Exception {
+        long value = 10;
+        parameterBinder.bind(value);
+        verify(preparedStatement, times(1)).setObject(position, value, Types.BIGINT);
+    }
+
+    @Test
+    public void binds_null_longs_correctly() throws Exception {
+        parameterBinder.bind((Long) null);
+        verify(preparedStatement, times(1)).setObject(position, null, Types.BIGINT);
     }
 
     @Test

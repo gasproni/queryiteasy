@@ -1,5 +1,10 @@
 package com.asprotunity.tersql.connection;
 
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
+
 @FunctionalInterface
 public interface StatementParameter {
 
@@ -9,7 +14,15 @@ public interface StatementParameter {
         return binder -> binder.bind(value);
     }
 
+    static StatementParameter bind(Short value) {
+        return binder -> binder.bind(value);
+    }
+
     static StatementParameter bind(Integer value) {
+        return binder -> binder.bind(value);
+    }
+
+    static StatementParameter bind(Long value) {
         return binder -> binder.bind(value);
     }
 
@@ -22,6 +35,26 @@ public interface StatementParameter {
     }
 
     static StatementParameter bind(Byte value) {
+        return binder -> binder.bind(value);
+    }
+
+    static StatementParameter bind(Boolean value) {
+        return binder -> binder.bind(value);
+    }
+
+    static StatementParameter bind(BigDecimal value) {
+        return binder -> binder.bind(value);
+    }
+
+    static StatementParameter bind(Date value) {
+        return binder -> binder.bind(value);
+    }
+
+    static StatementParameter bind(Time value) {
+        return binder -> binder.bind(value);
+    }
+
+    static StatementParameter bind(Timestamp value) {
         return binder -> binder.bind(value);
     }
 }

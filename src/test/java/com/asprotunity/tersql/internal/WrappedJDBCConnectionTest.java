@@ -16,7 +16,7 @@ import static org.mockito.Mockito.*;
 
 public class WrappedJDBCConnectionTest {
 
-    Connection jdbcConnection;
+    private Connection jdbcConnection;
     private WrappedJDBCConnection wrappedJDBCConnection;
 
     @Before

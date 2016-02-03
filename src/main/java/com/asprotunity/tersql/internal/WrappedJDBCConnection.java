@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class WrappedJDBCConnection implements Connection, AutoCloseable {
-    private java.sql.Connection connection;
+    private final java.sql.Connection connection;
 
     public WrappedJDBCConnection(java.sql.Connection connection) {
         this.connection = connection;
