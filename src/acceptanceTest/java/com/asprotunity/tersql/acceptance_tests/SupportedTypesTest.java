@@ -1,131 +1,160 @@
 package com.asprotunity.tersql.acceptance_tests;
 
 
-import com.asprotunity.tersql.connection.Batch;
 import com.asprotunity.tersql.connection.Row;
+import com.asprotunity.tersql.connection.StatementParameter;
 import org.junit.Test;
 
+import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.List;
 
-import static com.asprotunity.tersql.connection.Batch.batch;
 import static com.asprotunity.tersql.connection.StatementParameter.bind;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class SupportedTypesTest extends EndToEndTestBase {
 
 
     @Test
-    public void inserts_with_no_bind_values() throws SQLException {
-
-        dataStore.execute(connection -> {
-            connection.update("CREATE TABLE testtable (first INTEGER NOT NULL)");
-            connection.update("INSERT INTO testtable (first) VALUES (10)");
-        });
-
-        List<Row> expectedValues = query("SELECT first FROM testtable");
+    public void handles_integers_correctly() throws SQLException {
+        Integer value = 10;
+        List<Row> expectedValues = storeAndReadValuesBack("INTEGER", bind((Integer) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).asInteger("first"), is(10));
+        assertThat(expectedValues.get(0).asInteger("first"), is(nullValue()));
+        assertThat(expectedValues.get(0).asInteger("second"), is(value));
     }
 
-
     @Test
-    public void inserts_with_some_bind_values() throws SQLException {
-
-        dataStore.execute(connection -> {
-            connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
-            connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
-                    bind(10), bind("asecond"));
-        });
-
-        List<Row> expectedValues = query("SELECT * FROM testtable");
+    public void handles_short_integers_correctly() throws SQLException {
+        Short value = 10;
+        List<Row> expectedValues = storeAndReadValuesBack("SMALLINT", bind((Short) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).asInteger("first"), is(10));
-        assertThat(expectedValues.get(0).asString("second"), is("asecond"));
+        assertThat(expectedValues.get(0).asShort("first"), is(nullValue()));
+        assertThat(expectedValues.get(0).asShort("second"), is(value));
     }
 
     @Test
-    public void does_batch_inserts() throws SQLException {
+    public void handles_longs_correctly() throws SQLException {
+        Long value = 10L;
+        List<Row> expectedValues = storeAndReadValuesBack("BIGINT", bind((Long) null), bind(value));
+        assertThat(expectedValues.size(), is(1));
+        assertThat(expectedValues.get(0).asLong("first"), is(nullValue()));
+        assertThat(expectedValues.get(0).asLong("second"), is(value));
+    }
 
+    @Test
+    public void handles_doubles_mapped_to_double_correctly() throws SQLException {
+        Double value = 10.0;
+        List<Row> expectedValues = storeAndReadValuesBack("DOUBLE", bind((Double) null), bind(value));
+        assertThat(expectedValues.size(), is(1));
+        assertThat(expectedValues.get(0).asDouble("first"), is(nullValue()));
+        assertThat(expectedValues.get(0).asDouble("second"), is(value));
+    }
+
+    @Test
+    public void handles_doubles_mapped_to_float_correctly() throws SQLException {
+        Double value = 10.0;
+        List<Row> expectedValues = storeAndReadValuesBack("FLOAT", bind((Double) null), bind(value));
+        assertThat(expectedValues.size(), is(1));
+        assertThat(expectedValues.get(0).asDouble("first"), is(nullValue()));
+        assertThat(expectedValues.get(0).asDouble("second"), is(value));
+    }
+
+    @Test
+    public void handles_floats_correctly() throws SQLException {
+        Float value = 10.0F;
+        List<Row> expectedValues = storeAndReadValuesBack("REAL", bind((Float) null), bind(value));
+        assertThat(expectedValues.size(), is(1));
+        assertThat(expectedValues.get(0).asFloat("first"), is(nullValue()));
+        assertThat(expectedValues.get(0).asFloat("second"), is(value));
+    }
+
+    @Test
+    public void handles_bytes_correctly() throws SQLException {
+        Byte value = 's';
+        List<Row> expectedValues = storeAndReadValuesBack("TINYINT", bind((Byte) null), bind(value));
+        assertThat(expectedValues.size(), is(1));
+        assertThat(expectedValues.get(0).asByte("first"), is(nullValue()));
+        assertThat(expectedValues.get(0).asByte("second"), is(value));
+    }
+
+    @Test
+    public void handles_big_decimals_as_decimal_correctly() throws SQLException {
+        BigDecimal value = new BigDecimal(10);
+        List<Row> expectedValues = storeAndReadValuesBack("DECIMAL", bind((BigDecimal) null), bind(value));
+        assertThat(expectedValues.size(), is(1));
+        assertThat(expectedValues.get(0).asBigDecimal("first"), is(nullValue()));
+        assertThat(expectedValues.get(0).asBigDecimal("second"), is(value));
+    }
+
+    @Test
+    public void handles_big_decimals_as_numeric_correctly() throws SQLException {
+        BigDecimal value = new BigDecimal(10);
+        List<Row> expectedValues = storeAndReadValuesBack("NUMERIC", bind((BigDecimal) null), bind(value));
+        assertThat(expectedValues.size(), is(1));
+        assertThat(expectedValues.get(0).asBigDecimal("first"), is(nullValue()));
+        assertThat(expectedValues.get(0).asBigDecimal("second"), is(value));
+    }
+
+    @Test
+    public void handles_booleans_correctly() throws SQLException {
+        List<Row> expectedValues = storeAndReadValuesBack("BOOLEAN", bind((Boolean) null), bind(true));
+        assertThat(expectedValues.size(), is(1));
+        assertThat(expectedValues.get(0).asBoolean("first"), is(nullValue()));
+        assertTrue(expectedValues.get(0).asBoolean("second"));
+    }
+
+    @Test
+    public void handles_dates_correctly() throws SQLException {
+        // Fri, 01 Jan 2016 00:00:00 GMT It's important that the time is all zeroes
+        // or that will be lost when putting the value in the db
+        // and the assert will fail.
+        java.sql.Date value = new Date(1451606400000L);
+        List<Row> expectedValues = storeAndReadValuesBack("DATE", bind((Date) null), bind(value));
+        assertThat(expectedValues.size(), is(1));
+        assertThat(expectedValues.get(0).asDate("first"), is(nullValue()));
+        assertThat(expectedValues.get(0).asDate("second"), is(value));
+    }
+
+    @Test
+    public void handles_times_correctly() throws SQLException {
+        // 01 Jan 1970 10:11:12.000 GMT. It's important that the milliseconds are all zeroes
+        // or that will be lost when putting the value in the db
+        // and the assert will fail.
+        java.sql.Time value = new Time(36672000L);
+        List<Row> expectedValues = storeAndReadValuesBack("TIME", bind((Time) null), bind(value));
+        assertThat(expectedValues.size(), is(1));
+        assertThat(expectedValues.get(0).asTime("first"), is(nullValue()));
+        assertThat(expectedValues.get(0).asTime("second"), is(value));
+    }
+
+    @Test
+    public void handles_timestamps_correctly() throws SQLException {
+        // Tue, 12 Jan 2016 10:11:12.345 GMT
+        java.sql.Timestamp value = new Timestamp(1452593472345L);
+        List<Row> expectedValues = storeAndReadValuesBack("TIMESTAMP", bind((Timestamp) null), bind(value));
+        assertThat(expectedValues.size(), is(1));
+        assertThat(expectedValues.get(0).asTimestamp("first"), is(nullValue()));
+        assertThat(expectedValues.get(0).asTimestamp("second"), is(value));
+    }
+
+
+    private List<Row> storeAndReadValuesBack(String sqlType, StatementParameter firstValue, StatementParameter secondValue) {
         dataStore.execute(connection -> {
-            connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
+            connection.update("CREATE TABLE testtable (first " + sqlType + " NULL, second " + sqlType + " NOT NULL)");
             connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
-                    batch(bind(10), bind("asecond10")),
-                    batch(bind(11), bind("asecond11")),
-                    batch(bind(12), bind("asecond12")));
+                    firstValue, secondValue);
         });
 
-        List<Row> expectedValues = query("SELECT * FROM testtable ORDER BY first ASC");
-        assertThat(expectedValues.size(), is(3));
-        for (int first = 0; first < expectedValues.size(); ++first) {
-            assertThat(expectedValues.get(first).asInteger("first"), is(first + 10));
-            assertThat(expectedValues.get(first).asString("second"), is("asecond" + (first + 10)));
-        }
-    }
-
-    @Test
-    public void does_batch_inserts_with_batch_array() throws SQLException {
-
-        dataStore.execute(connection -> {
-            connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
-
-            Batch firstBatch = batch(bind(10), bind("asecond10"));
-            Batch[] batches = new Batch[2];
-            for (int first = 0; first < 2; ++first) {
-                int value = first + 11;
-                batches[first] = batch(bind(value), bind("asecond" + value));
-            }
-
-            connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)", firstBatch, batches);
-        });
-
-        List<Row> expectedValues = query("SELECT * FROM testtable ORDER BY first ASC");
-        assertThat(expectedValues.size(), is(3));
-        for (int first = 10; first < expectedValues.size(); ++first) {
-            assertThat(expectedValues.get(first).asInteger("first"), is(first));
-            assertThat(expectedValues.get(first).asString("second"), is("asecond" + first));
-        }
-    }
-
-
-    @Test
-    public void selects_with_no_bind_values() throws SQLException {
-
-        prepareExpectedData("CREATE TABLE testtable (first INTEGER NOT NULL)",
-                "INSERT INTO testtable (first) VALUES (10)",
-                "INSERT INTO testtable (first) VALUES (11)");
-
-        List<Integer> result = dataStore.executeWithResult(connection ->
-                connection.select("SELECT first FROM testtable ORDER BY first ASC",
-                        rowStream -> rowStream.map(row -> row.asInteger("first")).collect(toList()))
+        return dataStore.executeWithResult(connection ->
+                connection.select("SELECT * FROM testtable", rowStream -> rowStream.collect(toList()))
         );
-
-        assertThat(result.size(), is(2));
-        assertThat(result.get(0), is(10));
-        assertThat(result.get(1), is(11));
     }
-
-    @Test
-    public void selects_with_bind_values() throws SQLException {
-
-        prepareExpectedData("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)",
-                "INSERT INTO testtable (first, second) VALUES (10, 'asecond10')",
-                "INSERT INTO testtable (first, second) VALUES (11, 'asecond11')");
-
-        List<Row> result = dataStore.executeWithResult(connection ->
-                connection.select("SELECT first, second FROM testtable WHERE first = ? AND second = ?",
-                        rowStream -> rowStream.collect(toList()),
-                        bind(10), bind("asecond10"))
-        );
-
-        assertThat(result.size(), is(1));
-        assertThat(result.get(0).asInteger("first"), is(10));
-        assertThat(result.get(0).asString("second"), is("asecond10"));
-    }
-
-
-
 }
