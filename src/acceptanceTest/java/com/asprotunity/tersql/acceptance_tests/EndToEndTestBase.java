@@ -15,16 +15,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EndToEndTestBase {
-    protected static JDBCDataSource dataSource;
-    protected static DataStore dataStore;
+
+    private static JDBCDataSource dataSource;
+    private static DataStore dataStore;
 
     @BeforeClass
     public static void setUp() {
-        EndToEndTestBase.dataSource = new JDBCDataSource();
-        EndToEndTestBase.dataSource.setDatabase("jdbc:hsqldb:mem:testdb");
-        EndToEndTestBase.dataSource.setUser("sa");
-        EndToEndTestBase.dataSource.setPassword("");
-        EndToEndTestBase.dataStore = new DataStore(EndToEndTestBase.dataSource);
+        dataSource = new JDBCDataSource();
+        dataSource.setDatabase("jdbc:hsqldb:mem:testdb");
+        dataSource.setUser("sa");
+        dataSource.setPassword("");
+        EndToEndTestBase.dataStore = new DataStore(dataSource);
+    }
+
+    protected static DataStore getDataStore() {
+        return dataStore;
     }
 
     @After

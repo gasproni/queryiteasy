@@ -20,7 +20,7 @@ public class QueriesTest extends EndToEndTestBase {
     @Test
     public void inserts_with_no_bind_values() throws SQLException {
 
-        dataStore.execute(connection -> {
+        getDataStore().execute(connection -> {
             connection.update("CREATE TABLE testtable (first INTEGER NOT NULL)");
             connection.update("INSERT INTO testtable (first) VALUES (10)");
         });
@@ -34,7 +34,7 @@ public class QueriesTest extends EndToEndTestBase {
     @Test
     public void inserts_with_some_bind_values() throws SQLException {
 
-        dataStore.execute(connection -> {
+        getDataStore().execute(connection -> {
             connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
             connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
                     bind(10), bind("asecond"));
@@ -50,7 +50,7 @@ public class QueriesTest extends EndToEndTestBase {
     @Test
     public void does_batch_inserts() throws SQLException {
 
-        dataStore.execute(connection -> {
+        getDataStore().execute(connection -> {
             connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
             connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
                     batch(bind(10), bind("asecond10")),
@@ -69,7 +69,7 @@ public class QueriesTest extends EndToEndTestBase {
     @Test
     public void does_batch_inserts_with_batch_array() throws SQLException {
 
-        dataStore.execute(connection -> {
+        getDataStore().execute(connection -> {
             connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
 
             Batch firstBatch = batch(bind(10), bind("asecond10"));
@@ -98,7 +98,7 @@ public class QueriesTest extends EndToEndTestBase {
                 "INSERT INTO testtable (first) VALUES (10)",
                 "INSERT INTO testtable (first) VALUES (11)");
 
-        List<Integer> result = dataStore.executeWithResult(connection ->
+        List<Integer> result = getDataStore().executeWithResult(connection ->
                 connection.select("SELECT first FROM testtable ORDER BY first ASC",
                         rowStream -> rowStream.map(row -> row.asInteger("first")).collect(toList()))
         );
@@ -115,7 +115,7 @@ public class QueriesTest extends EndToEndTestBase {
                 "INSERT INTO testtable (first, second) VALUES (10, 'asecond10')",
                 "INSERT INTO testtable (first, second) VALUES (11, 'asecond11')");
 
-        List<Row> result = dataStore.executeWithResult(connection ->
+        List<Row> result = getDataStore().executeWithResult(connection ->
                 connection.select("SELECT first, second FROM testtable WHERE first = ? AND second = ?",
                         rowStream -> rowStream.collect(toList()),
                         bind(10), bind("asecond10"))

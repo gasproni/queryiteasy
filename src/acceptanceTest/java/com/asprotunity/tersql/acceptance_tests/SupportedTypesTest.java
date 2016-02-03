@@ -147,13 +147,13 @@ public class SupportedTypesTest extends EndToEndTestBase {
 
 
     private List<Row> storeAndReadValuesBack(String sqlType, StatementParameter firstValue, StatementParameter secondValue) {
-        dataStore.execute(connection -> {
+        getDataStore().execute(connection -> {
             connection.update("CREATE TABLE testtable (first " + sqlType + " NULL, second " + sqlType + " NOT NULL)");
             connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
                     firstValue, secondValue);
         });
 
-        return dataStore.executeWithResult(connection ->
+        return getDataStore().executeWithResult(connection ->
                 connection.select("SELECT * FROM testtable", rowStream -> rowStream.collect(toList()))
         );
     }
