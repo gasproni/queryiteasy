@@ -68,7 +68,7 @@ public final class TypeConverters {
     }
 
     public static <T extends Number> T convertNumber(Object object, Class<T> targetType, Function<String, T> valueOf, Function<Number, T>
-            convertFromNumber) {
+            toValueInstanceMethod) {
         if (object == null) {
             return null;
         } else if (object.getClass().equals(targetType)) {
@@ -76,7 +76,7 @@ public final class TypeConverters {
             T result = (T)object;
             return result;
         } else if (object instanceof Number) {
-            return convertFromNumber.apply((Number) object);
+            return toValueInstanceMethod.apply((Number) object);
         } else if (object instanceof String) {
             return valueOf.apply((String) object);
         }
