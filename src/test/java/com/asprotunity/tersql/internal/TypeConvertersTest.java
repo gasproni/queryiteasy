@@ -140,6 +140,43 @@ public class TypeConvertersTest {
         assert_throws_class_cast_exception(value, TypeConverters::toSqlTimestamp, Timestamp.class);
     }
 
+    @Test
+    public void converts_to_number_from_nullL_correctly() {
+        assertThat(convertNumber(null, Integer.class, Integer::valueOf, Number::intValue), is(nullValue()));
+    }
+
+    @Test
+    public void converts_to_number_correctly() {
+        Integer value = 10;
+        assertThat(convertNumber(value, Integer.class, Integer::valueOf, Number::intValue), is(value));
+    }
+
+    @Test
+    public void converts_to_number_from_different_numeric_type_correctly() {
+        Double toConvert = 10.0;
+        Integer expected = toConvert.intValue();
+        assertThat(convertNumber(toConvert, Integer.class, Integer::valueOf, Number::intValue), is(expected));
+    }
+
+    @Test
+    public void converts_to_number_from_string_correctly() {
+        String toConvert = "10";
+        Integer expected = Integer.parseInt(toConvert);
+        assertThat(convertNumber(toConvert, Integer.class, Integer::valueOf, Number::intValue), is(expected));
+    }
+
+    @Test
+    public void throws_class_cast_exception_when_conversion_to_number_not_possible() {
+        try {
+            Character toConvert = 10;
+            convertNumber(toConvert, Integer.class, Integer::valueOf, Number::intValue);
+            fail("Exception expected!");
+        } catch (java.lang.ClassCastException exc) {
+            assertThat(exc.getMessage(), is(Character.class.getCanonicalName() + " cannot be cast to " +
+                    Integer.class.getCanonicalName()));
+        }
+    }
+
     private <T> void assert_throws_class_cast_exception(Object toConvert, Function<Object, T> convertType, Class<T> targetType) {
         try {
             convertType.apply(toConvert);

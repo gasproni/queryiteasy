@@ -36,37 +36,37 @@ public class RowFromResultSet implements Row {
     @Override
     public Short asShort(String columnName) {
         Object object = columns[positionForColumn(columnName)];
-        return TypeConverters.convertNumber(object, Short::valueOf, () -> ((Number) object)::shortValue);
+        return TypeConverters.convertNumber(object, Short.class, Short::valueOf, Number::shortValue);
     }
 
     @Override
     public Integer asInteger(String columnName) {
         Object object = columns[positionForColumn(columnName)];
-        return TypeConverters.convertNumber(object, Integer::valueOf, () -> ((Number) object)::intValue);
+        return TypeConverters.convertNumber(object, Integer.class, Integer::valueOf, Number::intValue);
     }
 
     @Override
     public Long asLong(String columnName) {
         Object object = columns[positionForColumn(columnName)];
-        return TypeConverters.convertNumber(object, Long::valueOf, () -> ((Number) object)::longValue);
+        return TypeConverters.convertNumber(object, Long.class, Long::valueOf, Number::longValue);
     }
 
     @Override
     public Double asDouble(String columnName) {
         Object object = columns[positionForColumn(columnName)];
-        return TypeConverters.convertNumber(object, Double::valueOf, () -> ((Number) object)::doubleValue);
+        return TypeConverters.convertNumber(object, Double.class, Double::valueOf, Number::doubleValue);
     }
 
     @Override
     public Float asFloat(String columnName) {
         Object object = columns[positionForColumn(columnName)];
-        return TypeConverters.convertNumber(object, Float::valueOf, () -> ((Number) object)::floatValue);
+        return TypeConverters.convertNumber(object, Float.class, Float::valueOf, Number::floatValue);
     }
 
     @Override
     public Byte asByte(String columnName) {
         Object object = columns[positionForColumn(columnName)];
-        return TypeConverters.convertNumber(object, Byte::valueOf, () -> ((Number) object)::byteValue);
+        return TypeConverters.convertNumber(object, Byte.class, Byte::valueOf, Number::byteValue);
     }
 
     @Override

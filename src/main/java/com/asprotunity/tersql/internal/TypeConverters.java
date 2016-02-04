@@ -5,7 +5,6 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public final class TypeConverters {
 
@@ -26,7 +25,7 @@ public final class TypeConverters {
         if (object == null) {
             return null;
         } else if (object instanceof Boolean) {
-            return (Boolean)object;
+            return (Boolean) object;
         } else if (object instanceof String) {
             return Boolean.valueOf((String) object);
         }
@@ -68,17 +67,20 @@ public final class TypeConverters {
         throw new ClassCastException(classCastExceptionMessage(object, Timestamp.class));
     }
 
-    public static <T extends Number> T convertNumber(Object object, Function<String, T> valueOf, Supplier<Supplier<T>> objectMethodCaller) {
+    public static <T extends Number> T convertNumber(Object object, Class<T> targetType, Function<String, T> valueOf, Function<Number, T>
+            convertFromNumber) {
         if (object == null) {
             return null;
-        }
-        else if (object instanceof Number) {
-            return objectMethodCaller.get().get();
-        }
-        else if (object instanceof String) {
+        } else if (object.getClass().equals(targetType)) {
+            @SuppressWarnings("unchecked")
+            T result = (T)object;
+            return result;
+        } else if (object instanceof Number) {
+            return convertFromNumber.apply((Number) object);
+        } else if (object instanceof String) {
             return valueOf.apply((String) object);
         }
-        throw new ClassCastException("Invalid cast:" + object.getClass().getName());
+        throw new ClassCastException(classCastExceptionMessage(object, targetType));
     }
 
     private static <T> String classCastExceptionMessage(Object object, Class<T> targetType) {
