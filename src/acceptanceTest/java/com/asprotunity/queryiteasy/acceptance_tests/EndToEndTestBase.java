@@ -38,24 +38,6 @@ public class EndToEndTestBase {
         EndToEndTestBase.dataStore = new DataStore(dataSource);
     }
 
-    public static Properties loadTestConfigProperties() throws IOException {
-        String configFilePath = System.getProperty(QUERYITEASY_TEST_CONFIG_FILE);
-
-        Properties result = new Properties();
-        if (configFilePath != null) {
-            try (FileInputStream in = new FileInputStream(configFilePath)) {
-                result.load(in);
-                in.close();
-            }
-        } else {
-            result.put(QUERYITEASY_DATASOURCE_CLASS, "org.hsqldb.jdbc.JDBCDataSource");
-            result.put(QUERYITEASY_DATASOURCE_URL, "jdbc:hsqldb:mem:testdb");
-            result.put(QUERYITEASY_DATASOURCE_USER, "sa");
-            result.put(QUERYITEASY_DATASOURCE_PASSWORD, "");
-        }
-        return result;
-    }
-
     @After
     public void tearDown() throws SQLException {
         Connection connection = dataSource.getConnection();
@@ -112,6 +94,24 @@ public class EndToEndTestBase {
 
         Method setPassword = clazz.getMethod("setPassword", String.class);
         setPassword.invoke(result, testConfigProperties.getProperty(QUERYITEASY_DATASOURCE_PASSWORD));
+        return result;
+    }
+
+    private static Properties loadTestConfigProperties() throws IOException {
+        String configFilePath = System.getProperty(QUERYITEASY_TEST_CONFIG_FILE);
+
+        Properties result = new Properties();
+        if (configFilePath != null) {
+            try (FileInputStream in = new FileInputStream(configFilePath)) {
+                result.load(in);
+                in.close();
+            }
+        } else {
+            result.put(QUERYITEASY_DATASOURCE_CLASS, "org.hsqldb.jdbc.JDBCDataSource");
+            result.put(QUERYITEASY_DATASOURCE_URL, "jdbc:hsqldb:mem:testdb");
+            result.put(QUERYITEASY_DATASOURCE_USER, "sa");
+            result.put(QUERYITEASY_DATASOURCE_PASSWORD, "");
+        }
         return result;
     }
 
