@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.asprotunity.queryiteasy.DataStoreTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2016-02-04T14:59:41" hostname="Giovannis-MBP" time="0.292">
+  <properties/>
+  <testcase name="when_exception_thrown_rollbacks_and_closes_transaction_in_this_order_and_doesnt_commit" classname="com.asprotunity.queryiteasy.DataStoreTest" time="0.267"/>
+  <testcase name="when_exception_thrown_rollbacks_and_closes_transaction_in_this_order_and_doesnt_commit_query" classname="com.asprotunity.queryiteasy.DataStoreTest" time="0.005"/>
+  <testcase name="commits_rollbacks_and_closes_transaction_in_this_order" classname="com.asprotunity.queryiteasy.DataStoreTest" time="0.005"/>
+  <testcase name="throws_exception_when_datasource_is_null" classname="com.asprotunity.queryiteasy.DataStoreTest" time="0.001"/>
+  <testcase name="returns_correct_query_result_class_type" classname="com.asprotunity.queryiteasy.DataStoreTest" time="0.007"/>
+  <testcase name="commits_rollbacks_and_closes_transaction_in_this_order_for_query" classname="com.asprotunity.queryiteasy.DataStoreTest" time="0.003"/>
+  <testcase name="returns_correct_query_result_primitive_type" classname="com.asprotunity.queryiteasy.DataStoreTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

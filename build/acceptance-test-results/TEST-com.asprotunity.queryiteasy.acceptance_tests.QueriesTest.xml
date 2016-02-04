@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.asprotunity.queryiteasy.acceptance_tests.QueriesTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2016-02-04T14:59:42" hostname="Giovannis-MBP" time="0.647">
+  <properties/>
+  <testcase name="inserts_with_no_bind_values" classname="com.asprotunity.queryiteasy.acceptance_tests.QueriesTest" time="0.594"/>
+  <testcase name="selects_with_bind_values" classname="com.asprotunity.queryiteasy.acceptance_tests.QueriesTest" time="0.023"/>
+  <testcase name="selects_with_no_bind_values" classname="com.asprotunity.queryiteasy.acceptance_tests.QueriesTest" time="0.009"/>
+  <testcase name="does_batch_inserts" classname="com.asprotunity.queryiteasy.acceptance_tests.QueriesTest" time="0.008"/>
+  <testcase name="does_batch_inserts_with_batch_array" classname="com.asprotunity.queryiteasy.acceptance_tests.QueriesTest" time="0.006"/>
+  <testcase name="inserts_with_some_bind_values" classname="com.asprotunity.queryiteasy.acceptance_tests.QueriesTest" time="0.005"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

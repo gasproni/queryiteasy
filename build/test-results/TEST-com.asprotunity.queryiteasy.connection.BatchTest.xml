@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.asprotunity.queryiteasy.connection.BatchTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2016-02-04T14:59:41" hostname="Giovannis-MBP" time="0.058">
+  <properties/>
+  <testcase name="throws_exception_when_first_parameter_is_null" classname="com.asprotunity.queryiteasy.connection.BatchTest" time="0.002"/>
+  <testcase name="throws_exception_when_a_parameter_in_the_array_is_null" classname="com.asprotunity.queryiteasy.connection.BatchTest" time="0.055"/>
+  <testcase name="throws_exception_when_other_parameters_array_is_null" classname="com.asprotunity.queryiteasy.connection.BatchTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

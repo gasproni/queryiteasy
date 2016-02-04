@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.asprotunity.queryiteasy.internal.PositionalParameterBinderTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2016-02-04T14:59:41" hostname="Giovannis-MBP" time="0.108">
+  <properties/>
+  <testcase name="binds_valid_integers_correctly" classname="com.asprotunity.queryiteasy.internal.PositionalParameterBinderTest" time="0.077"/>
+  <testcase name="binds_null_doubles_correctly" classname="com.asprotunity.queryiteasy.internal.PositionalParameterBinderTest" time="0.001"/>
+  <testcase name="binds_strings_correctly" classname="com.asprotunity.queryiteasy.internal.PositionalParameterBinderTest" time="0.002"/>
+  <testcase name="binds_null_shorts_correctly" classname="com.asprotunity.queryiteasy.internal.PositionalParameterBinderTest" time="0.001"/>
+  <testcase name="binds_valid_bytes_correctly" classname="com.asprotunity.queryiteasy.internal.PositionalParameterBinderTest" time="0.002"/>
+  <testcase name="binds_null_floats_correctly" classname="com.asprotunity.queryiteasy.internal.PositionalParameterBinderTest" time="0.002"/>
+  <testcase name="binds_null_bytes_correctly" classname="com.asprotunity.queryiteasy.internal.PositionalParameterBinderTest" time="0.003"/>
+  <testcase name="binds_valid_longs_correctly" classname="com.asprotunity.queryiteasy.internal.PositionalParameterBinderTest" time="0.002"/>
+  <testcase name="binds_null_integers_correctly" classname="com.asprotunity.queryiteasy.internal.PositionalParameterBinderTest" time="0.004"/>
+  <testcase name="binds_valid_shorts_correctly" classname="com.asprotunity.queryiteasy.internal.PositionalParameterBinderTest" time="0.001"/>
+  <testcase name="binds_null_longs_correctly" classname="com.asprotunity.queryiteasy.internal.PositionalParameterBinderTest" time="0.0"/>
+  <testcase name="binds_valid_floats_correctly" classname="com.asprotunity.queryiteasy.internal.PositionalParameterBinderTest" time="0.001"/>
+  <testcase name="binds_valid_doubles_correctly" classname="com.asprotunity.queryiteasy.internal.PositionalParameterBinderTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

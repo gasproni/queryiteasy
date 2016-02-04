@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.asprotunity.queryiteasy.internal.WrappedJDBCConnectionTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2016-02-04T14:59:41" hostname="Giovannis-MBP" time="0.026">
+  <properties/>
+  <testcase name="closes_jdbc_connection_correctly" classname="com.asprotunity.queryiteasy.internal.WrappedJDBCConnectionTest" time="0.001"/>
+  <testcase name="batch_update_executes_batch_and_closes_statement_correctly" classname="com.asprotunity.queryiteasy.internal.WrappedJDBCConnectionTest" time="0.011"/>
+  <testcase name="update_executes_and_closes_statement_in_the_right_order" classname="com.asprotunity.queryiteasy.internal.WrappedJDBCConnectionTest" time="0.006"/>
+  <testcase name="select_executes_and_closes_result_set_stream_and_statement_in_the_right_order" classname="com.asprotunity.queryiteasy.internal.WrappedJDBCConnectionTest" time="0.007"/>
+  <testcase name="commits_jdbc_connection_correctly" classname="com.asprotunity.queryiteasy.internal.WrappedJDBCConnectionTest" time="0.001"/>
+  <testcase name="sets_jdbc_autocommit_to_false" classname="com.asprotunity.queryiteasy.internal.WrappedJDBCConnectionTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

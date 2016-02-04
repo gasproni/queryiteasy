@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.asprotunity.queryiteasy.internal.TypeConvertersTest" tests="26" skipped="0" failures="0" errors="0" timestamp="2016-02-04T14:59:41" hostname="Giovannis-MBP" time="0.036">
+  <properties/>
+  <testcase name="throws_class_cast_exception_when_conversion_to_number_not_possible" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.001"/>
+  <testcase name="converts_big_decimal_from_number_to_its_double_equivalent" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.003"/>
+  <testcase name="throws_class_cast_exception_when_conversion_to_sql_date_not_possible" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.001"/>
+  <testcase name="converts_sql_time_from_string_correctly" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.001"/>
+  <testcase name="converts_to_number_from_string_correctly" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.002"/>
+  <testcase name="converts_to_big_decimal_from_nullL_correctly" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.002"/>
+  <testcase name="converts_to_big_decimal_correctly" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.001"/>
+  <testcase name="converts_sql_date_correctly" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.0"/>
+  <testcase name="converts_to_number_from_nullL_correctly" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.001"/>
+  <testcase name="converts_string_to_boolean_correctly" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.0"/>
+  <testcase name="throws_class_cast_exception_when_conversion_to_big_decimal_not_possible" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.002"/>
+  <testcase name="converts_sql_time_correctly" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.001"/>
+  <testcase name="converts_sql_timestamp_from_string_correctly" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.001"/>
+  <testcase name="converts_to_number_correctly" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.001"/>
+  <testcase name="throws_class_cast_exception_when_conversion_to_sql_time_not_possible" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.001"/>
+  <testcase name="converts_to_boolean_from_nullL_correctly" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.0"/>
+  <testcase name="converts_sql_date_from_string_correctly" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.0"/>
+  <testcase name="converts_sql_timestamp_correctly" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.0"/>
+  <testcase name="converts_to_sql_date_from_nullL_correctly" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.0"/>
+  <testcase name="converts_to_boolean_correctly" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.0"/>
+  <testcase name="converts_big_decimal_from_string_correctly" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.001"/>
+  <testcase name="throws_class_cast_exception_when_conversion_to_boolean_not_possible" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.004"/>
+  <testcase name="throws_class_cast_exception_when_conversion_to_sql_timestamp_not_possible" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.001"/>
+  <testcase name="converts_to_number_from_different_numeric_type_correctly" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.001"/>
+  <testcase name="converts_to_sql_time_from_nullL_correctly" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.001"/>
+  <testcase name="converts_to_sql_timestamp_from_nullL_correctly" classname="com.asprotunity.queryiteasy.internal.TypeConvertersTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

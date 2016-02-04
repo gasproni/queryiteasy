@@ -28,6 +28,34 @@ public class EndToEndTestBase {
         EndToEndTestBase.dataStore = new DataStore(dataSource);
     }
 
+
+//    @BeforeClass
+//    public static void setUp() throws SQLException {
+//        createMySqlTestDb();
+//        dataSource = new MysqlDataSource();
+//        dataSource.setURL("jdbc:mysql://localhost:3306/queryiteasytest");
+//        dataSource.setUser("root");
+//        dataSource.setPassword("password");
+//        EndToEndTestBase.dataStore = new DataStore(dataSource);
+//    }
+//
+//
+//    private static MysqlDataSource createMySqlTestDb() throws SQLException {
+//        MysqlDataSource dataSource = new MysqlDataSource();
+//        dataSource.setURL("jdbc:mysql://localhost:3306/?user=root&password=password");
+//        dataSource.setUser("root");
+//        dataSource.setPassword("password");
+//        Connection connection = dataSource.getConnection();
+//        Statement statement = connection.createStatement();
+//        statement.execute("CREATE DATABASE IF NOT EXISTS queryiteasytest");
+//        if (!connection.getAutoCommit()) {
+//            connection.commit();
+//        }
+//        connection.close();
+//        return dataSource;
+//    }
+
+
     protected static DataStore getDataStore() {
         return dataStore;
     }
