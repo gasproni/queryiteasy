@@ -137,8 +137,8 @@ public class SupportedTypesTest extends EndToEndTestBase {
 
     @Test
     public void handles_timestamps_correctly() throws SQLException {
-        // Tue, 12 Jan 2016 10:11:12.345 GMT
-        java.sql.Timestamp value = new Timestamp(1452593472345L);
+        // Tue, 12 Jan 2016 10:11:12.000 GMT. Note that some DBs support the milliseconds.
+        java.sql.Timestamp value = new Timestamp(1452593472000L);
         List<Row> expectedValues = storeAndReadValuesBack("TIMESTAMP", bind((Timestamp) null), bind(value));
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0).asTimestamp("first"), is(nullValue()));
@@ -148,7 +148,7 @@ public class SupportedTypesTest extends EndToEndTestBase {
 
     private List<Row> storeAndReadValuesBack(String sqlType, StatementParameter firstValue, StatementParameter secondValue) {
         getDataStore().execute(connection -> {
-            connection.update("CREATE TABLE testtable (first " + sqlType + " NULL, second " + sqlType + " NOT NULL)");
+            connection.update("CREATE TABLE testtable (first " + sqlType + " NULL, second " + sqlType + " NULL)");
             connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
                     firstValue, secondValue);
         });

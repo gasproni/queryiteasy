@@ -38,7 +38,9 @@ public class EndToEndTestBase {
         Statement statement = connection.createStatement();
         statement.execute("DROP TABLE testtable");
         statement.close();
-        connection.commit();
+        if (!connection.getAutoCommit()) {
+            connection.commit();
+        }
         connection.close();
     }
 
@@ -50,7 +52,9 @@ public class EndToEndTestBase {
             while (rs.next()) {
                 result.add(new RowFromResultSet(rs));
             }
-            connection.commit();
+            if (!connection.getAutoCommit()) {
+                connection.commit();
+            }
             return result;
         }
     }
@@ -62,7 +66,9 @@ public class EndToEndTestBase {
             for (String sql : otherSqlStatements) {
                 statement.execute(sql);
             }
-            connection.commit();
+            if (!connection.getAutoCommit()) {
+                connection.commit();
+            }
         }
     }
 }

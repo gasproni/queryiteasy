@@ -20,7 +20,7 @@ public class RowFromResultSet implements Row {
             for (int columnIndex = 1; columnIndex <= columns.length; ++columnIndex) {
                 int position = columnIndex - 1;
                 columns[position] = rs.getObject(columnIndex);
-                nameToColumn.put(metadata.getColumnLabel(columnIndex), position);
+                nameToColumn.put(normaliseColumnName(metadata.getColumnLabel(columnIndex)), position);
             }
 
         } catch (SQLException e) {
@@ -99,7 +99,7 @@ public class RowFromResultSet implements Row {
         return TypeConverters.toSqlTimestamp(object);
     }
 
-    public String normaliseColumnName(String name) {
+    public static String normaliseColumnName(String name) {
         return name.toUpperCase();
     }
 

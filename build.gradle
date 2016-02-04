@@ -83,7 +83,7 @@ findbugs {
 
 dependencies {
     testCompile 'org.hamcrest:hamcrest-all:1.3', 'junit:junit:4.12', 'org.mockito:mockito-all:1.10.19'
-    acceptanceTestCompile 'org.hsqldb:hsqldb:2.3.3'
+    acceptanceTestCompile 'org.hsqldb:hsqldb:2.3.3', 'mysql:mysql-connector-java:5.1.38'
 }
 
 idea {
