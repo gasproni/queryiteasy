@@ -8,6 +8,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public final class TypeConverters {
+
     public static BigDecimal toBigDecimal(Object object) {
         if (object == null) {
             return null;
@@ -18,17 +19,18 @@ public final class TypeConverters {
         } else if (object instanceof Number) {
             return BigDecimal.valueOf(((Number) object).doubleValue());
         }
-        throw new ClassCastException("Invalid cast:" + object.getClass().getName());
+        throw new ClassCastException(classCastExceptionMessage(object, BigDecimal.class));
     }
 
     public static Boolean toBoolean(Object object) {
         if (object == null) {
             return null;
+        } else if (object instanceof Boolean) {
+            return (Boolean)object;
         } else if (object instanceof String) {
             return Boolean.valueOf((String) object);
-        } else {
-            return (Boolean) object;
         }
+        throw new ClassCastException(classCastExceptionMessage(object, Boolean.class));
     }
 
     public static Date toSqlDate(Object object) {
@@ -36,11 +38,10 @@ public final class TypeConverters {
             return null;
         } else if (object instanceof Date) {
             return (Date) object;
-        }
-        else if (object instanceof String) {
+        } else if (object instanceof String) {
             return Date.valueOf((String) object);
         }
-        throw new ClassCastException("Invalid cast:" + object.getClass().getName());
+        throw new ClassCastException(classCastExceptionMessage(object, Date.class));
     }
 
     public static Time toSqlTime(Object object) {
@@ -60,7 +61,7 @@ public final class TypeConverters {
         } else if (object instanceof Timestamp) {
             return (Timestamp) object;
         } else if (object instanceof java.util.Date) {
-            return Timestamp.from(((java.util.Date)object).toInstant());
+            return Timestamp.from(((java.util.Date) object).toInstant());
         } else if (object instanceof String) {
             return Timestamp.valueOf((String) object);
         }
@@ -76,5 +77,10 @@ public final class TypeConverters {
             return objectMethodCaller.get().get();
         }
         throw new ClassCastException("Invalid cast:" + object.getClass().getName());
+    }
+
+    private static <T> String classCastExceptionMessage(Object object, Class<T> targetType) {
+        return object.getClass().getCanonicalName() + " cannot be cast to " +
+                targetType.getCanonicalName();
     }
 }
