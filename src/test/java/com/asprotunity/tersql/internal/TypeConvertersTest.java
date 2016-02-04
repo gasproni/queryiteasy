@@ -4,16 +4,22 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.function.Function;
 
-import static com.asprotunity.tersql.internal.TypeConverters.toBigDecimal;
-import static com.asprotunity.tersql.internal.TypeConverters.toBoolean;
-import static com.asprotunity.tersql.internal.TypeConverters.toSqlDate;
+import static com.asprotunity.tersql.internal.TypeConverters.*;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 public class TypeConvertersTest {
+
+    @Test
+    public void converts_to_boolean_from_nullL_correctly() {
+        assertThat(toBoolean(null), is(nullValue()));
+    }
 
     @Test
     public void converts_to_boolean_correctly() {
@@ -35,6 +41,11 @@ public class TypeConvertersTest {
     public void throws_class_cast_exception_when_conversion_to_boolean_not_possible() {
         Integer value = 1;
         assert_throws_class_cast_exception(value, TypeConverters::toBoolean, Boolean.class);
+    }
+
+    @Test
+    public void converts_to_big_decimal_from_nullL_correctly() {
+        assertThat(toBigDecimal(null), is(nullValue()));
     }
 
     @Test
@@ -60,6 +71,10 @@ public class TypeConvertersTest {
         assert_throws_class_cast_exception(value, TypeConverters::toBigDecimal, BigDecimal.class);
     }
 
+    @Test
+    public void converts_to_sql_date_from_nullL_correctly() {
+        assertThat(toSqlDate(null), is(nullValue()));
+    }
 
     @Test
     public void converts_sql_date_correctly() {
@@ -77,6 +92,52 @@ public class TypeConvertersTest {
     public void throws_class_cast_exception_when_conversion_to_sql_date_not_possible() {
         Character value = 20;
         assert_throws_class_cast_exception(value, TypeConverters::toSqlDate, Date.class);
+    }
+
+    @Test
+    public void converts_to_sql_time_from_nullL_correctly() {
+        assertThat(toSqlTime(null), is(nullValue()));
+    }
+
+    @Test
+    public void converts_sql_time_correctly() {
+        Time time = new Time(123456);
+        assertThat(toSqlTime(time), is(time));
+    }
+
+    @Test
+    public void converts_sql_time_from_string_correctly() {
+        String value = "23:12:33";
+        assertThat(toSqlTime(value), is(Time.valueOf(value)));
+    }
+
+    @Test
+    public void throws_class_cast_exception_when_conversion_to_sql_time_not_possible() {
+        Character value = 20;
+        assert_throws_class_cast_exception(value, TypeConverters::toSqlTime, Time.class);
+    }
+
+    @Test
+    public void converts_to_sql_timestamp_from_nullL_correctly() {
+        assertThat(toSqlTimestamp(null), is(nullValue()));
+    }
+
+    @Test
+    public void converts_sql_timestamp_correctly() {
+        Timestamp timestamp = new Timestamp(123456);
+        assertThat(toSqlTimestamp(timestamp), is(timestamp));
+    }
+
+    @Test
+    public void converts_sql_timestamp_from_string_correctly() {
+        String value = "2016-02-27 21:12:30.333";
+        assertThat(toSqlTimestamp(value), is(Timestamp.valueOf(value)));
+    }
+
+    @Test
+    public void throws_class_cast_exception_when_conversion_to_sql_timestamp_not_possible() {
+        Character value = 20;
+        assert_throws_class_cast_exception(value, TypeConverters::toSqlTimestamp, Timestamp.class);
     }
 
     private <T> void assert_throws_class_cast_exception(Object toConvert, Function<Object, T> convertType, Class<T> targetType) {

@@ -52,7 +52,7 @@ public final class TypeConverters {
         } else if (object instanceof String) {
             return Time.valueOf((String) object);
         }
-        throw new ClassCastException("Invalid cast:" + object.getClass().getName());
+        throw new ClassCastException(classCastExceptionMessage(object, Time.class));
     }
 
     public static Timestamp toSqlTimestamp(Object object) {
@@ -65,16 +65,18 @@ public final class TypeConverters {
         } else if (object instanceof String) {
             return Timestamp.valueOf((String) object);
         }
-        throw new ClassCastException("Invalid cast:" + object.getClass().getName());
+        throw new ClassCastException(classCastExceptionMessage(object, Timestamp.class));
     }
 
     public static <T extends Number> T convertNumber(Object object, Function<String, T> valueOf, Supplier<Supplier<T>> objectMethodCaller) {
         if (object == null) {
             return null;
-        } else if (object instanceof String) {
-            return valueOf.apply((String) object);
-        } else if (object instanceof Number) {
+        }
+        else if (object instanceof Number) {
             return objectMethodCaller.get().get();
+        }
+        else if (object instanceof String) {
+            return valueOf.apply((String) object);
         }
         throw new ClassCastException("Invalid cast:" + object.getClass().getName());
     }
