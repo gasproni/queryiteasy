@@ -29,7 +29,6 @@ public class RowFromResultSetTest {
 
         RowFromResultSet rowFromResultSet = new RowFromResultSet(rs);
 
-
         assertThat(rowFromResultSet.asInteger(mixedCaseColumnName.toLowerCase()), is(1));
 
     }
