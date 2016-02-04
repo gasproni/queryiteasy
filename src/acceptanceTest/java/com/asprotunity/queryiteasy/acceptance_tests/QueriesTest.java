@@ -3,6 +3,7 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 
 import com.asprotunity.queryiteasy.connection.Batch;
 import com.asprotunity.queryiteasy.connection.Row;
+import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import org.junit.Test;
 
 import java.sql.SQLException;
@@ -13,6 +14,7 @@ import static com.asprotunity.queryiteasy.connection.StatementParameter.bind;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class QueriesTest extends EndToEndTestBase {
 
@@ -30,6 +32,21 @@ public class QueriesTest extends EndToEndTestBase {
         assertThat(expectedValues.get(0).asInteger("first"), is(10));
     }
 
+    @Test
+    public void rolls_back_transaction_when_exception_thrown() throws SQLException {
+
+        try {
+            getDataStore().execute(connection -> {
+                connection.update("CREATE TABLE testtable (first INTEGER NOT NULL)");
+                connection.update("INSERT INTO testtable (first) VALUES (10)");
+                throw new RuntimeException();
+            });
+            fail("Exception expected");
+        } catch (RuntimeException ex) {
+            List<Row> expectedValues = query("SELECT first FROM testtable");
+            assertThat(expectedValues.size(), is(0));
+        }
+    }
 
     @Test
     public void inserts_with_some_bind_values() throws SQLException {
