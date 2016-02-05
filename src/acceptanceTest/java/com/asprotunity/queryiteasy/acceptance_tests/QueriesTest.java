@@ -76,9 +76,9 @@ public class QueriesTest extends EndToEndTestBase {
 
         List<Row> expectedValues = query("SELECT * FROM testtable ORDER BY first ASC");
         assertThat(expectedValues.size(), is(3));
-        for (int first = 0; first < expectedValues.size(); ++first) {
-            assertThat(expectedValues.get(first).asInteger("first"), is(first + 10));
-            assertThat(expectedValues.get(first).asString("second"), is("asecond" + (first + 10)));
+        for (int index = 0; index < expectedValues.size(); ++index) {
+            assertThat(expectedValues.get(index).asInteger("first"), is(index + 10));
+            assertThat(expectedValues.get(index).asString("second"), is("asecond" + (index + 10)));
         }
     }
 
@@ -90,9 +90,9 @@ public class QueriesTest extends EndToEndTestBase {
 
             Batch firstBatch = batch(bind(10), bind("asecond10"));
             Batch[] batches = new Batch[2];
-            for (int first = 0; first < 2; ++first) {
-                int value = first + 11;
-                batches[first] = batch(bind(value), bind("asecond" + value));
+            for (int index = 0; index < 2; ++index) {
+                int value = index + 11;
+                batches[index] = batch(bind(value), bind("asecond" + value));
             }
 
             connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)", firstBatch, batches);
@@ -100,9 +100,9 @@ public class QueriesTest extends EndToEndTestBase {
 
         List<Row> expectedValues = query("SELECT * FROM testtable ORDER BY first ASC");
         assertThat(expectedValues.size(), is(3));
-        for (int first = 10; first < expectedValues.size(); ++first) {
-            assertThat(expectedValues.get(first).asInteger("first"), is(first));
-            assertThat(expectedValues.get(first).asString("second"), is("asecond" + first));
+        for (int value = 10; value < expectedValues.size(); ++value) {
+            assertThat(expectedValues.get(value).asInteger("first"), is(value));
+            assertThat(expectedValues.get(value).asString("second"), is("asecond" + value));
         }
     }
 
