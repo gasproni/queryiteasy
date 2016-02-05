@@ -10,4 +10,4 @@ Some very important rules are:
 To compile execute the "gradlew build" (or "gradlew.bat build" if in Windows) script. That will download the necessary
 gradle packages, compile the project and run all the tests.
 
-To see at example usages have a look at the acceptance test classes in src/acceptanceTest/java/com/asprotunity/queryiteasy/acceptance_tests.
+To see at example usages have a look at the acceptance test classes in [src/acceptanceTest/java/com/asprotunity/queryiteasy/acceptance_tests](src/acceptanceTest/java/com/asprotunity/queryiteasy/acceptance_tests).

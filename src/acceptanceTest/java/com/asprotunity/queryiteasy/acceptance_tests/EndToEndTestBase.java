@@ -35,7 +35,7 @@ public class EndToEndTestBase {
         Properties testConfigProperties = loadTestConfigProperties();
 
         dataSource = createDataSource(testConfigProperties);
-        EndToEndTestBase.dataStore = new DataStore(dataSource);
+        dataStore = new DataStore(dataSource);
     }
 
     @After
