@@ -1,6 +1,8 @@
 package com.asprotunity.queryiteasy.internal;
 
+import com.asprotunity.queryiteasy.connection.Batch;
 import com.asprotunity.queryiteasy.connection.Row;
+import com.asprotunity.queryiteasy.exception.InvalidArgumentException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -89,7 +91,6 @@ public class WrappedJDBCConnectionTest {
 
     }
 
-
     @Test
     public void batch_update_executes_batch_and_closes_statement_correctly() throws Exception {
         String sql = "INSERT INTO foo VALUES(?)";
@@ -105,6 +106,41 @@ public class WrappedJDBCConnectionTest {
         order.verify(preparedStatement, times(1)).addBatch();
         order.verify(preparedStatement, times(1)).executeBatch();
         order.verify(preparedStatement, times(1)).close();
+    }
+
+    @Test
+    public void updateBatch_ignores_empty_batches() throws Exception {
+        final String sql = "INSERT INTO foo VALUES(?)";
+
+        wrappedJDBCConnection.updateBatch(sql);
+
+        // setAutoCommit is called in constructor
+        verify(jdbcConnection).setAutoCommit(false);
+        verifyNoMoreInteractions(jdbcConnection);
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void updateNonemptyBatch_throws_exception_when_empty_batch() throws Exception {
+        final String sql = "INSERT INTO foo VALUES(?)";
+
+        wrappedJDBCConnection.updateNonemptyBatch(sql);
+
+        // setAutoCommit is called in constructor
+        verify(jdbcConnection).setAutoCommit(false);
+        verifyNoMoreInteractions(jdbcConnection);
+    }
+
+    @Test
+    public void updateNonemptyBatch_calls_updateBatch_when_nonempty_batch() throws SQLException {
+        final String sql = "INSERT INTO foo VALUES(?)";
+        final Batch testBatch = batch(bind(10));
+        final PreparedStatement preparedStatement = mock(PreparedStatement.class);
+        final WrappedJDBCConnection wrappedJDBCConnectionSpy = spy(wrappedJDBCConnection);
+        when(jdbcConnection.prepareStatement(sql)).thenReturn(preparedStatement);
+
+        wrappedJDBCConnectionSpy.updateNonemptyBatch(sql, testBatch);
+
+        verify(wrappedJDBCConnectionSpy, times(1)).updateBatch(sql, testBatch);
     }
 
 }

@@ -4,6 +4,7 @@ import com.asprotunity.queryiteasy.connection.Batch;
 import com.asprotunity.queryiteasy.connection.Connection;
 import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.connection.StatementParameter;
+import com.asprotunity.queryiteasy.exception.InvalidArgumentException;
 import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 
 import java.sql.PreparedStatement;
@@ -46,14 +47,25 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
 
     @Override
     public void updateBatch(String sql, Batch... batches) {
-        RuntimeSQLException.wrapException(() -> {
-            try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                for (Batch batch : batches) {
-                    addBatch(batch, statement);
+        if(batches.length > 0) {
+            RuntimeSQLException.wrapException(() -> {
+                try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                    for (Batch batch : batches) {
+                        addBatch(batch, statement);
+                    }
+                    statement.executeBatch();
                 }
-                statement.executeBatch();
-            }
-        });
+            });
+        }
+    }
+
+    @Override
+    public void updateNonemptyBatch(String sql, Batch... batches) {
+        if(batches.length > 0) {
+            updateBatch(sql, batches);
+        } else {
+            throw new InvalidArgumentException("Array of batches shouldn't be empty");
+        }
     }
 
 
