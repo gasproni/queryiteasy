@@ -96,7 +96,7 @@ public class WrappedJDBCConnectionTest {
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(jdbcConnection.prepareStatement(sql)).thenReturn(preparedStatement);
 
-        wrappedJDBCConnection.update(sql, batch(bind(10)), batch(bind(20)));
+        wrappedJDBCConnection.updateBatch(sql, batch(bind(10)), batch(bind(20)));
 
         InOrder order = inOrder(preparedStatement);
         order.verify(preparedStatement, times(1)).setObject(1, 10, Types.INTEGER);
