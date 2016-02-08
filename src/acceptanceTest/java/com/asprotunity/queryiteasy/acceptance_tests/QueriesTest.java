@@ -68,7 +68,7 @@ public class QueriesTest extends EndToEndTestBase {
 
         getDataStore().execute(connection -> {
             connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
-            connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
+            connection.updateBatch("INSERT INTO testtable (first, second) VALUES (?, ?)",
                     batch(bind(10), bind("asecond10")),
                     batch(bind(11), bind("asecond11")),
                     batch(bind(12), bind("asecond12")));
@@ -88,14 +88,13 @@ public class QueriesTest extends EndToEndTestBase {
         getDataStore().execute(connection -> {
             connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
 
-            Batch firstBatch = batch(bind(10), bind("asecond10"));
-            Batch[] batches = new Batch[2];
-            for (int index = 0; index < 2; ++index) {
-                int value = index + 11;
+            Batch[] batches = new Batch[3];
+            for (int index = 0; index < batches.length; ++index) {
+                int value = index + 10;
                 batches[index] = batch(bind(value), bind("asecond" + value));
             }
 
-            connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)", firstBatch, batches);
+            connection.updateBatch("INSERT INTO testtable (first, second) VALUES (?, ?)", batches);
         });
 
         List<Row> expectedValues = query("SELECT * FROM testtable ORDER BY first ASC");
