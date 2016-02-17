@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
-import static com.asprotunity.queryiteasy.connection.StatementParameter.bind;
+import static com.asprotunity.queryiteasy.connection.InputParameter.bind;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;

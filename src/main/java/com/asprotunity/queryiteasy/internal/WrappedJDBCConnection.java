@@ -3,7 +3,7 @@ package com.asprotunity.queryiteasy.internal;
 import com.asprotunity.queryiteasy.connection.Batch;
 import com.asprotunity.queryiteasy.connection.Connection;
 import com.asprotunity.queryiteasy.connection.Row;
-import com.asprotunity.queryiteasy.connection.StatementParameter;
+import com.asprotunity.queryiteasy.connection.InputParameter;
 import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 
 import java.sql.PreparedStatement;
@@ -35,7 +35,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     }
 
     @Override
-    public void update(String sql, StatementParameter... parameters) {
+    public void update(String sql, InputParameter... parameters) {
         RuntimeSQLException.wrapException(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 bindParameters(parameters, statement);
@@ -59,7 +59,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
 
 
     @Override
-    public <ResultType> ResultType select(String sql, Function<Stream<Row>, ResultType> processRow, StatementParameter... parameters) {
+    public <ResultType> ResultType select(String sql, Function<Stream<Row>, ResultType> processRow, InputParameter... parameters) {
         return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 bindParameters(parameters, statement);
@@ -76,11 +76,11 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         RuntimeSQLException.wrapException(preparedStatement::addBatch);
     }
 
-    private void bindParameters(StatementParameter[] parameters, PreparedStatement preparedStatement) {
+    private void bindParameters(InputParameter[] parameters, PreparedStatement preparedStatement) {
         IntStream.range(0, parameters.length).forEach(i -> bindTo(preparedStatement).accept(parameters[i], i));
     }
 
-    private BiConsumer<StatementParameter, Integer> bindTo(PreparedStatement preparedStatement) {
+    private BiConsumer<InputParameter, Integer> bindTo(PreparedStatement preparedStatement) {
         return (parameter, position) ->
                 parameter.accept(new PositionalParameterBinder(position + 1, preparedStatement));
     }

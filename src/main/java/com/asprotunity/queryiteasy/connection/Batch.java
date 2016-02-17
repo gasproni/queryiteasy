@@ -7,9 +7,9 @@ import java.util.stream.IntStream;
 
 public class Batch {
 
-    private final StatementParameter[] parameters;
+    private final InputParameter[] parameters;
 
-    public static Batch batch(StatementParameter firstParameter, StatementParameter... parameters) {
+    public static Batch batch(InputParameter firstParameter, InputParameter... parameters) {
         if (firstParameter == null || parameters == null) {
             throw new InvalidArgumentException("Arguments cannot be null.");
         }
@@ -21,12 +21,12 @@ public class Batch {
         return new Batch(firstParameter, parameters);
     }
 
-    public void forEachParameter(BiConsumer<StatementParameter, Integer> function) {
+    public void forEachParameter(BiConsumer<InputParameter, Integer> function) {
         IntStream.range(0, parameters.length).forEach(i -> function.accept(parameters[i], i));
     }
 
-    private Batch(StatementParameter parameter, StatementParameter[] parameters) {
-        this.parameters = new StatementParameter[parameters.length + 1];
+    private Batch(InputParameter parameter, InputParameter[] parameters) {
+        this.parameters = new InputParameter[parameters.length + 1];
         this.parameters[0] = parameter;
         System.arraycopy(parameters, 0, this.parameters, 1, parameters.length);
     }

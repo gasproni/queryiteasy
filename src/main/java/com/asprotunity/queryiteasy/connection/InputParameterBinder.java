@@ -5,7 +5,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 
-public interface StatementParameterBinder {
+public interface InputParameterBinder {
     void bind(String value);
 
     void bind(Short value);

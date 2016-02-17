@@ -6,55 +6,55 @@ import java.sql.Time;
 import java.sql.Timestamp;
 
 @FunctionalInterface
-public interface StatementParameter {
+public interface InputParameter {
 
-    void accept(StatementParameterBinder binder);
+    void accept(InputParameterBinder binder);
 
-    static StatementParameter bind(String value) {
+    static InputParameter bind(String value) {
         return binder -> binder.bind(value);
     }
 
-    static StatementParameter bind(Short value) {
+    static InputParameter bind(Short value) {
         return binder -> binder.bind(value);
     }
 
-    static StatementParameter bind(Integer value) {
+    static InputParameter bind(Integer value) {
         return binder -> binder.bind(value);
     }
 
-    static StatementParameter bind(Long value) {
+    static InputParameter bind(Long value) {
         return binder -> binder.bind(value);
     }
 
-    static StatementParameter bind(Double value) {
+    static InputParameter bind(Double value) {
         return binder -> binder.bind(value);
     }
 
-    static StatementParameter bind(Float value) {
+    static InputParameter bind(Float value) {
         return binder -> binder.bind(value);
     }
 
-    static StatementParameter bind(Byte value) {
+    static InputParameter bind(Byte value) {
         return binder -> binder.bind(value);
     }
 
-    static StatementParameter bind(Boolean value) {
+    static InputParameter bind(Boolean value) {
         return binder -> binder.bind(value);
     }
 
-    static StatementParameter bind(BigDecimal value) {
+    static InputParameter bind(BigDecimal value) {
         return binder -> binder.bind(value);
     }
 
-    static StatementParameter bind(Date value) {
+    static InputParameter bind(Date value) {
         return binder -> binder.bind(value);
     }
 
-    static StatementParameter bind(Time value) {
+    static InputParameter bind(Time value) {
         return binder -> binder.bind(value);
     }
 
-    static StatementParameter bind(Timestamp value) {
+    static InputParameter bind(Timestamp value) {
         return binder -> binder.bind(value);
     }
 }

@@ -2,7 +2,7 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 
 
 import com.asprotunity.queryiteasy.connection.Row;
-import com.asprotunity.queryiteasy.connection.StatementParameter;
+import com.asprotunity.queryiteasy.connection.InputParameter;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -12,7 +12,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
 
-import static com.asprotunity.queryiteasy.connection.StatementParameter.bind;
+import static com.asprotunity.queryiteasy.connection.InputParameter.bind;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -146,7 +146,7 @@ public class SupportedTypesTest extends EndToEndTestBase {
     }
 
 
-    private List<Row> storeAndReadValuesBack(String sqlType, StatementParameter firstValue, StatementParameter secondValue) {
+    private List<Row> storeAndReadValuesBack(String sqlType, InputParameter firstValue, InputParameter secondValue) {
         getDataStore().execute(connection -> {
             connection.update("CREATE TABLE testtable (first " + sqlType + " NULL, second " + sqlType + " NULL)");
             connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",

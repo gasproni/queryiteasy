@@ -11,7 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
-import static com.asprotunity.queryiteasy.connection.StatementParameter.bind;
+import static com.asprotunity.queryiteasy.connection.InputParameter.bind;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 

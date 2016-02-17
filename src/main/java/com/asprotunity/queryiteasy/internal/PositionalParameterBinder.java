@@ -1,12 +1,12 @@
 package com.asprotunity.queryiteasy.internal;
 
-import com.asprotunity.queryiteasy.connection.StatementParameterBinder;
+import com.asprotunity.queryiteasy.connection.InputParameterBinder;
 import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 
 import java.math.BigDecimal;
 import java.sql.*;
 
-class PositionalParameterBinder implements StatementParameterBinder {
+class PositionalParameterBinder implements InputParameterBinder {
 
     private final PreparedStatement statement;
     private final int position;
