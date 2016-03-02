@@ -2,12 +2,14 @@ package com.asprotunity.queryiteasy.internal;
 
 import com.asprotunity.queryiteasy.connection.Batch;
 import com.asprotunity.queryiteasy.connection.Connection;
-import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.connection.InputParameter;
-import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
+import com.asprotunity.queryiteasy.connection.Row;
+import com.asprotunity.queryiteasy.disposer.Disposer;
+import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -37,8 +39,8 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     @Override
     public void update(String sql, InputParameter... parameters) {
         RuntimeSQLException.wrapException(() -> {
-            try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                bindParameters(parameters, statement);
+            try (Disposer disposer = Disposer.makeNew();
+                 PreparedStatement statement = createStatement(connection, sql, disposer, parameters)) {
                 statement.execute();
             }
         });
@@ -47,10 +49,11 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     @Override
     public void update(String sql, Batch firstBatch, Batch... batches) {
         RuntimeSQLException.wrapException(() -> {
-            try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                addBatch(firstBatch, statement);
+            try (Disposer disposer = Disposer.makeNew();
+                 PreparedStatement statement = connection.prepareStatement(sql)) {
+                addBatch(firstBatch, statement, disposer);
                 for (Batch batch : batches) {
-                    addBatch(batch, statement);
+                    addBatch(batch, statement, disposer);
                 }
                 statement.executeBatch();
             }
@@ -61,8 +64,8 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     @Override
     public <ResultType> ResultType select(String sql, Function<Stream<Row>, ResultType> processRow, InputParameter... parameters) {
         return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
-            try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                bindParameters(parameters, statement);
+            try (Disposer disposer = Disposer.makeNew();
+                 PreparedStatement statement = createStatement(connection, sql, disposer, parameters)) {
                 try (ResultSet rs = statement.executeQuery();
                      Stream<Row> rowStream = StreamSupport.stream(new RowSpliterator(rs), false)) {
                     return processRow.apply(rowStream);
@@ -71,18 +74,25 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         });
     }
 
-    private void addBatch(Batch batch, PreparedStatement preparedStatement) {
-        batch.forEachParameter(bindTo(preparedStatement));
-        RuntimeSQLException.wrapException(preparedStatement::addBatch);
+    private static PreparedStatement createStatement(java.sql.Connection connection, String sql, Disposer disposer,
+                                                     InputParameter... parameters) throws SQLException {
+        PreparedStatement result = connection.prepareStatement(sql);
+        bindParameters(parameters, result, disposer);
+        return result;
     }
 
-    private void bindParameters(InputParameter[] parameters, PreparedStatement preparedStatement) {
-        IntStream.range(0, parameters.length).forEach(i -> bindTo(preparedStatement).accept(parameters[i], i));
+    private static void addBatch(Batch batch, PreparedStatement preparedStatement, Disposer disposer) throws SQLException {
+        batch.forEachParameter(bindTo(preparedStatement, disposer));
+        preparedStatement.addBatch();
     }
 
-    private BiConsumer<InputParameter, Integer> bindTo(PreparedStatement preparedStatement) {
+    private static void bindParameters(InputParameter[] parameters, PreparedStatement preparedStatement, Disposer disposer) {
+        IntStream.range(0, parameters.length).forEach(i -> bindTo(preparedStatement, disposer).accept(parameters[i], i));
+    }
+
+    private static BiConsumer<InputParameter, Integer> bindTo(PreparedStatement preparedStatement, Disposer disposer) {
         return (parameter, position) ->
-                parameter.accept(new PositionalParameterBinder(position + 1, preparedStatement));
+                parameter.accept(new PositionalParameterBinder(position + 1, preparedStatement, disposer));
     }
 
 }

@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
 
+import java.io.InputStream;
 import java.sql.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
@@ -46,8 +47,7 @@ public class WrappedJDBCConnectionTest {
     @Test
     public void update_executes_and_closes_statement_in_the_right_order() throws Exception {
         String sql = "INSERT INTO foo VALUES(1)";
-        PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        when(jdbcConnection.prepareStatement(sql)).thenReturn(preparedStatement);
+        PreparedStatement preparedStatement = prepareStatement(sql);
 
         wrappedJDBCConnection.update(sql);
 
@@ -57,10 +57,24 @@ public class WrappedJDBCConnectionTest {
     }
 
     @Test
+    public void update_closes_blob_stream_correctly() throws Exception {
+        String sql = "INSERT INTO foo VALUES(?)";
+        PreparedStatement preparedStatement = prepareStatement(sql);
+        InputStream blobStream = mock(InputStream.class);
+
+        wrappedJDBCConnection.update(sql, bind(() -> blobStream));
+
+        InOrder order = inOrder(preparedStatement, blobStream);
+        order.verify(preparedStatement, times(1)).execute();
+        order.verify(preparedStatement, times(1)).close();
+        order.verify(blobStream, times(1)).close();
+    }
+
+    @Test
     public void select_executes_and_closes_result_set_stream_and_statement_in_the_right_order() throws Exception {
         String sql = "SELECT * FROM foo";
-        PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        when(jdbcConnection.prepareStatement(sql)).thenReturn(preparedStatement);
+        PreparedStatement preparedStatement = prepareStatement(sql);
+
         ResultSet rs = mock(ResultSet.class);
         when(preparedStatement.executeQuery()).thenReturn(rs);
         when(rs.next()).thenReturn(false);
@@ -86,15 +100,34 @@ public class WrappedJDBCConnectionTest {
         order.verify(preparedStatement, times(1)).executeQuery();
         order.verify(rs, times(1)).close();
         order.verify(preparedStatement, times(1)).close();
+    }
 
+    @Test
+    public void select_closes_blob_streams_correctly() throws Exception {
+        String sql = "SELECT * FROM foo where blob = ?";
+        PreparedStatement preparedStatement = prepareStatement(sql);
+
+        InputStream blobStream = mock(InputStream.class);
+
+        ResultSet rs = mock(ResultSet.class);
+        when(preparedStatement.executeQuery()).thenReturn(rs);
+        when(rs.next()).thenReturn(false);
+
+
+        wrappedJDBCConnection.select(sql, rowStream -> 1, bind(() -> blobStream));
+
+        InOrder order = inOrder(preparedStatement, rs, blobStream);
+        order.verify(preparedStatement, times(1)).executeQuery();
+        order.verify(rs, times(1)).close();
+        order.verify(preparedStatement, times(1)).close();
+        order.verify(blobStream, times(1)).close();
     }
 
 
     @Test
     public void batch_update_executes_batch_and_closes_statement_correctly() throws Exception {
         String sql = "INSERT INTO foo VALUES(?)";
-        PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        when(jdbcConnection.prepareStatement(sql)).thenReturn(preparedStatement);
+        PreparedStatement preparedStatement = prepareStatement(sql);
 
         wrappedJDBCConnection.update(sql, batch(bind(10)), batch(bind(20)));
 
@@ -106,5 +139,27 @@ public class WrappedJDBCConnectionTest {
         order.verify(preparedStatement, times(1)).executeBatch();
         order.verify(preparedStatement, times(1)).close();
     }
+
+    @Test
+    public void batch_update_closes_blob_stream_correctly() throws Exception {
+        String sql = "INSERT INTO foo VALUES(?)";
+        PreparedStatement preparedStatement = prepareStatement(sql);
+
+        InputStream blobStream = mock(InputStream.class);
+
+        wrappedJDBCConnection.update(sql, batch(bind(() -> blobStream)));
+
+        InOrder order = inOrder(preparedStatement, blobStream);
+        order.verify(preparedStatement, times(1)).executeBatch();
+        order.verify(preparedStatement, times(1)).close();
+        order.verify(blobStream, times(1)).close();
+    }
+
+    public PreparedStatement prepareStatement(String sql) throws SQLException {
+        PreparedStatement preparedStatement = mock(PreparedStatement.class);
+        when(jdbcConnection.prepareStatement(sql)).thenReturn(preparedStatement);
+        return preparedStatement;
+    }
+
 
 }

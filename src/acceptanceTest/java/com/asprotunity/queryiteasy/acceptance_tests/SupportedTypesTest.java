@@ -1,16 +1,25 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
 
-import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.connection.InputParameter;
+import com.asprotunity.queryiteasy.connection.Row;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static com.asprotunity.queryiteasy.connection.InputParameter.bind;
 import static java.util.stream.Collectors.toList;
@@ -145,6 +154,37 @@ public class SupportedTypesTest extends EndToEndTestBase {
         assertThat(expectedValues.get(0).asTimestamp("second"), is(value));
     }
 
+    @Test
+    public void handles_blobs_correctly() throws SQLException, UnsupportedEncodingException {
+        String blobContent = "this is the content of the blob";
+        Charset charset = Charset.forName("UTF-8");
+        Supplier<InputStream> value = () -> new ByteArrayInputStream(blobContent.getBytes(charset));
+        getDataStore().execute(connection -> {
+            connection.update("CREATE TABLE testtable (first BLOB NULL, second BLOB NULL)");
+            connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
+                    bind(() -> null), bind(value));
+        });
+
+        getDataStore().execute(connection -> {
+            List<Row> expectedValues = connection.select("SELECT * FROM testtable",
+                    rowStream -> rowStream.collect(toList()));
+            assertThat(expectedValues.size(), is(1));
+            assertThat(expectedValues.get(0).fromBlob("first", this::readFrom), is(nullValue()));
+            assertThat(expectedValues.get(0).fromBlob("second", this::readFrom), is(blobContent));
+            assertThat(expectedValues.get(0).fromBlob("second", this::readFrom), is(blobContent));
+
+        });
+    }
+
+    private String readFrom(Optional<InputStream> inputStream) {
+        if (inputStream.isPresent()) {
+            java.util.Scanner s = new java.util.Scanner(inputStream.get()).useDelimiter("\\A");
+            return s.hasNext() ? s.next() : "";
+        }
+        else {
+            return null;
+        }
+    }
 
     private List<Row> storeAndReadValuesBack(String sqlType, InputParameter firstValue, InputParameter secondValue) {
         getDataStore().execute(connection -> {
@@ -157,4 +197,5 @@ public class SupportedTypesTest extends EndToEndTestBase {
                 connection.select("SELECT * FROM testtable", rowStream -> rowStream.collect(toList()))
         );
     }
+
 }

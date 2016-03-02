@@ -1,19 +1,24 @@
 package com.asprotunity.queryiteasy.internal;
 
 import com.asprotunity.queryiteasy.connection.InputParameterBinder;
-import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
+import com.asprotunity.queryiteasy.disposer.Disposer;
+import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
 
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.*;
+import java.util.function.Supplier;
 
 class PositionalParameterBinder implements InputParameterBinder {
 
     private final PreparedStatement statement;
     private final int position;
+    private Disposer disposer;
 
-    PositionalParameterBinder(int position, PreparedStatement statement) {
+    PositionalParameterBinder(int position, PreparedStatement statement, Disposer disposer) {
         this.statement = statement;
         this.position = position;
+        this.disposer = disposer;
     }
 
     @Override
@@ -74,6 +79,20 @@ class PositionalParameterBinder implements InputParameterBinder {
     @Override
     public void bind(Timestamp value) {
         RuntimeSQLException.wrapException(() -> statement.setTimestamp(this.position, value));
+    }
+
+    @Override
+    public void bind(Supplier<InputStream> inputStreamSupplier) {
+        InputStream inputStream = inputStreamSupplier.get();
+        RuntimeSQLException.wrapException(() -> {
+            if (inputStream == null) {
+                statement.setNull(this.position, Types.BLOB);
+            }
+            else {
+                disposer.onClose(inputStream::close);
+                statement.setBlob(this.position, inputStream);
+            }
+        });
     }
 
     private void setValue(Object value, int sqlType) {

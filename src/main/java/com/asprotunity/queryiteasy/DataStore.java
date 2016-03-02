@@ -2,7 +2,7 @@ package com.asprotunity.queryiteasy;
 
 import com.asprotunity.queryiteasy.connection.Connection;
 import com.asprotunity.queryiteasy.exception.InvalidArgumentException;
-import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
+import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
 import com.asprotunity.queryiteasy.internal.WrappedJDBCConnection;
 
 import javax.sql.DataSource;

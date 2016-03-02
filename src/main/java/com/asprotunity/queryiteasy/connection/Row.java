@@ -1,10 +1,13 @@
 package com.asprotunity.queryiteasy.connection;
 
 
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Optional;
+import java.util.function.Function;
 
 public interface Row {
     String asString(String columnName);
@@ -19,4 +22,5 @@ public interface Row {
     Date asDate(String columnName);
     Time asTime(String columnName);
     Timestamp asTimestamp(String columnName);
+    <ResultType> ResultType fromBlob(String columnName, Function<Optional<InputStream>, ResultType> blobInputStream);
 }

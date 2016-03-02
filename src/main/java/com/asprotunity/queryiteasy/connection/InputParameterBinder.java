@@ -1,9 +1,11 @@
 package com.asprotunity.queryiteasy.connection;
 
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.function.Supplier;
 
 public interface InputParameterBinder {
     void bind(String value);
@@ -29,4 +31,6 @@ public interface InputParameterBinder {
     void bind(Time value);
 
     void bind(Timestamp value);
+
+    void bind(Supplier<InputStream> value);
 }
