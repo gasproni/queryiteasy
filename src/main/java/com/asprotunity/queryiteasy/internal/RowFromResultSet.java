@@ -1,10 +1,8 @@
 package com.asprotunity.queryiteasy.internal;
 
 import com.asprotunity.queryiteasy.connection.Row;
-import com.asprotunity.queryiteasy.exception.RuntimeIOException;
 import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.*;
@@ -108,17 +106,7 @@ public class RowFromResultSet implements Row {
     public <ResultType> ResultType fromBlob(String columnName,
                                             Function<Optional<InputStream>, ResultType> blobReader) {
         Object object = columns[positionForColumn(columnName)];
-        if (object == null) {
-            return blobReader.apply(Optional.empty());
-        }
-        java.sql.Blob blob = (java.sql.Blob) object;
-        try (InputStream inputStream = blob.getBinaryStream()) {
-            return blobReader.apply(Optional.of(inputStream));
-        } catch (SQLException e) {
-            throw new RuntimeSQLException(e);
-        } catch (IOException e) {
-            throw new RuntimeIOException(e);
-        }
+        return TypeConverters.fromBlob(object, blobReader);
     }
 
     public static String normaliseColumnName(String name) {

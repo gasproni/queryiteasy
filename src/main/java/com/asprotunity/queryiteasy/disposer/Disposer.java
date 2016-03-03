@@ -6,6 +6,7 @@ import java.util.Stack;
 public interface Disposer extends AutoCloseable {
     void onClose(CloseHandler closeHandler);
 
+    @Override
     void close();
 
     boolean isClosed();

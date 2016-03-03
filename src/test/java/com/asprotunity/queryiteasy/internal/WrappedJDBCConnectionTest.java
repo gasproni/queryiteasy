@@ -1,5 +1,6 @@
 package com.asprotunity.queryiteasy.internal;
 
+import com.asprotunity.queryiteasy.connection.Batch;
 import com.asprotunity.queryiteasy.connection.Row;
 import org.junit.Before;
 import org.junit.Test;
@@ -7,6 +8,9 @@ import org.mockito.InOrder;
 
 import java.io.InputStream;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -129,7 +133,7 @@ public class WrappedJDBCConnectionTest {
         String sql = "INSERT INTO foo VALUES(?)";
         PreparedStatement preparedStatement = prepareStatement(sql);
 
-        wrappedJDBCConnection.update(sql, batch(bind(10)), batch(bind(20)));
+        wrappedJDBCConnection.update(sql, Arrays.asList(batch(bind(10)), batch(bind(20))));
 
         InOrder order = inOrder(preparedStatement);
         order.verify(preparedStatement, times(1)).setObject(1, 10, Types.INTEGER);
@@ -147,7 +151,7 @@ public class WrappedJDBCConnectionTest {
 
         InputStream blobStream = mock(InputStream.class);
 
-        wrappedJDBCConnection.update(sql, batch(bind(() -> blobStream)));
+        wrappedJDBCConnection.update(sql, Collections.singletonList(batch(bind(() -> blobStream))));
 
         InOrder order = inOrder(preparedStatement, blobStream);
         order.verify(preparedStatement, times(1)).executeBatch();

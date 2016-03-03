@@ -2,10 +2,12 @@ package com.asprotunity.queryiteasy.internal;
 
 import org.junit.Test;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Scanner;
 import java.util.function.Function;
 
 import static com.asprotunity.queryiteasy.internal.TypeConverters.*;
@@ -175,6 +177,17 @@ public class TypeConvertersTest {
             assertThat(exc.getMessage(), is(Character.class.getCanonicalName() + " cannot be cast to " +
                     Integer.class.getCanonicalName()));
         }
+    }
+
+    @Test
+    public void converts_from_blob_byte_array() throws UnsupportedEncodingException {
+        String expected = "this is a string to be converted;";
+        String charset = "UTF-8";
+        byte[] bytes = expected.getBytes(charset);
+
+        String converted = fromBlob(bytes, optInputStream -> new Scanner(optInputStream.get(), charset).useDelimiter("\\A").next());
+
+        assertThat(converted, is(expected));
     }
 
     private <T> void assert_throws_class_cast_exception(Object toConvert, Function<Object, T> convertType, Class<T> targetType) {

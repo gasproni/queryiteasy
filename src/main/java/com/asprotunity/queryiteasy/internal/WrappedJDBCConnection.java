@@ -10,6 +10,7 @@ import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -47,11 +48,13 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     }
 
     @Override
-    public void update(String sql, Batch firstBatch, Batch... batches) {
+    public void update(String sql, List<Batch> batches) {
+        if (batches.isEmpty()) {
+            throw new RuntimeSQLException("Batch is empty.");
+        }
         RuntimeSQLException.wrapException(() -> {
             try (Disposer disposer = Disposer.makeNew();
                  PreparedStatement statement = connection.prepareStatement(sql)) {
-                addBatch(firstBatch, statement, disposer);
                 for (Batch batch : batches) {
                     addBatch(batch, statement, disposer);
                 }

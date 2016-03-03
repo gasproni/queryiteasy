@@ -1,9 +1,14 @@
 package com.asprotunity.queryiteasy.internal;
 
+import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
+import com.asprotunity.queryiteasy.exception.RuntimeIOException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
+import java.sql.*;
+import java.util.Optional;
 import java.util.function.Function;
 
 public final class TypeConverters {
@@ -86,5 +91,29 @@ public final class TypeConverters {
     private static <T> String classCastExceptionMessage(Object object, Class<T> targetType) {
         return object.getClass().getCanonicalName() + " cannot be cast to " +
                 targetType.getCanonicalName();
+    }
+
+    public static <ResultType> ResultType fromBlob(Object object, Function<Optional<InputStream>, ResultType> blobReader) {
+        if (object == null) {
+            return blobReader.apply(Optional.empty());
+        }
+        else if (object instanceof Blob) {
+            Blob blob = (Blob) object;
+            try (InputStream inputStream = blob.getBinaryStream()) {
+                return blobReader.apply(Optional.of(inputStream));
+            } catch (SQLException e) {
+                throw new RuntimeSQLException(e);
+            } catch (IOException e) {
+                throw new RuntimeIOException(e);
+            }
+        }
+        else if (object instanceof byte[]) {
+            try (InputStream inputStream = new ByteArrayInputStream((byte[])object)) {
+                return blobReader.apply(Optional.of(inputStream));
+            } catch (IOException e) {
+                throw new RuntimeIOException(e);
+            }
+        }
+        throw new ClassCastException("Cannot extract blob data from " + object.getClass());
     }
 }

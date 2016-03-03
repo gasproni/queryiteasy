@@ -1,11 +1,13 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
 
-import com.asprotunity.queryiteasy.connection.Batch;
 import com.asprotunity.queryiteasy.connection.Row;
+import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
 import org.junit.Test;
 
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
@@ -69,9 +71,9 @@ public class QueriesTest extends EndToEndTestBase {
         getDataStore().execute(connection -> {
             connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
             connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
-                    batch(bind(10), bind("asecond10")),
-                    batch(bind(11), bind("asecond11")),
-                    batch(bind(12), bind("asecond12")));
+                    Arrays.asList(batch(bind(10), bind("asecond10")),
+                            batch(bind(11), bind("asecond11")),
+                            batch(bind(12), bind("asecond12"))));
         });
 
         List<Row> expectedValues = query("SELECT * FROM testtable ORDER BY first ASC");
@@ -83,27 +85,21 @@ public class QueriesTest extends EndToEndTestBase {
     }
 
     @Test
-    public void does_batch_inserts_with_batch_array() throws SQLException {
+    public void throws_exception_when_batch_is_empty() throws SQLException {
 
-        getDataStore().execute(connection -> {
-            connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
-
-            Batch firstBatch = batch(bind(10), bind("asecond10"));
-            Batch[] batches = new Batch[2];
-            for (int index = 0; index < 2; ++index) {
-                int value = index + 11;
-                batches[index] = batch(bind(value), bind("asecond" + value));
-            }
-
-            connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)", firstBatch, batches);
-        });
-
-        List<Row> expectedValues = query("SELECT * FROM testtable ORDER BY first ASC");
-        assertThat(expectedValues.size(), is(3));
-        for (int value = 10; value < expectedValues.size(); ++value) {
-            assertThat(expectedValues.get(value).asInteger("first"), is(value));
-            assertThat(expectedValues.get(value).asString("second"), is("asecond" + value));
+        try {
+            getDataStore().execute(connection -> {
+                connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
+                connection.update("INSERT INTO testtable (first, second) VALUES (1, 'sometext')",
+                        Collections.emptyList());
+            });
+            fail("RuntimeSQLException expected!");
+        } catch (RuntimeSQLException exception) {
+            List<Row> expectedValues = query("SELECT * FROM testtable");
+            assertThat(expectedValues.size(), is(0));
+            assertThat(exception.getMessage(), is("Batch is empty."));
         }
+
     }
 
 

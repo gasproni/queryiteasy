@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
@@ -17,9 +16,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static com.asprotunity.queryiteasy.connection.InputParameter.bind;
 import static java.util.stream.Collectors.toList;
@@ -169,19 +166,20 @@ public class SupportedTypesTest extends EndToEndTestBase {
             List<Row> expectedValues = connection.select("SELECT * FROM testtable",
                     rowStream -> rowStream.collect(toList()));
             assertThat(expectedValues.size(), is(1));
-            assertThat(expectedValues.get(0).fromBlob("first", this::readFrom), is(nullValue()));
-            assertThat(expectedValues.get(0).fromBlob("second", this::readFrom), is(blobContent));
-            assertThat(expectedValues.get(0).fromBlob("second", this::readFrom), is(blobContent));
+            assertThat(expectedValues.get(0).fromBlob("first", optInputStream ->
+                    readFrom(optInputStream, charset.name())), is(nullValue()));
+            assertThat(expectedValues.get(0).fromBlob("second",
+                    optInputStream -> readFrom(optInputStream, charset.name())), is(blobContent));
+            assertThat(expectedValues.get(0).fromBlob("second",
+                    optInputStream -> readFrom(optInputStream, charset.name())), is(blobContent));
 
         });
     }
 
-    private String readFrom(Optional<InputStream> inputStream) {
+    private static String readFrom(Optional<InputStream> inputStream, String charset) {
         if (inputStream.isPresent()) {
-            java.util.Scanner s = new java.util.Scanner(inputStream.get()).useDelimiter("\\A");
-            return s.hasNext() ? s.next() : "";
-        }
-        else {
+            return new java.util.Scanner(inputStream.get(), charset).useDelimiter("\\A").next();
+        } else {
             return null;
         }
     }

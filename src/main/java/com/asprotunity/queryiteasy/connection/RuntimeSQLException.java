@@ -5,6 +5,10 @@ public class RuntimeSQLException extends RuntimeException {
         super(e);
     }
 
+    public RuntimeSQLException(String message) {
+        super(message);
+    }
+
     public static void wrapException(VoidCodeBlock codeBlock) {
         try {
             codeBlock.execute();
