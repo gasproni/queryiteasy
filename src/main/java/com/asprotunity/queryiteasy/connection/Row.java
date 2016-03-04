@@ -1,6 +1,8 @@
 package com.asprotunity.queryiteasy.connection;
 
 
+import com.asprotunity.queryiteasy.functional.ThrowingFunction;
+
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -22,5 +24,6 @@ public interface Row {
     Date asDate(String columnName);
     Time asTime(String columnName);
     Timestamp asTimestamp(String columnName);
-    <ResultType> ResultType fromBlob(String columnName, Function<Optional<InputStream>, ResultType> blobInputStream);
+    <ResultType> ResultType fromBlob(String columnName,
+                                     ThrowingFunction<Optional<InputStream>, ResultType> blobInputStream);
 }

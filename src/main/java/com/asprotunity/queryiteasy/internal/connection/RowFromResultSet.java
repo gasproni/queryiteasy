@@ -2,6 +2,7 @@ package com.asprotunity.queryiteasy.internal.connection;
 
 import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
+import com.asprotunity.queryiteasy.functional.ThrowingFunction;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -104,7 +105,7 @@ public class RowFromResultSet implements Row {
 
     @Override
     public <ResultType> ResultType fromBlob(String columnName,
-                                            Function<Optional<InputStream>, ResultType> blobReader) {
+                                            ThrowingFunction<Optional<InputStream>, ResultType> blobReader) {
         Object object = columns[positionForColumn(columnName)];
         return TypeConverters.fromBlob(object, blobReader);
     }
