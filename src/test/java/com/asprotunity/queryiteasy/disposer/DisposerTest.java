@@ -38,7 +38,7 @@ public class DisposerTest {
         Disposable disposable = new Disposable();
         assertFalse(disposable.isDisposed());
 
-        Disposer disposer = Disposer.makeNew();
+        Disposer disposer = new Disposer();
         disposer.onClose(disposable::dispose);
         disposer.close();
 
@@ -50,7 +50,7 @@ public class DisposerTest {
         Disposable disposable1 = new Disposable();
         Disposable disposable2 = new Disposable();
 
-        Disposer disposer = Disposer.makeNew();
+        Disposer disposer = new Disposer();
         disposer.onClose(disposable1::dispose);
         disposer.onClose(disposable2::dispose);
         disposer.close();
@@ -60,7 +60,7 @@ public class DisposerTest {
 
     @Test
     public void works_correctly_when_no_handlers_registered() {
-        Disposer disposer = Disposer.makeNew();
+        Disposer disposer = new Disposer();
         assertFalse(disposer.isClosed());
         disposer.close();
         assertTrue(disposer.isClosed());
@@ -72,7 +72,7 @@ public class DisposerTest {
         Exception thrownByDisposable = new Exception();
         Disposable disposable = new Disposable(thrownByDisposable);
 
-        Disposer disposer = Disposer.makeNew();
+        Disposer disposer = new Disposer();
         disposer.onClose(disposable::dispose);
 
         try {
@@ -95,7 +95,7 @@ public class DisposerTest {
         Exception disposable2Exception = new Exception();
         Disposable disposable2 = new Disposable(disposable2Exception);
 
-        Disposer disposer = Disposer.makeNew();
+        Disposer disposer = new Disposer();
         disposer.onClose(disposable1::dispose);
         disposer.onClose(nonThrowingDisposable::dispose);
         disposer.onClose(disposable2::dispose);

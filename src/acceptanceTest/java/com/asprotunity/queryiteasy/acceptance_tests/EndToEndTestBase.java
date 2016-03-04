@@ -86,15 +86,29 @@ public class EndToEndTestBase {
         Class<?> clazz = Class.forName(testConfigProperties.getProperty(QUERYITEASY_DATASOURCE_CLASS));
         DataSource result = (DataSource) clazz.newInstance();
 
-        Method setUrl = clazz.getMethod("setURL", String.class);
-        setUrl.invoke(result, testConfigProperties.getProperty(QUERYITEASY_DATASOURCE_URL));
 
+        Method setUrl = null;
+        try {
+            setUrl = clazz.getMethod("setURL", String.class);
+        } catch (Exception ignored) {
+
+        }
+        if (setUrl != null) {
+            setUrl.invoke(result, testConfigProperties.getProperty(QUERYITEASY_DATASOURCE_URL));
+        } else {
+            Method setServerName = clazz.getMethod("setServerName", String.class);
+            setServerName.invoke(result, "localhost");
+
+            Method setDatabaseName = clazz.getMethod("setDatabaseName", String.class);
+            setDatabaseName.invoke(result, "queryiteasytest");
+        }
         Method setUser = clazz.getMethod("setUser", String.class);
         setUser.invoke(result, testConfigProperties.getProperty(QUERYITEASY_DATASOURCE_USER));
 
         Method setPassword = clazz.getMethod("setPassword", String.class);
         setPassword.invoke(result, testConfigProperties.getProperty(QUERYITEASY_DATASOURCE_PASSWORD));
         return result;
+
     }
 
     private static Properties loadTestConfigProperties() throws IOException {

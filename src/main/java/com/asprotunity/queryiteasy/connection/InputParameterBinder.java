@@ -32,5 +32,5 @@ public interface InputParameterBinder {
 
     void bind(Timestamp value);
 
-    void bind(Supplier<InputStream> value);
+    void bind(ThrowingSupplier<InputStream> value);
 }

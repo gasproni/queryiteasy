@@ -60,7 +60,7 @@ public interface InputParameter {
         return binder -> binder.bind(value);
     }
 
-    static InputParameter bind(Supplier<InputStream> value) {
+    static InputParameter bind(ThrowingSupplier<InputStream> value) {
         return binder -> binder.bind(value);
     }
 }

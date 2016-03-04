@@ -25,7 +25,7 @@ public class PositionalParameterBinderTest {
     public void setUp() {
         preparedStatement = mock(PreparedStatement.class);
         position = 1;
-        disposer = Disposer.makeNew();
+        disposer = new Disposer();
         parameterBinder = new PositionalParameterBinder(position, preparedStatement, disposer);
     }
 

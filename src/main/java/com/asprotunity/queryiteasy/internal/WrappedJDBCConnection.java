@@ -40,7 +40,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     @Override
     public void update(String sql, InputParameter... parameters) {
         RuntimeSQLException.wrapException(() -> {
-            try (Disposer disposer = Disposer.makeNew();
+            try (Disposer disposer = new Disposer();
                  PreparedStatement statement = createStatement(connection, sql, disposer, parameters)) {
                 statement.execute();
             }
@@ -53,7 +53,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
             throw new RuntimeSQLException("Batch is empty.");
         }
         RuntimeSQLException.wrapException(() -> {
-            try (Disposer disposer = Disposer.makeNew();
+            try (Disposer disposer = new Disposer();
                  PreparedStatement statement = connection.prepareStatement(sql)) {
                 for (Batch batch : batches) {
                     addBatch(batch, statement, disposer);
@@ -67,7 +67,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     @Override
     public <ResultType> ResultType select(String sql, Function<Stream<Row>, ResultType> processRow, InputParameter... parameters) {
         return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
-            try (Disposer disposer = Disposer.makeNew();
+            try (Disposer disposer = new Disposer();
                  PreparedStatement statement = createStatement(connection, sql, disposer, parameters)) {
                 try (ResultSet rs = statement.executeQuery();
                      Stream<Row> rowStream = StreamSupport.stream(new RowSpliterator(rs), false)) {

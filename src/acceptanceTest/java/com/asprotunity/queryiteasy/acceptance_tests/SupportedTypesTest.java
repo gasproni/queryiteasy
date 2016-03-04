@@ -3,9 +3,11 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 
 import com.asprotunity.queryiteasy.connection.InputParameter;
 import com.asprotunity.queryiteasy.connection.Row;
+import com.asprotunity.queryiteasy.connection.ThrowingSupplier;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -155,7 +157,7 @@ public class SupportedTypesTest extends EndToEndTestBase {
     public void handles_blobs_correctly() throws SQLException, UnsupportedEncodingException {
         String blobContent = "this is the content of the blob";
         Charset charset = Charset.forName("UTF-8");
-        Supplier<InputStream> value = () -> new ByteArrayInputStream(blobContent.getBytes(charset));
+        ThrowingSupplier<InputStream> value = () -> new ByteArrayInputStream(blobContent.getBytes(charset));
         getDataStore().execute(connection -> {
             connection.update("CREATE TABLE testtable (first BLOB NULL, second BLOB NULL)");
             connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
@@ -177,11 +179,7 @@ public class SupportedTypesTest extends EndToEndTestBase {
     }
 
     private static String readFrom(Optional<InputStream> inputStream, String charset) {
-        if (inputStream.isPresent()) {
-            return new java.util.Scanner(inputStream.get(), charset).useDelimiter("\\A").next();
-        } else {
-            return null;
-        }
+        return inputStream.map(stream -> new java.util.Scanner(stream, charset).useDelimiter("\\A").next()).orElse(null);
     }
 
     private List<Row> storeAndReadValuesBack(String sqlType, InputParameter firstValue, InputParameter secondValue) {

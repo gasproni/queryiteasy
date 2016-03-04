@@ -1,6 +1,8 @@
 package com.asprotunity.queryiteasy.internal;
 
 import com.asprotunity.queryiteasy.connection.InputParameterBinder;
+import com.asprotunity.queryiteasy.connection.ThrowingSupplier;
+import com.asprotunity.queryiteasy.connection.ThrowingSupplierException;
 import com.asprotunity.queryiteasy.disposer.Disposer;
 import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
 
@@ -82,8 +84,8 @@ class PositionalParameterBinder implements InputParameterBinder {
     }
 
     @Override
-    public void bind(Supplier<InputStream> inputStreamSupplier) {
-        InputStream inputStream = inputStreamSupplier.get();
+    public void bind(ThrowingSupplier<InputStream> inputStreamSupplier) {
+        InputStream inputStream = ThrowingSupplierException.wrapExceptionAndReturnResult(inputStreamSupplier::get);
         RuntimeSQLException.wrapException(() -> {
             if (inputStream == null) {
                 statement.setNull(this.position, Types.BLOB);
