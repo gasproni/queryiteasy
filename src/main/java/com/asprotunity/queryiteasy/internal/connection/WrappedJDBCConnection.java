@@ -1,18 +1,15 @@
-package com.asprotunity.queryiteasy.internal;
+package com.asprotunity.queryiteasy.internal.connection;
 
-import com.asprotunity.queryiteasy.connection.Batch;
-import com.asprotunity.queryiteasy.connection.Connection;
-import com.asprotunity.queryiteasy.connection.InputParameter;
-import com.asprotunity.queryiteasy.connection.Row;
-import com.asprotunity.queryiteasy.disposer.Disposer;
-import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
+import com.asprotunity.queryiteasy.connection.*;
+import com.asprotunity.queryiteasy.functional.ThrowingFunction;
+import com.asprotunity.queryiteasy.functional.ThrowingFunctionException;
+import com.asprotunity.queryiteasy.internal.disposer.Disposer;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -22,16 +19,16 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
 
     public WrappedJDBCConnection(java.sql.Connection connection) {
         this.connection = connection;
-        RuntimeSQLException.wrapException(() -> this.connection.setAutoCommit(false));
+        RuntimeSQLExceptionWrapper.execute(() -> this.connection.setAutoCommit(false));
     }
 
     public void commit() {
-        RuntimeSQLException.wrapException(connection::commit);
+        RuntimeSQLExceptionWrapper.execute(connection::commit);
     }
 
     @Override
     public void close() {
-        RuntimeSQLException.wrapException(() -> {
+        RuntimeSQLExceptionWrapper.execute(() -> {
             connection.rollback();
             connection.close();
         });
@@ -39,7 +36,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
 
     @Override
     public void update(String sql, InputParameter... parameters) {
-        RuntimeSQLException.wrapException(() -> {
+        RuntimeSQLExceptionWrapper.execute(() -> {
             try (Disposer disposer = new Disposer();
                  PreparedStatement statement = createStatement(connection, sql, disposer, parameters)) {
                 statement.execute();
@@ -52,7 +49,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         if (batches.isEmpty()) {
             throw new RuntimeSQLException("Batch is empty.");
         }
-        RuntimeSQLException.wrapException(() -> {
+        RuntimeSQLExceptionWrapper.execute(() -> {
             try (Disposer disposer = new Disposer();
                  PreparedStatement statement = connection.prepareStatement(sql)) {
                 for (Batch batch : batches) {
@@ -65,13 +62,17 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
 
 
     @Override
-    public <ResultType> ResultType select(String sql, Function<Stream<Row>, ResultType> processRow, InputParameter... parameters) {
-        return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
+    public <ResultType> ResultType select(String sql, ThrowingFunction<Stream<Row>, ResultType> processRow, InputParameter... parameters) {
+        return RuntimeSQLExceptionWrapper.executeAndReturnResult(() -> {
             try (Disposer disposer = new Disposer();
                  PreparedStatement statement = createStatement(connection, sql, disposer, parameters)) {
                 try (ResultSet rs = statement.executeQuery();
                      Stream<Row> rowStream = StreamSupport.stream(new RowSpliterator(rs), false)) {
                     return processRow.apply(rowStream);
+                } catch (RuntimeException exception) {
+                    throw exception;
+                } catch (Exception exception) {
+                    throw new ThrowingFunctionException(exception);
                 }
             }
         });

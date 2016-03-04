@@ -2,8 +2,8 @@ package com.asprotunity.queryiteasy;
 
 import com.asprotunity.queryiteasy.connection.Connection;
 import com.asprotunity.queryiteasy.exception.InvalidArgumentException;
-import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
-import com.asprotunity.queryiteasy.internal.WrappedJDBCConnection;
+import com.asprotunity.queryiteasy.internal.connection.RuntimeSQLExceptionWrapper;
+import com.asprotunity.queryiteasy.internal.connection.WrappedJDBCConnection;
 
 import javax.sql.DataSource;
 import java.util.function.Consumer;
@@ -21,7 +21,7 @@ public class DataStore {
     }
 
     public void execute(Consumer<Connection> transaction) {
-        RuntimeSQLException.wrapException(() -> {
+        RuntimeSQLExceptionWrapper.execute(() -> {
                     try (WrappedJDBCConnection connection = new WrappedJDBCConnection(dataSource.getConnection())) {
                         transaction.accept(connection);
                         connection.commit();
@@ -32,7 +32,7 @@ public class DataStore {
 
 
     public <ResultType> ResultType executeWithResult(Function<Connection, ResultType> transaction) {
-        return RuntimeSQLException.wrapExceptionAndReturnResult(() -> {
+        return RuntimeSQLExceptionWrapper.executeAndReturnResult(() -> {
                     try (WrappedJDBCConnection connection = new WrappedJDBCConnection(dataSource.getConnection())) {
                         ResultType result = transaction.apply(connection);
                         connection.commit();

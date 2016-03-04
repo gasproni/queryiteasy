@@ -1,5 +1,6 @@
-package com.asprotunity.queryiteasy.internal;
+package com.asprotunity.queryiteasy.internal.connection;
 
+import com.asprotunity.queryiteasy.internal.connection.RowFromResultSet;
 import org.junit.Test;
 
 import java.sql.ResultSet;

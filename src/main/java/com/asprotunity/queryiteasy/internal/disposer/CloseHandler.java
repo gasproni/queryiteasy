@@ -1,4 +1,4 @@
-package com.asprotunity.queryiteasy.disposer;
+package com.asprotunity.queryiteasy.internal.disposer;
 
 @FunctionalInterface
 public interface CloseHandler {

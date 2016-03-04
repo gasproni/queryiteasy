@@ -1,5 +1,7 @@
-package com.asprotunity.queryiteasy.disposer;
+package com.asprotunity.queryiteasy.internal.disposer;
 
+import com.asprotunity.queryiteasy.internal.disposer.Disposer;
+import com.asprotunity.queryiteasy.internal.disposer.DisposerException;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;

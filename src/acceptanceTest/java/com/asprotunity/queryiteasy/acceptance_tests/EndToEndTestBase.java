@@ -2,7 +2,7 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 
 import com.asprotunity.queryiteasy.DataStore;
 import com.asprotunity.queryiteasy.connection.Row;
-import com.asprotunity.queryiteasy.internal.RowFromResultSet;
+import com.asprotunity.queryiteasy.internal.connection.RowFromResultSet;
 import org.junit.After;
 import org.junit.BeforeClass;
 

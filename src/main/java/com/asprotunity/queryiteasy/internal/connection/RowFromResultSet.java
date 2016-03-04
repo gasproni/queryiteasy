@@ -1,4 +1,4 @@
-package com.asprotunity.queryiteasy.internal;
+package com.asprotunity.queryiteasy.internal.connection;
 
 import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.connection.RuntimeSQLException;

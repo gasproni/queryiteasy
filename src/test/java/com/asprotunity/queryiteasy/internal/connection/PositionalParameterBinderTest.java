@@ -1,6 +1,6 @@
-package com.asprotunity.queryiteasy.internal;
+package com.asprotunity.queryiteasy.internal.connection;
 
-import com.asprotunity.queryiteasy.disposer.Disposer;
+import com.asprotunity.queryiteasy.internal.disposer.Disposer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

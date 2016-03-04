@@ -3,11 +3,10 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 
 import com.asprotunity.queryiteasy.connection.InputParameter;
 import com.asprotunity.queryiteasy.connection.Row;
-import com.asprotunity.queryiteasy.connection.ThrowingSupplier;
+import com.asprotunity.queryiteasy.functional.ThrowingSupplier;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -18,7 +17,6 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import static com.asprotunity.queryiteasy.connection.InputParameter.bind;
 import static java.util.stream.Collectors.toList;

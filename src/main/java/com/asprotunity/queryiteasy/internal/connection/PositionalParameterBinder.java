@@ -1,23 +1,21 @@
-package com.asprotunity.queryiteasy.internal;
+package com.asprotunity.queryiteasy.internal.connection;
 
 import com.asprotunity.queryiteasy.connection.InputParameterBinder;
-import com.asprotunity.queryiteasy.connection.ThrowingSupplier;
-import com.asprotunity.queryiteasy.connection.ThrowingSupplierException;
-import com.asprotunity.queryiteasy.disposer.Disposer;
-import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
+import com.asprotunity.queryiteasy.functional.ThrowingSupplier;
+import com.asprotunity.queryiteasy.internal.disposer.Disposer;
+import com.asprotunity.queryiteasy.internal.functional.ThrowingSupplierExceptionWrapper;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.*;
-import java.util.function.Supplier;
 
-class PositionalParameterBinder implements InputParameterBinder {
+public class PositionalParameterBinder implements InputParameterBinder {
 
     private final PreparedStatement statement;
     private final int position;
     private Disposer disposer;
 
-    PositionalParameterBinder(int position, PreparedStatement statement, Disposer disposer) {
+    public PositionalParameterBinder(int position, PreparedStatement statement, Disposer disposer) {
         this.statement = statement;
         this.position = position;
         this.disposer = disposer;
@@ -25,7 +23,7 @@ class PositionalParameterBinder implements InputParameterBinder {
 
     @Override
     public void bind(String value) {
-        RuntimeSQLException.wrapException(() -> statement.setString(this.position, value));
+        RuntimeSQLExceptionWrapper.execute(() -> statement.setString(this.position, value));
     }
 
     @Override
@@ -65,28 +63,28 @@ class PositionalParameterBinder implements InputParameterBinder {
 
     @Override
     public void bind(BigDecimal value) {
-        RuntimeSQLException.wrapException(() -> statement.setBigDecimal(this.position, value));
+        RuntimeSQLExceptionWrapper.execute(() -> statement.setBigDecimal(this.position, value));
     }
 
     @Override
     public void bind(Date value) {
-        RuntimeSQLException.wrapException(() -> statement.setDate(this.position, value));
+        RuntimeSQLExceptionWrapper.execute(() -> statement.setDate(this.position, value));
     }
 
     @Override
     public void bind(Time value) {
-        RuntimeSQLException.wrapException(() -> statement.setTime(this.position, value));
+        RuntimeSQLExceptionWrapper.execute(() -> statement.setTime(this.position, value));
     }
 
     @Override
     public void bind(Timestamp value) {
-        RuntimeSQLException.wrapException(() -> statement.setTimestamp(this.position, value));
+        RuntimeSQLExceptionWrapper.execute(() -> statement.setTimestamp(this.position, value));
     }
 
     @Override
-    public void bind(ThrowingSupplier<InputStream> inputStreamSupplier) {
-        InputStream inputStream = ThrowingSupplierException.wrapExceptionAndReturnResult(inputStreamSupplier::get);
-        RuntimeSQLException.wrapException(() -> {
+    public void bind(ThrowingSupplier<InputStream> streamSupplier) {
+        InputStream inputStream = ThrowingSupplierExceptionWrapper.executeAndReturnResult(streamSupplier::get);
+        RuntimeSQLExceptionWrapper.execute(() -> {
             if (inputStream == null) {
                 statement.setNull(this.position, Types.BLOB);
             }
@@ -98,6 +96,6 @@ class PositionalParameterBinder implements InputParameterBinder {
     }
 
     private void setValue(Object value, int sqlType) {
-        RuntimeSQLException.wrapException(() -> statement.setObject(this.position, value, sqlType));
+        RuntimeSQLExceptionWrapper.execute(() -> statement.setObject(this.position, value, sqlType));
     }
 }

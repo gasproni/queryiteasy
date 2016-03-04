@@ -1,5 +1,6 @@
-package com.asprotunity.queryiteasy.internal;
+package com.asprotunity.queryiteasy.internal.connection;
 
+import com.asprotunity.queryiteasy.internal.connection.TypeConverters;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
@@ -10,7 +11,7 @@ import java.sql.Timestamp;
 import java.util.Scanner;
 import java.util.function.Function;
 
-import static com.asprotunity.queryiteasy.internal.TypeConverters.*;
+import static com.asprotunity.queryiteasy.internal.connection.TypeConverters.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
