@@ -1,4 +1,4 @@
-package com.asprotunity.queryiteasy.internal.disposer;
+package com.asprotunity.queryiteasy.disposer;
 
 public class DisposerException extends RuntimeException {
     public DisposerException(Exception cause) {

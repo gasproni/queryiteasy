@@ -1,6 +1,7 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
 import com.asprotunity.queryiteasy.connection.Row;
+import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
 
 import java.sql.ResultSet;
 import java.util.Spliterator;
@@ -16,7 +17,7 @@ public class RowSpliterator implements Spliterator<Row> {
 
     @Override
     public boolean tryAdvance(Consumer<? super Row> action) {
-        return RuntimeSQLExceptionWrapper.executeAndReturnResult(() -> {
+        return RuntimeSQLException.executeAndReturnResult(() -> {
             if (resultSet.next()) {
                 action.accept(new RowFromResultSet(resultSet));
                 return true;

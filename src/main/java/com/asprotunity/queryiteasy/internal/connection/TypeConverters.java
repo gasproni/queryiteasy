@@ -44,6 +44,9 @@ public final class TypeConverters {
             return (Date) object;
         } else if (object instanceof String) {
             return Date.valueOf((String) object);
+        } else if (object instanceof Timestamp) {
+            Timestamp timestamp = (Timestamp)object;
+            return new java.sql.Date(timestamp.getTime());
         }
         throw new ClassCastException(classCastExceptionMessage(object, Date.class));
     }
@@ -55,6 +58,9 @@ public final class TypeConverters {
             return (Time) object;
         } else if (object instanceof String) {
             return Time.valueOf((String) object);
+        } else if (object instanceof Timestamp) {
+            Timestamp timestamp = (Timestamp)object;
+            return new java.sql.Time(timestamp.getTime());
         }
         throw new ClassCastException(classCastExceptionMessage(object, Time.class));
     }

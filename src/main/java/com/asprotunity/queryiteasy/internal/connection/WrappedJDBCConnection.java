@@ -1,7 +1,7 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
 import com.asprotunity.queryiteasy.connection.*;
-import com.asprotunity.queryiteasy.internal.disposer.Disposer;
+import com.asprotunity.queryiteasy.disposer.Disposer;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,16 +18,16 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
 
     public WrappedJDBCConnection(java.sql.Connection connection) {
         this.connection = connection;
-        RuntimeSQLExceptionWrapper.execute(() -> this.connection.setAutoCommit(false));
+        RuntimeSQLException.execute(() -> this.connection.setAutoCommit(false));
     }
 
     public void commit() {
-        RuntimeSQLExceptionWrapper.execute(connection::commit);
+        RuntimeSQLException.execute(connection::commit);
     }
 
     @Override
     public void close() {
-        RuntimeSQLExceptionWrapper.execute(() -> {
+        RuntimeSQLException.execute(() -> {
             connection.rollback();
             connection.close();
         });
@@ -35,7 +35,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
 
     @Override
     public void update(String sql, InputParameter... parameters) {
-        RuntimeSQLExceptionWrapper.execute(() -> {
+        RuntimeSQLException.execute(() -> {
             try (Disposer disposer = new Disposer();
                  PreparedStatement statement = createStatement(connection, sql, disposer, parameters)) {
                 statement.execute();
@@ -48,7 +48,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         if (batches.isEmpty()) {
             throw new RuntimeSQLException("Batch is empty.");
         }
-        RuntimeSQLExceptionWrapper.execute(() -> {
+        RuntimeSQLException.execute(() -> {
             try (Disposer disposer = new Disposer();
                  PreparedStatement statement = connection.prepareStatement(sql)) {
                 for (Batch batch : batches) {
@@ -62,7 +62,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
 
     @Override
     public <ResultType> ResultType select(String sql, Function<Stream<Row>, ResultType> processRow, InputParameter... parameters) {
-        return RuntimeSQLExceptionWrapper.executeAndReturnResult(() -> {
+        return RuntimeSQLException.executeAndReturnResult(() -> {
             try (Disposer disposer = new Disposer();
                  PreparedStatement statement = createStatement(connection, sql, disposer, parameters)) {
                 try (ResultSet rs = statement.executeQuery();
@@ -91,7 +91,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
 
     private static BiConsumer<InputParameter, Integer> bindTo(PreparedStatement preparedStatement, Disposer disposer) {
         return (parameter, position) ->
-                parameter.accept(new PositionalParameterBinder(position + 1, preparedStatement, disposer));
+                parameter.accept(preparedStatement, position +1, disposer);
     }
 
 }
