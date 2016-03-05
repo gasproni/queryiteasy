@@ -1,10 +1,7 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
 import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
-import com.asprotunity.queryiteasy.exception.RuntimeIOException;
-import com.asprotunity.queryiteasy.functional.ThrowingFunction;
-import com.asprotunity.queryiteasy.functional.ThrowingFunctionException;
-import com.asprotunity.queryiteasy.internal.functional.ThrowingFunctionExceptionWrapper;
+import com.asprotunity.queryiteasy.connection.RuntimeIOException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -97,9 +94,9 @@ public final class TypeConverters {
     }
 
     public static <ResultType> ResultType fromBlob(Object object,
-                                                   ThrowingFunction<Optional<InputStream>, ResultType> blobReader) {
+                                                   Function<Optional<InputStream>, ResultType> blobReader) {
         if (object == null) {
-            return ThrowingFunctionExceptionWrapper.executeAndReturnResult(() -> blobReader.apply(Optional.empty()));
+            return blobReader.apply(Optional.empty());
         } else if (object instanceof Blob) {
             Blob blob = (Blob) object;
             try (InputStream inputStream = blob.getBinaryStream()) {
@@ -108,16 +105,12 @@ public final class TypeConverters {
                 throw new RuntimeSQLException(e);
             } catch (IOException e) {
                 throw new RuntimeIOException(e);
-            } catch (Exception e) {
-                throw new ThrowingFunctionException(e);
             }
         } else if (object instanceof byte[]) {
             try (InputStream inputStream = new ByteArrayInputStream((byte[]) object)) {
                 return blobReader.apply(Optional.of(inputStream));
             } catch (IOException e) {
                 throw new RuntimeIOException(e);
-            } catch (Exception e) {
-                throw new ThrowingFunctionException(e);
             }
         } else {
             throw new ClassCastException("Cannot extract blob data from " + object.getClass());

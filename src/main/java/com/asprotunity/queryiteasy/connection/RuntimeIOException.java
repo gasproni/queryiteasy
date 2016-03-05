@@ -1,4 +1,4 @@
-package com.asprotunity.queryiteasy.exception;
+package com.asprotunity.queryiteasy.connection;
 
 public class RuntimeIOException extends RuntimeException {
     public RuntimeIOException(java.io.IOException e) {

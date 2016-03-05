@@ -1,8 +1,6 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
 import com.asprotunity.queryiteasy.connection.Row;
-import com.asprotunity.queryiteasy.functional.ThrowingFunction;
-import com.asprotunity.queryiteasy.internal.connection.WrappedJDBCConnection;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -84,7 +82,7 @@ public class WrappedJDBCConnectionTest {
         when(rs.next()).thenReturn(false);
 
         final AtomicBoolean streamClosed = new AtomicBoolean(false);
-        ThrowingFunction<Stream<Row>, Stream<Row>> setStreamOnCloseToVerifyResultSetNotClosedBeforeStreamAndMarkStreamClosed =
+        Function<Stream<Row>, Stream<Row>> setStreamOnCloseToVerifyResultSetNotClosedBeforeStreamAndMarkStreamClosed =
                 rowStream -> {
                     rowStream.onClose(() -> {
                         try {

@@ -1,13 +1,12 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
 import com.asprotunity.queryiteasy.connection.InputParameterBinder;
-import com.asprotunity.queryiteasy.functional.ThrowingSupplier;
 import com.asprotunity.queryiteasy.internal.disposer.Disposer;
-import com.asprotunity.queryiteasy.internal.functional.ThrowingFunctionExceptionWrapper;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.*;
+import java.util.function.Supplier;
 
 public class PositionalParameterBinder implements InputParameterBinder {
 
@@ -82,8 +81,8 @@ public class PositionalParameterBinder implements InputParameterBinder {
     }
 
     @Override
-    public void bind(ThrowingSupplier<InputStream> streamSupplier) {
-        InputStream inputStream = ThrowingFunctionExceptionWrapper.executeAndReturnResult(streamSupplier::get);
+    public void bind(Supplier<InputStream> streamSupplier) {
+        InputStream inputStream = streamSupplier.get();
         RuntimeSQLExceptionWrapper.execute(() -> {
             if (inputStream == null) {
                 statement.setNull(this.position, Types.BLOB);

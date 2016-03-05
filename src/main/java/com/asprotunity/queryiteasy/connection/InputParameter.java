@@ -1,12 +1,11 @@
 package com.asprotunity.queryiteasy.connection;
 
-import com.asprotunity.queryiteasy.functional.ThrowingSupplier;
-
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.function.Supplier;
 
 @FunctionalInterface
 public interface InputParameter {
@@ -61,7 +60,7 @@ public interface InputParameter {
         return binder -> binder.bind(value);
     }
 
-    static InputParameter bind(ThrowingSupplier<InputStream> streamSupplier) {
+    static InputParameter bind(Supplier<InputStream> streamSupplier) {
         return binder -> binder.bind(streamSupplier);
     }
 }

@@ -1,8 +1,6 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
 import com.asprotunity.queryiteasy.connection.*;
-import com.asprotunity.queryiteasy.functional.ThrowingFunction;
-import com.asprotunity.queryiteasy.functional.ThrowingFunctionException;
 import com.asprotunity.queryiteasy.internal.disposer.Disposer;
 
 import java.sql.PreparedStatement;
@@ -10,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -62,17 +61,13 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
 
 
     @Override
-    public <ResultType> ResultType select(String sql, ThrowingFunction<Stream<Row>, ResultType> processRow, InputParameter... parameters) {
+    public <ResultType> ResultType select(String sql, Function<Stream<Row>, ResultType> processRow, InputParameter... parameters) {
         return RuntimeSQLExceptionWrapper.executeAndReturnResult(() -> {
             try (Disposer disposer = new Disposer();
                  PreparedStatement statement = createStatement(connection, sql, disposer, parameters)) {
                 try (ResultSet rs = statement.executeQuery();
                      Stream<Row> rowStream = StreamSupport.stream(new RowSpliterator(rs), false)) {
                     return processRow.apply(rowStream);
-                } catch (RuntimeException exception) {
-                    throw exception;
-                } catch (Exception exception) {
-                    throw new ThrowingFunctionException(exception);
                 }
             }
         });
