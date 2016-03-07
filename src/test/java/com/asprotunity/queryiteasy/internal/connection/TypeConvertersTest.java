@@ -1,6 +1,5 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
-import com.asprotunity.queryiteasy.internal.connection.TypeConverters;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;

@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static com.asprotunity.queryiteasy.connection.InputParameter.bind;
+import static com.asprotunity.queryiteasy.connection.InputParameterDefaultBinders.bind;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
