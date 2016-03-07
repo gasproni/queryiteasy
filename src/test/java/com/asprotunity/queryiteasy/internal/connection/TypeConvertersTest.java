@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Scanner;
 import java.util.function.Function;
 
@@ -91,6 +92,13 @@ public class TypeConvertersTest {
     }
 
     @Test
+    public void converts_sql_date_from_sql_timestamp_correctly() {
+        Timestamp timestamp = Timestamp.valueOf("2016-02-27 21:12:30.333");
+        Date expectedDate = Date.valueOf("2016-02-27");
+        assertThat(toSqlDate(timestamp).toLocalDate(), is(expectedDate.toLocalDate()));
+    }
+
+    @Test
     public void throws_class_cast_exception_when_conversion_to_sql_date_not_possible() {
         Character value = 20;
         assert_throws_class_cast_exception(value, TypeConverters::toSqlDate, Date.class);
@@ -111,6 +119,13 @@ public class TypeConvertersTest {
     public void converts_sql_time_from_string_correctly() {
         String value = "23:12:33";
         assertThat(toSqlTime(value), is(Time.valueOf(value)));
+    }
+
+    @Test
+    public void converts_sql_time_from_sql_timestamp_correctly() {
+        Timestamp timestamp = Timestamp.valueOf("2016-02-27 21:12:30.333");
+        Time expectedTime = Time.valueOf("21:12:30");
+        assertThat(toSqlTime(timestamp).toLocalTime(), is(expectedTime.toLocalTime()));
     }
 
     @Test
