@@ -15,37 +15,37 @@ public class InputParameterDefaultBinders {
 
     public static InputParameter bind(Short value) {
         return (statement, position, disposer) ->
-                setValue(value, statement, position, Types.SMALLINT);
+                setValue(statement, position, value, Types.SMALLINT);
     }
 
     public static InputParameter bind(Integer value) {
         return (statement, position, disposer) ->
-                setValue(value, statement, position, Types.INTEGER);
+                setValue(statement, position, value, Types.INTEGER);
     }
 
     public static InputParameter bind(Long value) {
         return (statement, position, disposer) ->
-                setValue(value, statement, position, Types.BIGINT);
+                setValue(statement, position, value, Types.BIGINT);
     }
 
     public static InputParameter bind(Double value) {
         return (statement, position, disposer) ->
-                setValue(value, statement, position, Types.DOUBLE);
+                setValue(statement, position, value, Types.DOUBLE);
     }
 
     public static InputParameter bind(Float value) {
         return (statement, position, disposer) ->
-                setValue(value, statement, position, Types.REAL);
+                setValue(statement, position, value, Types.REAL);
     }
 
     public static InputParameter bind(Byte value) {
         return (statement, position, disposer) ->
-                setValue(value, statement, position, Types.TINYINT);
+                setValue(statement, position, value, Types.TINYINT);
     }
 
     public static InputParameter bind(Boolean value) {
         return (statement, position, disposer) ->
-                setValue(value, statement, position, Types.BOOLEAN);
+                setValue(statement, position, value, Types.BOOLEAN);
     }
 
     public static InputParameter bind(BigDecimal value) {
@@ -82,7 +82,7 @@ public class InputParameterDefaultBinders {
         };
     }
 
-    private static void setValue(Object value, PreparedStatement statement, int position, int sqlType) {
+    private static void setValue(PreparedStatement statement, int position, Object value, int sqlType) {
         RuntimeSQLException.execute(() -> statement.setObject(position, value, sqlType));
     }
 }
