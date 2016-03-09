@@ -3,25 +3,25 @@ package com.asprotunity.queryiteasy.disposer;
 import java.util.ArrayList;
 
 
-public class Disposer implements AutoCloseable {
+public class Closer implements AutoCloseable {
 
     private boolean isClosed = false;
-    private ArrayList<CloseHandler> handlers = new ArrayList<>();
+    private ArrayList<CloseAction> closeActions = new ArrayList<>();
 
-    public void onClose(CloseHandler handler) {
-        this.handlers.add(handler);
+    public void onClose(CloseAction caller) {
+        this.closeActions.add(caller);
     }
 
     @Override
     public void close() {
-        DisposerException toThrow = null;
-        for (int position = handlers.size() - 1; position >= 0; --position) {
+        CloserException toThrow = null;
+        for (int position = closeActions.size() - 1; position >= 0; --position) {
             try {
-                CloseHandler handler = handlers.get(position);
-                handler.apply();
+                CloseAction closeAction = closeActions.get(position);
+                closeAction.perform();
             } catch (Exception exception) {
                 if (toThrow == null) {
-                    toThrow = new DisposerException(exception);
+                    toThrow = new CloserException(exception);
                 } else {
                     toThrow.addSuppressed(exception);
                 }
@@ -38,7 +38,7 @@ public class Disposer implements AutoCloseable {
     }
 
     public int handlersCount() {
-        return handlers.size();
+        return closeActions.size();
     }
 
 }
