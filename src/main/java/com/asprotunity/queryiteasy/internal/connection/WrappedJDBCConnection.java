@@ -91,7 +91,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
 
     private static BiConsumer<InputParameter, Integer> bindTo(PreparedStatement preparedStatement, Closer closer) {
         return (parameter, position) ->
-                parameter.accept(preparedStatement, position +1, closer);
+                parameter.bind(preparedStatement, position +1, closer);
     }
 
 }
