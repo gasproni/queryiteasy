@@ -1,4 +1,4 @@
-package com.asprotunity.queryiteasy.disposer;
+package com.asprotunity.queryiteasy.closer;
 
 public class CloserException extends RuntimeException {
     public CloserException(Exception cause) {

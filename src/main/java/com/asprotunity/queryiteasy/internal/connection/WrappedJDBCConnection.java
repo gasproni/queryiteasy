@@ -1,7 +1,7 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
 import com.asprotunity.queryiteasy.connection.*;
-import com.asprotunity.queryiteasy.disposer.Closer;
+import com.asprotunity.queryiteasy.closer.Closer;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

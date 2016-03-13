@@ -1,7 +1,7 @@
-package com.asprotunity.queryiteasy.internal.disposer;
+package com.asprotunity.queryiteasy.closer;
 
-import com.asprotunity.queryiteasy.disposer.Closer;
-import com.asprotunity.queryiteasy.disposer.CloserException;
+import com.asprotunity.queryiteasy.closer.Closer;
+import com.asprotunity.queryiteasy.closer.CloserException;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
