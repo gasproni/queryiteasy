@@ -11,4 +11,6 @@ public interface Connection {
 
     <ResultType> ResultType select(String sql, Function<Stream<Row>, ResultType> rowProcessor,
                                    InputParameter... parameters);
+
+    void call(String sql, Parameter...parameters);
 }

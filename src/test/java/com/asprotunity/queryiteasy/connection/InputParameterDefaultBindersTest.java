@@ -1,4 +1,4 @@
-package com.asprotunity.queryiteasy.internal.connection;
+package com.asprotunity.queryiteasy.connection;
 
 import com.asprotunity.queryiteasy.closer.Closer;
 import org.junit.After;

@@ -59,7 +59,7 @@ public class WrappedJDBCConnectionTest {
     }
 
     @Test
-    public void update_closes_blob_stream_correctly() throws Exception {
+    public void update_closes_blob_stream_before_closing_statement() throws Exception {
         String sql = "INSERT INTO foo VALUES(?)";
         PreparedStatement preparedStatement = prepareStatement(sql);
         InputStream blobStream = mock(InputStream.class);
@@ -68,8 +68,8 @@ public class WrappedJDBCConnectionTest {
 
         InOrder order = inOrder(preparedStatement, blobStream);
         order.verify(preparedStatement, times(1)).execute();
-        order.verify(preparedStatement, times(1)).close();
         order.verify(blobStream, times(1)).close();
+        order.verify(preparedStatement, times(1)).close();
     }
 
     @Test
@@ -105,7 +105,7 @@ public class WrappedJDBCConnectionTest {
     }
 
     @Test
-    public void select_closes_blob_streams_correctly() throws Exception {
+    public void select_closes_blob_streams_before_closing_statement() throws Exception {
         String sql = "SELECT * FROM foo where blob = ?";
         PreparedStatement preparedStatement = prepareStatement(sql);
 
@@ -121,8 +121,8 @@ public class WrappedJDBCConnectionTest {
         InOrder order = inOrder(preparedStatement, rs, blobStream);
         order.verify(preparedStatement, times(1)).executeQuery();
         order.verify(rs, times(1)).close();
-        order.verify(preparedStatement, times(1)).close();
         order.verify(blobStream, times(1)).close();
+        order.verify(preparedStatement, times(1)).close();
     }
 
 
@@ -143,7 +143,7 @@ public class WrappedJDBCConnectionTest {
     }
 
     @Test
-    public void batch_update_closes_blob_stream_correctly() throws Exception {
+    public void batch_update_closes_blob_stream_before_closing_statement() throws Exception {
         String sql = "INSERT INTO foo VALUES(?)";
         PreparedStatement preparedStatement = prepareStatement(sql);
 
@@ -153,8 +153,8 @@ public class WrappedJDBCConnectionTest {
 
         InOrder order = inOrder(preparedStatement, blobStream);
         order.verify(preparedStatement, times(1)).executeBatch();
-        order.verify(preparedStatement, times(1)).close();
         order.verify(blobStream, times(1)).close();
+        order.verify(preparedStatement, times(1)).close();
     }
 
     public PreparedStatement prepareStatement(String sql) throws SQLException {

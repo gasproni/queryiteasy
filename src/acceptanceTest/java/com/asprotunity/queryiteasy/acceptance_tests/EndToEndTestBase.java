@@ -42,7 +42,7 @@ public class EndToEndTestBase {
     public void tearDown() throws SQLException {
         Connection connection = dataSource.getConnection();
         Statement statement = connection.createStatement();
-        statement.execute("DROP TABLE testtable");
+        statement.execute("DROP SCHEMA PUBLIC CASCADE");
         statement.close();
         if (!connection.getAutoCommit()) {
             connection.commit();

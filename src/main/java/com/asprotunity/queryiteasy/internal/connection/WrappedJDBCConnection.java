@@ -1,8 +1,9 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
-import com.asprotunity.queryiteasy.connection.*;
 import com.asprotunity.queryiteasy.closer.Closer;
+import com.asprotunity.queryiteasy.connection.*;
 
+import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -36,8 +37,9 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     @Override
     public void update(String sql, InputParameter... parameters) {
         RuntimeSQLException.execute(() -> {
-            try (Closer closer = new Closer();
-                 PreparedStatement statement = createStatement(connection, sql, closer, parameters)) {
+            try (PreparedStatement statement = connection.prepareStatement(sql);
+                 Closer closer = new Closer()) {
+                bindParameters(parameters, statement, closer);
                 statement.execute();
             }
         });
@@ -49,8 +51,8 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
             throw new RuntimeSQLException("Batch is empty.");
         }
         RuntimeSQLException.execute(() -> {
-            try (Closer closer = new Closer();
-                 PreparedStatement statement = connection.prepareStatement(sql)) {
+            try (PreparedStatement statement = connection.prepareStatement(sql);
+                 Closer closer = new Closer()) {
                 for (Batch batch : batches) {
                     addBatch(batch, statement, closer);
                 }
@@ -63,8 +65,9 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     @Override
     public <ResultType> ResultType select(String sql, Function<Stream<Row>, ResultType> processRow, InputParameter... parameters) {
         return RuntimeSQLException.executeAndReturnResult(() -> {
-            try (Closer closer = new Closer();
-                 PreparedStatement statement = createStatement(connection, sql, closer, parameters)) {
+            try (PreparedStatement statement = connection.prepareStatement(sql);
+                 Closer closer = new Closer()) {
+                bindParameters(parameters, statement, closer);
                 try (ResultSet rs = statement.executeQuery();
                      Stream<Row> rowStream = StreamSupport.stream(new RowSpliterator(rs), false)) {
                     return processRow.apply(rowStream);
@@ -73,11 +76,15 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         });
     }
 
-    private static PreparedStatement createStatement(java.sql.Connection connection, String sql, Closer closer,
-                                                     InputParameter... parameters) throws SQLException {
-        PreparedStatement result = connection.prepareStatement(sql);
-        bindParameters(parameters, result, closer);
-        return result;
+    @Override
+    public void call(String sql, Parameter... parameters) {
+        RuntimeSQLException.execute(() -> {
+            try (CallableStatement statement = connection.prepareCall(sql);
+                 Closer closer = new Closer()) {
+                bindCallableParameters(parameters, statement, closer);
+                statement.execute();
+            }
+        });
     }
 
     private static void addBatch(Batch batch, PreparedStatement preparedStatement, Closer closer) throws SQLException {
@@ -86,12 +93,16 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     }
 
     private static void bindParameters(InputParameter[] parameters, PreparedStatement preparedStatement, Closer closer) {
-        IntStream.range(0, parameters.length).forEach(i -> bindTo(preparedStatement, closer).accept(parameters[i], i));
+        IntStream.range(0, parameters.length).forEach(i -> parameters[i].bind(preparedStatement, i + 1, closer));
+    }
+
+    private static void bindCallableParameters(Parameter[] parameters, CallableStatement callableStatement, Closer closer) {
+        IntStream.range(0, parameters.length).forEach(i -> parameters[i].bind(callableStatement, i + 1, closer));
     }
 
     private static BiConsumer<InputParameter, Integer> bindTo(PreparedStatement preparedStatement, Closer closer) {
         return (parameter, position) ->
-                parameter.bind(preparedStatement, position +1, closer);
+                parameter.bind(preparedStatement, position + 1, closer);
     }
 
 }
