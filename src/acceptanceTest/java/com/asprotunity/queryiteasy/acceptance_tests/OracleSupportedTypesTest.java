@@ -32,15 +32,16 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 public class OracleSupportedTypesTest extends SupportedTypesTestBase {
-
 
     private static DataStore dataStore;
 
     @BeforeClass
     public static void setUp() throws Exception {
         DataSource dataSource = OracleConfigurationAndSchemaDrop.configureDataSource();
+        assumeTrue("No Oracle JDBC driver found, skipping tests", dataSource != null);
         dataStore = new DataStore(dataSource);
     }
 
