@@ -12,7 +12,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public interface DataSourceHelpers {
+public interface DataSourceInstantiationAndAccess {
     static DataSource instantiateDataSource(String fullyQualifiedClassName)
             throws IllegalAccessException, InstantiationException, ClassNotFoundException {
         Class<?> clazz = Class.forName(fullyQualifiedClassName);

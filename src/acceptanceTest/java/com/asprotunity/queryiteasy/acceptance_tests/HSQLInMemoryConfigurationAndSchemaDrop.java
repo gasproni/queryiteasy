@@ -5,7 +5,7 @@ import org.hsqldb.jdbc.JDBCDataSource;
 
 import javax.sql.DataSource;
 
-public interface HSQLInMemoryHelpers {
+public interface HSQLInMemoryConfigurationAndSchemaDrop {
     static DataSource configureHSQLInMemoryDataSource() throws Exception {
         JDBCDataSource result = new JDBCDataSource();
         result.setUrl("jdbc:hsqldb:mem:testdb");

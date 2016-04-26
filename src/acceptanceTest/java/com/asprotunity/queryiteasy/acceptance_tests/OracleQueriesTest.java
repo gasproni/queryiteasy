@@ -9,15 +9,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.sql.DataSource;
-import java.lang.reflect.Method;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Properties;
-import java.util.stream.Collectors;
 
+import static com.asprotunity.queryiteasy.acceptance_tests.OracleConfigurationAndSchemaDrop.configureDataSource;
+import static com.asprotunity.queryiteasy.acceptance_tests.OracleConfigurationAndSchemaDrop.dropSchemaObjects;
 import static com.asprotunity.queryiteasy.connection.InputParameterDefaultBinders.bind;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -50,7 +46,7 @@ public class OracleQueriesTest extends QueriesTestBase {
     @Test
     public void calls_stored_procedure_with_bind_values() throws SQLException {
 
-        DataSourceHelpers.prepareData(getDataSource(), "CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)",
+        DataSourceInstantiationAndAccess.prepareData(getDataSource(), "CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)",
                 "CREATE PROCEDURE insert_new_record(first in INTEGER, ioparam in out VARCHAR," +
                         "                                               other in VARCHAR, res out VARCHAR)\n" +
                         "IS\n" +
@@ -68,7 +64,7 @@ public class OracleQueriesTest extends QueriesTestBase {
                         bind("asecond10"), outputParameter)
         );
 
-        List<Row> expectedValues = DataSourceHelpers.query(getDataSource(), "SELECT * FROM testtable");
+        List<Row> expectedValues = DataSourceInstantiationAndAccess.query(getDataSource(), "SELECT * FROM testtable");
 
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0).asInteger("first"), is(10));
@@ -79,36 +75,7 @@ public class OracleQueriesTest extends QueriesTestBase {
 
     @Override
     protected void cleanup() throws Exception {
-        getDataStore().execute(connection -> {
-            List<String> dropStatements = connection.select("select 'drop '||object_type||' '|| object_name|| " +
-                            "DECODE(OBJECT_TYPE,'TABLE',' CASCADE CONSTRAINTS','') as command from user_objects",
-                    rowStream -> rowStream.map(row -> row.asString("command")).collect(Collectors.toList()));
-            for (String statement : dropStatements) {
-                connection.update(statement);
-            }
-        });
-    }
-
-    private static DataSource configureDataSource() throws Exception {
-
-        Path path = Paths.get("test_datasources", "oracle.properties");
-        if (!Files.exists(path)) {
-            return null;
-        }
-        Properties properties = PropertiesLoader.loadProperties(path);
-
-        DataSource result = DataSourceHelpers.instantiateDataSource(properties.getProperty("queryiteasy.oracle.datasource.class"));
-
-        Method setUrl = result.getClass().getMethod("setURL", String.class);
-        setUrl.invoke(result, properties.getProperty("queryiteasy.oracle.datasource.url"));
-
-        Method setUser = result.getClass().getMethod("setUser", String.class);
-        setUser.invoke(result, properties.getProperty("queryiteasy.oracle.datasource.user"));
-
-        Method setPassword = result.getClass().getMethod("setPassword", String.class);
-        setPassword.invoke(result, properties.getProperty("queryiteasy.oracle.datasource.password"));
-        return result;
-
+        dropSchemaObjects(getDataStore());
     }
 
 }

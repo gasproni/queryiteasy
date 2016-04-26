@@ -41,7 +41,7 @@ public abstract class QueriesTestBase {
             connection.update("INSERT INTO testtable (first) VALUES (10)");
         });
 
-        List<Row> expectedValues = DataSourceHelpers.query(getDataSource(), "SELECT first FROM testtable");
+        List<Row> expectedValues = DataSourceInstantiationAndAccess.query(getDataSource(), "SELECT first FROM testtable");
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0).asInteger("first"), is(10));
     }
@@ -57,7 +57,7 @@ public abstract class QueriesTestBase {
             });
             fail("Exception expected");
         } catch (RuntimeException ex) {
-            List<Row> expectedValues = DataSourceHelpers.query(getDataSource(), "SELECT first FROM testtable");
+            List<Row> expectedValues = DataSourceInstantiationAndAccess.query(getDataSource(), "SELECT first FROM testtable");
             assertThat(expectedValues.size(), is(0));
         }
     }
@@ -71,7 +71,7 @@ public abstract class QueriesTestBase {
                     bind(10), bind("asecond"));
         });
 
-        List<Row> expectedValues = DataSourceHelpers.query(getDataSource(), "SELECT * FROM testtable");
+        List<Row> expectedValues = DataSourceInstantiationAndAccess.query(getDataSource(), "SELECT * FROM testtable");
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0).asInteger("first"), is(10));
         assertThat(expectedValues.get(0).asString("second"), is("asecond"));
@@ -88,7 +88,7 @@ public abstract class QueriesTestBase {
                             batch(bind(12), bind("asecond12"))));
         });
 
-        List<Row> expectedValues = DataSourceHelpers.query(getDataSource(), "SELECT * FROM testtable ORDER BY first ASC");
+        List<Row> expectedValues = DataSourceInstantiationAndAccess.query(getDataSource(), "SELECT * FROM testtable ORDER BY first ASC");
         assertThat(expectedValues.size(), is(3));
         for (int index = 0; index < expectedValues.size(); ++index) {
             assertThat(expectedValues.get(index).asInteger("first"), is(index + 10));
@@ -107,7 +107,7 @@ public abstract class QueriesTestBase {
             });
             fail("RuntimeSQLException expected!");
         } catch (RuntimeSQLException exception) {
-            List<Row> expectedValues = DataSourceHelpers.query(getDataSource(), "SELECT * FROM testtable");
+            List<Row> expectedValues = DataSourceInstantiationAndAccess.query(getDataSource(), "SELECT * FROM testtable");
             assertThat(expectedValues.size(), is(0));
             assertThat(exception.getMessage(), is("Batch is empty."));
         }
@@ -116,7 +116,7 @@ public abstract class QueriesTestBase {
     @Test
     public void selects_with_no_bind_values() throws SQLException {
 
-        DataSourceHelpers.prepareData(getDataSource(), "CREATE TABLE testtable (first INTEGER NOT NULL)",
+        DataSourceInstantiationAndAccess.prepareData(getDataSource(), "CREATE TABLE testtable (first INTEGER NOT NULL)",
                 "INSERT INTO testtable (first) VALUES (10)",
                 "INSERT INTO testtable (first) VALUES (11)");
 
@@ -132,7 +132,7 @@ public abstract class QueriesTestBase {
 
     @Test
     public void selects_with_bind_values() throws SQLException {
-        DataSourceHelpers.prepareData(getDataSource(), "CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)",
+        DataSourceInstantiationAndAccess.prepareData(getDataSource(), "CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)",
                 "INSERT INTO testtable (first, second) VALUES (10, 'asecond10')",
                 "INSERT INTO testtable (first, second) VALUES (11, 'asecond11')");
 

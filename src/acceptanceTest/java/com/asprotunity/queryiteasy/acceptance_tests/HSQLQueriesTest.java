@@ -12,7 +12,7 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.List;
 
-import static com.asprotunity.queryiteasy.acceptance_tests.HSQLInMemoryHelpers.dropHSQLPublicSchema;
+import static com.asprotunity.queryiteasy.acceptance_tests.HSQLInMemoryConfigurationAndSchemaDrop.dropHSQLPublicSchema;
 import static com.asprotunity.queryiteasy.connection.InputParameterDefaultBinders.bind;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -27,7 +27,7 @@ public class HSQLQueriesTest extends QueriesTestBase {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        dataSource = HSQLInMemoryHelpers.configureHSQLInMemoryDataSource();
+        dataSource = HSQLInMemoryConfigurationAndSchemaDrop.configureHSQLInMemoryDataSource();
         dataStore = new DataStore(dataSource);
     }
 
@@ -46,8 +46,8 @@ public class HSQLQueriesTest extends QueriesTestBase {
     @Test
     public void calls_stored_procedure_with_bind_values() throws SQLException {
 
-        DataSourceHelpers.prepareData(getDataSource(), "CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
-        DataSourceHelpers.prepareData(getDataSource(), "CREATE PROCEDURE insert_new_record(in first INTEGER, inout ioparam  VARCHAR(20)," +
+        DataSourceInstantiationAndAccess.prepareData(getDataSource(), "CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
+        DataSourceInstantiationAndAccess.prepareData(getDataSource(), "CREATE PROCEDURE insert_new_record(in first INTEGER, inout ioparam  VARCHAR(20)," +
                 "                                               in other VARCHAR(20), out res VARCHAR(20))\n" +
                 "MODIFIES SQL DATA\n" +
                 "BEGIN ATOMIC \n" +
@@ -64,7 +64,7 @@ public class HSQLQueriesTest extends QueriesTestBase {
                         bind("asecond10"), outputParameter)
         );
 
-        List<Row> expectedValues = DataSourceHelpers.query(getDataSource(), "SELECT * FROM testtable");
+        List<Row> expectedValues = DataSourceInstantiationAndAccess.query(getDataSource(), "SELECT * FROM testtable");
 
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0).asInteger("first"), is(10));
