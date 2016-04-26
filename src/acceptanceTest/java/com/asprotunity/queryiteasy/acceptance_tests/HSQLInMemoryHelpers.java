@@ -6,7 +6,7 @@ import org.hsqldb.jdbc.JDBCDataSource;
 import javax.sql.DataSource;
 
 public abstract class HSQLInMemoryHelpers {
-    static DataSource configureHSQLInMemoryDataSource() throws Exception {
+    public static DataSource configureHSQLInMemoryDataSource() throws Exception {
         JDBCDataSource result = new JDBCDataSource();
         result.setUrl("jdbc:hsqldb:mem:testdb");
         result.setUser("sa");
