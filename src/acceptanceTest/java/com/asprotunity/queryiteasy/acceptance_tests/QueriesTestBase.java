@@ -1,16 +1,21 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
-
+import com.asprotunity.queryiteasy.DataStore;
 import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
-import com.asprotunity.queryiteasy.connection.StringInputOutputParameter;
-import com.asprotunity.queryiteasy.connection.StringOutputParameter;
+import com.asprotunity.queryiteasy.internal.connection.RowFromResultSet;
+import org.junit.After;
 import org.junit.Test;
 
+import javax.sql.DataSource;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.sql.Statement;
+import java.util.*;
 
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
 import static com.asprotunity.queryiteasy.connection.InputParameterDefaultBinders.bind;
@@ -19,7 +24,46 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-public class QueriesTest extends EndToEndTestBase {
+public abstract class QueriesTestBase {
+
+    @After
+    public void tearDown() throws Exception {
+        cleanup();
+    }
+
+    protected abstract void cleanup() throws Exception;
+
+    protected abstract DataSource getDataSource();
+
+    protected abstract DataStore getDataStore();
+
+    protected List<Row> query(String sql) throws SQLException {
+        try (Connection connection = getDataSource().getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet rs = statement.executeQuery(sql)) {
+            ArrayList<Row> result = new ArrayList<>();
+            while (rs.next()) {
+                result.add(new RowFromResultSet(rs));
+            }
+            if (!connection.getAutoCommit()) {
+                connection.commit();
+            }
+            return result;
+        }
+    }
+
+    protected void prepareExpectedData(String firstSqlStatement, String... otherSqlStatements) throws SQLException {
+        try (Connection connection = getDataSource().getConnection();
+             Statement statement = connection.createStatement()) {
+            statement.execute(firstSqlStatement);
+            for (String sql : otherSqlStatements) {
+                statement.execute(sql);
+            }
+            if (!connection.getAutoCommit()) {
+                connection.commit();
+            }
+        }
+    }
 
 
     @Test
@@ -66,7 +110,6 @@ public class QueriesTest extends EndToEndTestBase {
         assertThat(expectedValues.get(0).asString("second"), is("asecond"));
     }
 
-
     @Test
     public void does_batch_inserts() throws SQLException {
 
@@ -101,9 +144,7 @@ public class QueriesTest extends EndToEndTestBase {
             assertThat(expectedValues.size(), is(0));
             assertThat(exception.getMessage(), is("Batch is empty."));
         }
-
     }
-
 
     @Test
     public void selects_with_no_bind_values() throws SQLException {
@@ -124,7 +165,6 @@ public class QueriesTest extends EndToEndTestBase {
 
     @Test
     public void selects_with_bind_values() throws SQLException {
-
         prepareExpectedData("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)",
                 "INSERT INTO testtable (first, second) VALUES (10, 'asecond10')",
                 "INSERT INTO testtable (first, second) VALUES (11, 'asecond11')");
@@ -138,36 +178,6 @@ public class QueriesTest extends EndToEndTestBase {
         assertThat(result.size(), is(1));
         assertThat(result.get(0).asInteger("first"), is(10));
         assertThat(result.get(0).asString("second"), is("asecond10"));
-    }
-
-    @Test
-    public void calls_stored_procedure_with_bind_values() throws SQLException {
-
-        prepareExpectedData("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
-        prepareExpectedData("CREATE PROCEDURE insert_new_record(in first INTEGER, inout ioparam  VARCHAR(20)," +
-                "                                               in other VARCHAR(20), out res VARCHAR(20))\n" +
-                "MODIFIES SQL DATA\n" +
-                "BEGIN ATOMIC \n" +
-                "   INSERT INTO testtable VALUES (first, other);\n" +
-                "   SET res = ioparam;\n" +
-                "   SET ioparam = 'NewString';\n" +
-                " END");
-
-
-        StringInputOutputParameter inputOutputParameter = new StringInputOutputParameter("OldString");
-        StringOutputParameter outputParameter = new StringOutputParameter();
-        getDataStore().execute(connection ->
-                connection.call("{call insert_new_record(?, ?, ?, ?)}", bind(10), inputOutputParameter,
-                        bind("asecond10"), outputParameter)
-        );
-
-        List<Row> expectedValues = query("SELECT * FROM testtable");
-
-        assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).asInteger("first"), is(10));
-        assertThat(expectedValues.get(0).asString("second"), is("asecond10"));
-        assertThat(inputOutputParameter.value(), is("NewString"));
-        assertThat(outputParameter.value(), is("OldString"));
     }
 
 

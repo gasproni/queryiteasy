@@ -1,13 +1,18 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
 
+import com.asprotunity.queryiteasy.DataStore;
 import com.asprotunity.queryiteasy.connection.InputParameter;
 import com.asprotunity.queryiteasy.connection.Row;
+import org.junit.After;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import javax.sql.DataSource;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.sql.Date;
@@ -18,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static com.asprotunity.queryiteasy.acceptance_tests.DataSourceInstantiator.configureHSQLInMemoryDataSource;
 import static com.asprotunity.queryiteasy.connection.InputParameterDefaultBinders.bind;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -25,8 +31,25 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-public class SupportedTypesTest extends EndToEndTestBase {
+public class HSQLSupportedTypesTest {
 
+
+    private static DataStore dataStore;
+
+    @BeforeClass
+    public static void setUp() throws Exception {
+        DataSource dataSource = configureHSQLInMemoryDataSource();
+        dataStore = new DataStore(dataSource);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        getDataStore().execute(connection -> connection.update("DROP SCHEMA PUBLIC CASCADE"));
+    }
+
+    private DataStore getDataStore() {
+        return dataStore;
+    }
 
     @Test
     public void handles_integers_correctly() throws SQLException {

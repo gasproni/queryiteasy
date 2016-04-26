@@ -1,3 +1,5 @@
-*.iml
 .idea/*
 build/*
+jdbclibs/*
+test_datasources/*
+
