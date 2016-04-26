@@ -12,6 +12,7 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.List;
 
+import static com.asprotunity.queryiteasy.acceptance_tests.HSQLInMemoryHelpers.dropHSQLInMemorySchema;
 import static com.asprotunity.queryiteasy.connection.InputParameterDefaultBinders.bind;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -26,7 +27,7 @@ public class HSQLQueriesTest extends QueriesTestBase {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        dataSource = DataSourceInstantiator.configureHSQLInMemoryDataSource();
+        dataSource = HSQLInMemoryHelpers.configureHSQLInMemoryDataSource();
         dataStore = new DataStore(dataSource);
     }
 
@@ -74,7 +75,7 @@ public class HSQLQueriesTest extends QueriesTestBase {
 
     @Override
     protected void cleanup() throws Exception {
-        getDataStore().execute(connection -> connection.update("DROP SCHEMA PUBLIC CASCADE"));
+        dropHSQLInMemorySchema(getDataStore());
     }
 
 }

@@ -11,12 +11,4 @@ public class DataSourceInstantiator {
         return (DataSource) clazz.newInstance();
     }
 
-    static DataSource configureHSQLInMemoryDataSource() throws Exception {
-        JDBCDataSource result = new JDBCDataSource();
-        result.setUrl("jdbc:hsqldb:mem:testdb");
-        result.setUser("sa");
-        result.setPassword("");
-        return result;
-
-    }
 }

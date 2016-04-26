@@ -12,7 +12,6 @@ import javax.sql.DataSource;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.sql.Date;
@@ -23,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static com.asprotunity.queryiteasy.acceptance_tests.DataSourceInstantiator.configureHSQLInMemoryDataSource;
+import static com.asprotunity.queryiteasy.acceptance_tests.HSQLInMemoryHelpers.configureHSQLInMemoryDataSource;
 import static com.asprotunity.queryiteasy.connection.InputParameterDefaultBinders.bind;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -44,7 +43,7 @@ public class HSQLSupportedTypesTest {
 
     @After
     public void tearDown() throws Exception {
-        getDataStore().execute(connection -> connection.update("DROP SCHEMA PUBLIC CASCADE"));
+        HSQLInMemoryHelpers.dropHSQLInMemorySchema(getDataStore());
     }
 
     private DataStore getDataStore() {
