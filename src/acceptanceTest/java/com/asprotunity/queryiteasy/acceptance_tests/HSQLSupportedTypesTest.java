@@ -43,7 +43,7 @@ public class HSQLSupportedTypesTest {
 
     @After
     public void tearDown() throws Exception {
-        HSQLInMemoryHelpers.dropHSQLInMemorySchema(getDataStore());
+        HSQLInMemoryHelpers.dropHSQLPublicSchema(getDataStore());
     }
 
     private DataStore getDataStore() {

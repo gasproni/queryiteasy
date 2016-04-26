@@ -3,19 +3,14 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 import com.asprotunity.queryiteasy.DataStore;
 import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
-import com.asprotunity.queryiteasy.internal.connection.RowFromResultSet;
 import org.junit.After;
 import org.junit.Test;
 
 import javax.sql.DataSource;
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
 import static com.asprotunity.queryiteasy.connection.InputParameterDefaultBinders.bind;
@@ -37,34 +32,6 @@ public abstract class QueriesTestBase {
 
     protected abstract DataStore getDataStore();
 
-    protected List<Row> query(String sql) throws SQLException {
-        try (Connection connection = getDataSource().getConnection();
-             Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery(sql)) {
-            ArrayList<Row> result = new ArrayList<>();
-            while (rs.next()) {
-                result.add(new RowFromResultSet(rs));
-            }
-            if (!connection.getAutoCommit()) {
-                connection.commit();
-            }
-            return result;
-        }
-    }
-
-    protected void prepareExpectedData(String firstSqlStatement, String... otherSqlStatements) throws SQLException {
-        try (Connection connection = getDataSource().getConnection();
-             Statement statement = connection.createStatement()) {
-            statement.execute(firstSqlStatement);
-            for (String sql : otherSqlStatements) {
-                statement.execute(sql);
-            }
-            if (!connection.getAutoCommit()) {
-                connection.commit();
-            }
-        }
-    }
-
 
     @Test
     public void inserts_with_no_bind_values() throws SQLException {
@@ -74,7 +41,7 @@ public abstract class QueriesTestBase {
             connection.update("INSERT INTO testtable (first) VALUES (10)");
         });
 
-        List<Row> expectedValues = query("SELECT first FROM testtable");
+        List<Row> expectedValues = DataSourceHelpers.query(getDataSource(), "SELECT first FROM testtable");
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0).asInteger("first"), is(10));
     }
@@ -90,7 +57,7 @@ public abstract class QueriesTestBase {
             });
             fail("Exception expected");
         } catch (RuntimeException ex) {
-            List<Row> expectedValues = query("SELECT first FROM testtable");
+            List<Row> expectedValues = DataSourceHelpers.query(getDataSource(), "SELECT first FROM testtable");
             assertThat(expectedValues.size(), is(0));
         }
     }
@@ -104,7 +71,7 @@ public abstract class QueriesTestBase {
                     bind(10), bind("asecond"));
         });
 
-        List<Row> expectedValues = query("SELECT * FROM testtable");
+        List<Row> expectedValues = DataSourceHelpers.query(getDataSource(), "SELECT * FROM testtable");
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0).asInteger("first"), is(10));
         assertThat(expectedValues.get(0).asString("second"), is("asecond"));
@@ -121,7 +88,7 @@ public abstract class QueriesTestBase {
                             batch(bind(12), bind("asecond12"))));
         });
 
-        List<Row> expectedValues = query("SELECT * FROM testtable ORDER BY first ASC");
+        List<Row> expectedValues = DataSourceHelpers.query(getDataSource(), "SELECT * FROM testtable ORDER BY first ASC");
         assertThat(expectedValues.size(), is(3));
         for (int index = 0; index < expectedValues.size(); ++index) {
             assertThat(expectedValues.get(index).asInteger("first"), is(index + 10));
@@ -140,7 +107,7 @@ public abstract class QueriesTestBase {
             });
             fail("RuntimeSQLException expected!");
         } catch (RuntimeSQLException exception) {
-            List<Row> expectedValues = query("SELECT * FROM testtable");
+            List<Row> expectedValues = DataSourceHelpers.query(getDataSource(), "SELECT * FROM testtable");
             assertThat(expectedValues.size(), is(0));
             assertThat(exception.getMessage(), is("Batch is empty."));
         }
@@ -149,7 +116,7 @@ public abstract class QueriesTestBase {
     @Test
     public void selects_with_no_bind_values() throws SQLException {
 
-        prepareExpectedData("CREATE TABLE testtable (first INTEGER NOT NULL)",
+        DataSourceHelpers.prepareData(getDataSource(), "CREATE TABLE testtable (first INTEGER NOT NULL)",
                 "INSERT INTO testtable (first) VALUES (10)",
                 "INSERT INTO testtable (first) VALUES (11)");
 
@@ -165,7 +132,7 @@ public abstract class QueriesTestBase {
 
     @Test
     public void selects_with_bind_values() throws SQLException {
-        prepareExpectedData("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)",
+        DataSourceHelpers.prepareData(getDataSource(), "CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)",
                 "INSERT INTO testtable (first, second) VALUES (10, 'asecond10')",
                 "INSERT INTO testtable (first, second) VALUES (11, 'asecond11')");
 

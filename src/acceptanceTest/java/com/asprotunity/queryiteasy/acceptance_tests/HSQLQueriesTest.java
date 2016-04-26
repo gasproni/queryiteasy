@@ -12,7 +12,7 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.List;
 
-import static com.asprotunity.queryiteasy.acceptance_tests.HSQLInMemoryHelpers.dropHSQLInMemorySchema;
+import static com.asprotunity.queryiteasy.acceptance_tests.HSQLInMemoryHelpers.dropHSQLPublicSchema;
 import static com.asprotunity.queryiteasy.connection.InputParameterDefaultBinders.bind;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -46,8 +46,8 @@ public class HSQLQueriesTest extends QueriesTestBase {
     @Test
     public void calls_stored_procedure_with_bind_values() throws SQLException {
 
-        prepareExpectedData("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
-        prepareExpectedData("CREATE PROCEDURE insert_new_record(in first INTEGER, inout ioparam  VARCHAR(20)," +
+        DataSourceHelpers.prepareData(getDataSource(), "CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
+        DataSourceHelpers.prepareData(getDataSource(), "CREATE PROCEDURE insert_new_record(in first INTEGER, inout ioparam  VARCHAR(20)," +
                 "                                               in other VARCHAR(20), out res VARCHAR(20))\n" +
                 "MODIFIES SQL DATA\n" +
                 "BEGIN ATOMIC \n" +
@@ -64,7 +64,7 @@ public class HSQLQueriesTest extends QueriesTestBase {
                         bind("asecond10"), outputParameter)
         );
 
-        List<Row> expectedValues = query("SELECT * FROM testtable");
+        List<Row> expectedValues = DataSourceHelpers.query(getDataSource(), "SELECT * FROM testtable");
 
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0).asInteger("first"), is(10));
@@ -75,7 +75,7 @@ public class HSQLQueriesTest extends QueriesTestBase {
 
     @Override
     protected void cleanup() throws Exception {
-        dropHSQLInMemorySchema(getDataStore());
+        dropHSQLPublicSchema(getDataStore());
     }
 
 }

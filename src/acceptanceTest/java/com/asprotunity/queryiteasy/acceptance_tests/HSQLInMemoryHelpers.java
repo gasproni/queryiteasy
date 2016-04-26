@@ -5,8 +5,8 @@ import org.hsqldb.jdbc.JDBCDataSource;
 
 import javax.sql.DataSource;
 
-public abstract class HSQLInMemoryHelpers {
-    public static DataSource configureHSQLInMemoryDataSource() throws Exception {
+public interface HSQLInMemoryHelpers {
+    static DataSource configureHSQLInMemoryDataSource() throws Exception {
         JDBCDataSource result = new JDBCDataSource();
         result.setUrl("jdbc:hsqldb:mem:testdb");
         result.setUser("sa");
@@ -15,7 +15,7 @@ public abstract class HSQLInMemoryHelpers {
 
     }
 
-    public static void dropHSQLInMemorySchema(DataStore dataStore) {
+    static void dropHSQLPublicSchema(DataStore dataStore) {
         dataStore.execute(connection -> connection.update("DROP SCHEMA PUBLIC CASCADE"));
     }
 }

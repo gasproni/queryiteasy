@@ -50,15 +50,15 @@ public class OracleQueriesTest extends QueriesTestBase {
     @Test
     public void calls_stored_procedure_with_bind_values() throws SQLException {
 
-        prepareExpectedData("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
-        prepareExpectedData("CREATE PROCEDURE insert_new_record(first in INTEGER, ioparam in out VARCHAR," +
-                "                                               other in VARCHAR, res out VARCHAR)\n" +
-                "IS\n" +
-                "BEGIN\n" +
-                "   INSERT INTO testtable VALUES (first, other);\n" +
-                "   res := ioparam;\n" +
-                "   ioparam := 'NewString';\n" +
-                " END;");
+        DataSourceHelpers.prepareData(getDataSource(), "CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)",
+                "CREATE PROCEDURE insert_new_record(first in INTEGER, ioparam in out VARCHAR," +
+                        "                                               other in VARCHAR, res out VARCHAR)\n" +
+                        "IS\n" +
+                        "BEGIN\n" +
+                        "   INSERT INTO testtable VALUES (first, other);\n" +
+                        "   res := ioparam;\n" +
+                        "   ioparam := 'NewString';\n" +
+                        " END;");
 
 
         StringInputOutputParameter inputOutputParameter = new StringInputOutputParameter("OldString");
@@ -68,7 +68,7 @@ public class OracleQueriesTest extends QueriesTestBase {
                         bind("asecond10"), outputParameter)
         );
 
-        List<Row> expectedValues = query("SELECT * FROM testtable");
+        List<Row> expectedValues = DataSourceHelpers.query(getDataSource(), "SELECT * FROM testtable");
 
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0).asInteger("first"), is(10));
@@ -97,7 +97,7 @@ public class OracleQueriesTest extends QueriesTestBase {
         }
         Properties properties = PropertiesLoader.loadProperties(path);
 
-        DataSource result = DataSourceInstantiator.instantiateDataSource(properties.getProperty("queryiteasy.oracle.datasource.class"));
+        DataSource result = DataSourceHelpers.instantiateDataSource(properties.getProperty("queryiteasy.oracle.datasource.class"));
 
         Method setUrl = result.getClass().getMethod("setURL", String.class);
         setUrl.invoke(result, properties.getProperty("queryiteasy.oracle.datasource.url"));
