@@ -5,10 +5,9 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        HSQLQueriesTest.class,
         HSQLSupportedTypesTest.class,
-        OracleQueriesTest.class,
-        OracleSupportedTypesTest.class
+        OracleSupportedTypesTest.class,
+        QueriesTest.class
 })
 public class EndToEndSuite {
 }
