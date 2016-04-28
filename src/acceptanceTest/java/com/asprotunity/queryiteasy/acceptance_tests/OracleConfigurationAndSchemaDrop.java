@@ -26,7 +26,8 @@ public interface OracleConfigurationAndSchemaDrop {
     }
 
     static boolean isNotDropOfSystemOrLobIndex(String statement) {
-        return !statement.startsWith("drop INDEX SYS_") && !statement.startsWith("drop LOB");
+        String statementToLower = statement.toLowerCase();
+        return !statementToLower.startsWith("drop index sys_") && !statementToLower.startsWith("drop lob");
     }
 
     static DataSource configureDataSource() throws Exception {

@@ -23,7 +23,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
-public abstract class SupportedTypesTestBase {
+public abstract class SupportedTypesTestCommon {
 
     @After
     public void tearDown() throws Exception {
@@ -68,7 +68,7 @@ public abstract class SupportedTypesTestBase {
 
     @Test
     public void handles_big_decimals_as_decimal_correctly() throws SQLException {
-        BigDecimal value = new BigDecimal(10);
+        BigDecimal value = BigDecimal.TEN;
         List<Row> expectedValues = storeAndReadValuesBack("DECIMAL", bind((BigDecimal) null), bind(value));
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0).asBigDecimal("first"), is(nullValue()));
@@ -77,7 +77,7 @@ public abstract class SupportedTypesTestBase {
 
     @Test
     public void handles_big_decimals_as_numeric_correctly() throws SQLException {
-        BigDecimal value = new BigDecimal(10);
+        BigDecimal value = BigDecimal.TEN;
         List<Row> expectedValues = storeAndReadValuesBack("NUMERIC", bind((BigDecimal) null), bind(value));
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0).asBigDecimal("first"), is(nullValue()));
@@ -97,6 +97,24 @@ public abstract class SupportedTypesTestBase {
     }
 
     @Test
+    public void can_handle_doubles_as_double_precision() throws SQLException {
+        Double value = 10.0;
+        List<Row> expectedValues = storeAndReadValuesBack("DOUBLE PRECISION", bind((Double) null), bind(value));
+        assertThat(expectedValues.size(), is(1));
+        assertThat(expectedValues.get(0).asDouble("first"), is(nullValue()));
+        assertThat(expectedValues.get(0).asDouble("second"), is(value));
+    }
+
+    @Test
+    public void can_handle_bytes_as_smallints() throws SQLException {
+        Byte value = 's';
+        List<Row> expectedValues = storeAndReadValuesBack("SMALLINT", bind((Byte) null), bind(value));
+        assertThat(expectedValues.size(), is(1));
+        assertThat(expectedValues.get(0).asByte("first"), is(nullValue()));
+        assertThat(expectedValues.get(0).asByte("second"), is(value));
+    }
+
+    @Test
     public void handles_blobs_correctly() throws SQLException, UnsupportedEncodingException {
         String blobContent = "this is the content of the blob";
         Charset charset = Charset.forName("UTF-8");
@@ -112,11 +130,11 @@ public abstract class SupportedTypesTestBase {
                     rowStream -> rowStream.collect(toList()));
             assertThat(expectedValues.size(), is(1));
             assertThat(expectedValues.get(0).fromBlob("first", optInputStream ->
-                    SupportedTypesTestBase.readFrom(optInputStream, charset.name())), is(nullValue()));
+                    SupportedTypesTestCommon.readFrom(optInputStream, charset.name())), is(nullValue()));
             assertThat(expectedValues.get(0).fromBlob("second",
-                    optInputStream -> SupportedTypesTestBase.readFrom(optInputStream, charset.name())), is(blobContent));
+                    optInputStream -> SupportedTypesTestCommon.readFrom(optInputStream, charset.name())), is(blobContent));
             assertThat(expectedValues.get(0).fromBlob("second",
-                    optInputStream -> SupportedTypesTestBase.readFrom(optInputStream, charset.name())), is(blobContent));
+                    optInputStream -> SupportedTypesTestCommon.readFrom(optInputStream, charset.name())), is(blobContent));
 
         });
     }

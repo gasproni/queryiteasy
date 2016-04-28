@@ -16,7 +16,6 @@ import static com.asprotunity.queryiteasy.acceptance_tests.HSQLInMemoryConfigura
 import static com.asprotunity.queryiteasy.connection.InputParameterDefaultBinders.bind;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 public class HSQLQueriesTest extends QueriesTestBase {
 
@@ -40,7 +39,6 @@ public class HSQLQueriesTest extends QueriesTestBase {
     protected DataStore getDataStore() {
         return dataStore;
     }
-
 
 
     @Test

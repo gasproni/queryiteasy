@@ -20,7 +20,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-public class HSQLSupportedTypesTest extends SupportedTypesTestBase {
+public class HSQLSupportedTypesTest extends SupportedTypesTestCommon {
 
 
     private static DataStore dataStore;
@@ -81,7 +81,7 @@ public class HSQLSupportedTypesTest extends SupportedTypesTestBase {
         // 01 Jan 1970 10:11:12.000 GMT. It's important that the milliseconds are all zeroes
         // or that will be lost when putting the value in the db
         // and the assert will fail.
-        java.sql.Time value = new Time(36672000L);
+        Time value = new Time(36672000L);
         List<Row> expectedValues = storeAndReadValuesBack("TIME", bind((Time) null), bind(value));
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0).asTime("first"), is(nullValue()));
@@ -91,7 +91,7 @@ public class HSQLSupportedTypesTest extends SupportedTypesTestBase {
     @Test
     public void handles_timestamps_correctly() throws SQLException {
         // Tue, 12 Jan 2016 10:11:12.000 GMT. Note that some DBs support the milliseconds.
-        java.sql.Timestamp value = new Timestamp(1452593472000L);
+        Timestamp value = new Timestamp(1452593472000L);
         List<Row> expectedValues = storeAndReadValuesBack("TIMESTAMP", bind((Timestamp) null), bind(value));
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0).asTimestamp("first"), is(nullValue()));

@@ -2,39 +2,26 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 
 
 import com.asprotunity.queryiteasy.DataStore;
-import com.asprotunity.queryiteasy.connection.InputParameter;
 import com.asprotunity.queryiteasy.connection.Row;
+import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.sql.DataSource;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
-import java.nio.charset.Charset;
-import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
 
-import static com.asprotunity.queryiteasy.acceptance_tests.HSQLInMemoryConfigurationAndSchemaDrop.configureHSQLInMemoryDataSource;
-import static com.asprotunity.queryiteasy.acceptance_tests.HSQLInMemoryConfigurationAndSchemaDrop.dropHSQLPublicSchema;
 import static com.asprotunity.queryiteasy.acceptance_tests.OracleConfigurationAndSchemaDrop.dropSchemaObjects;
 import static com.asprotunity.queryiteasy.connection.InputParameterDefaultBinders.bind;
-import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
-public class OracleSupportedTypesTest extends SupportedTypesTestBase {
+public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
 
     private static DataStore dataStore;
 
@@ -55,30 +42,12 @@ public class OracleSupportedTypesTest extends SupportedTypesTestBase {
     }
 
     @Test
-    public void handles_longs_as_numbers() throws SQLException {
+    public void can_handle_longs_as_numbers() throws SQLException {
         Long value = 10L;
         List<Row> expectedValues = storeAndReadValuesBack("NUMBER", bind((Long) null), bind(value));
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0).asLong("first"), is(nullValue()));
         assertThat(expectedValues.get(0).asLong("second"), is(value));
-    }
-
-    @Test
-    public void handles_doubles_as_double_precision() throws SQLException {
-        Double value = 10.0;
-        List<Row> expectedValues = storeAndReadValuesBack("DOUBLE PRECISION", bind((Double) null), bind(value));
-        assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).asDouble("first"), is(nullValue()));
-        assertThat(expectedValues.get(0).asDouble("second"), is(value));
-    }
-
-    @Test
-    public void handles_bytes_as_smallints() throws SQLException {
-        Byte value = 's';
-        List<Row> expectedValues = storeAndReadValuesBack("SMALLINT", bind((Byte) null), bind(value));
-        assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).asByte("first"), is(nullValue()));
-        assertThat(expectedValues.get(0).asByte("second"), is(value));
     }
 
     @Test
@@ -101,6 +70,16 @@ public class OracleSupportedTypesTest extends SupportedTypesTestBase {
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0).asDate("first"), is(nullValue()));
         assertThat(expectedValues.get(0).asDate("second"), is(value));
+    }
+
+
+    @Test
+    public void doesnt_support_booleans() throws SQLException {
+        try {
+            storeAndReadValuesBack("BOOLEAN", bind((Boolean) null), bind(true));
+        } catch (RuntimeSQLException exc) {
+            assertThat(exc.getCause().getMessage(), is("ORA-00902: invalid datatype\n"));
+        }
     }
 
     @Override

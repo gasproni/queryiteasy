@@ -2,7 +2,6 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 
 import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.internal.connection.RowFromResultSet;
-import org.hsqldb.jdbc.JDBCDataSource;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
