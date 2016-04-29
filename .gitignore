@@ -1,5 +1,5 @@
 .idea/*
 build/*
 jdbclibs/*
-test_datasources/*
+test_datasources_config/*
 

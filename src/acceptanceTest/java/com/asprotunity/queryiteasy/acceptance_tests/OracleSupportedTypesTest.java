@@ -11,7 +11,6 @@ import javax.sql.DataSource;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -19,6 +18,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
 import static com.asprotunity.queryiteasy.connection.InputParameterDefaultBinders.bind;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -102,11 +102,11 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
 
     private static DataSource configureDataSource() throws Exception {
 
-        Path path = Paths.get("test_datasources", "oracle.properties");
+        Path path = prependTestDatasourcesConfigFolderPath("oracle.properties");
         if (!Files.exists(path)) {
             return null;
         }
-        Properties properties = PropertiesLoader.loadProperties(path);
+        Properties properties = TestPropertiesLoader.loadProperties(path);
 
         DataSource result = DataSourceInstantiationAndAccess.instantiateDataSource(properties.getProperty("queryiteasy.oracle.datasource.class"));
 
