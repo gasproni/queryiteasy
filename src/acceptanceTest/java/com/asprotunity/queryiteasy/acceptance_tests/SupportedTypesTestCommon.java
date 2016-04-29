@@ -49,7 +49,7 @@ public abstract class SupportedTypesTestCommon {
     }
 
     @Test
-    public void stores_and_reads_doubles_mapped_to_float_correctly() throws SQLException {
+    public void stores_and_reads_doubles_as_floats_correctly() throws SQLException {
         Double value = 10.0;
         List<Row> expectedValues = storeAndReadValuesBack("FLOAT", bind((Double) null), bind(value));
         assertThat(expectedValues.size(), is(1));
@@ -130,11 +130,11 @@ public abstract class SupportedTypesTestCommon {
                     rowStream -> rowStream.collect(toList()));
             assertThat(expectedValues.size(), is(1));
             assertThat(expectedValues.get(0).fromBlob("first", optInputStream ->
-                    SupportedTypesTestCommon.readFrom(optInputStream, charset.name())), is(nullValue()));
+                    readFrom(optInputStream, charset.name())), is(nullValue()));
             assertThat(expectedValues.get(0).fromBlob("second",
-                    optInputStream -> SupportedTypesTestCommon.readFrom(optInputStream, charset.name())), is(blobContent));
+                    optInputStream -> readFrom(optInputStream, charset.name())), is(blobContent));
             assertThat(expectedValues.get(0).fromBlob("second",
-                    optInputStream -> SupportedTypesTestCommon.readFrom(optInputStream, charset.name())), is(blobContent));
+                    optInputStream -> readFrom(optInputStream, charset.name())), is(blobContent));
 
         });
     }

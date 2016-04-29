@@ -4,17 +4,21 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 import com.asprotunity.queryiteasy.DataStore;
 import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
-import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.sql.DataSource;
+import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Properties;
+import java.util.stream.Collectors;
 
-import static com.asprotunity.queryiteasy.acceptance_tests.OracleConfigurationAndSchemaDrop.dropSchemaObjects;
 import static com.asprotunity.queryiteasy.connection.InputParameterDefaultBinders.bind;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -27,14 +31,9 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        DataSource dataSource = OracleConfigurationAndSchemaDrop.configureDataSource();
+        DataSource dataSource = configureDataSource();
         assumeTrue("No Oracle JDBC driver found, skipping tests", dataSource != null);
         dataStore = new DataStore(dataSource);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        OracleConfigurationAndSchemaDrop.dropSchemaObjects(getDataStore());
     }
 
     protected DataStore getDataStore() {
@@ -84,7 +83,43 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
 
     @Override
     protected void cleanup() throws Exception {
-        dropSchemaObjects(getDataStore());
+        getDataStore().execute(connection -> {
+            List<String> dropStatements = connection.select("select 'drop '||object_type||' '|| object_name|| " +
+                            "DECODE(OBJECT_TYPE,'TABLE',' CASCADE CONSTRAINTS','') as dropStatements from user_objects",
+                    rowStream -> rowStream.map(row -> row.asString("dropStatements")).collect(Collectors.toList()));
+            for (String statement : dropStatements) {
+                if (isNotDropOfSystemOrLobIndex(statement)) {
+                    connection.update(statement);
+                }
+            }
+        });
+    }
+
+    private static boolean isNotDropOfSystemOrLobIndex(String statement) {
+        String statementToLower = statement.toLowerCase();
+        return !statementToLower.startsWith("drop index sys_") && !statementToLower.startsWith("drop lob");
+    }
+
+    private static DataSource configureDataSource() throws Exception {
+
+        Path path = Paths.get("test_datasources", "oracle.properties");
+        if (!Files.exists(path)) {
+            return null;
+        }
+        Properties properties = PropertiesLoader.loadProperties(path);
+
+        DataSource result = DataSourceInstantiationAndAccess.instantiateDataSource(properties.getProperty("queryiteasy.oracle.datasource.class"));
+
+        Method setUrl = result.getClass().getMethod("setURL", String.class);
+        setUrl.invoke(result, properties.getProperty("queryiteasy.oracle.datasource.url"));
+
+        Method setUser = result.getClass().getMethod("setUser", String.class);
+        setUser.invoke(result, properties.getProperty("queryiteasy.oracle.datasource.user"));
+
+        Method setPassword = result.getClass().getMethod("setPassword", String.class);
+        setPassword.invoke(result, properties.getProperty("queryiteasy.oracle.datasource.password"));
+        return result;
+
     }
 
 }
