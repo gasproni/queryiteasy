@@ -13,17 +13,17 @@ import java.util.function.Function;
 public class RowFromResultSet implements Row {
 
     private Object columns[];
-    private HashMap<String, Integer> nameToColumn;
+    private HashMap<String, Integer> labelToColumn;
 
     public RowFromResultSet(ResultSet rs) {
         try {
             ResultSetMetaData metadata = rs.getMetaData();
             columns = new Object[metadata.getColumnCount()];
-            nameToColumn = new HashMap<>();
+            labelToColumn = new HashMap<>();
             for (int columnIndex = 1; columnIndex <= columns.length; ++columnIndex) {
                 int position = columnIndex(columnIndex);
                 columns[position] = rs.getObject(columnIndex);
-                nameToColumn.put(normaliseColumnName(metadata.getColumnLabel(columnIndex)), columnIndex);
+                labelToColumn.put(normaliseColumnLabel(metadata.getColumnLabel(columnIndex)), columnIndex);
             }
 
         } catch (SQLException e) {
@@ -170,12 +170,12 @@ public class RowFromResultSet implements Row {
         return TypeConverters.fromBlob(object, blobReader);
     }
 
-    public static String normaliseColumnName(String name) {
+    public static String normaliseColumnLabel(String name) {
         return name.toUpperCase();
     }
 
     private Integer columnPosition(String columnName) {
-        return nameToColumn.get(normaliseColumnName(columnName));
+        return labelToColumn.get(normaliseColumnLabel(columnName));
     }
 
     private int columnIndex(int position) {

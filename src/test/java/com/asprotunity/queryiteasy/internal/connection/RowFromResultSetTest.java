@@ -1,6 +1,5 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
-import com.asprotunity.queryiteasy.internal.connection.RowFromResultSet;
 import org.junit.Test;
 
 import java.sql.ResultSet;
@@ -9,7 +8,7 @@ import java.sql.SQLException;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -19,7 +18,7 @@ public class RowFromResultSetTest {
     public void column_names_are_normalised_correctly_at_creation() throws SQLException {
 
         String mixedCaseColumnName = "ThisIsAColumnName";
-        assertThat(mixedCaseColumnName, not(RowFromResultSet.normaliseColumnName(mixedCaseColumnName)));
+        assertThat(mixedCaseColumnName, not(RowFromResultSet.normaliseColumnLabel(mixedCaseColumnName)));
 
         ResultSet rs = mock(ResultSet.class);
         ResultSetMetaData rsm = mock(ResultSetMetaData.class);
