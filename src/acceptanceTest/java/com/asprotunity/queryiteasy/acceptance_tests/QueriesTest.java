@@ -40,7 +40,7 @@ public class QueriesTest {
     }
 
     @Test
-    public void calls_stored_procedure_with_bind_values() throws SQLException {
+    public void calls_stored_procedure_with_input_inputoutput_and_output_parameters() throws SQLException {
 
         DataSourceInstantiationAndAccess.prepareData(dataSource, "CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
         DataSourceInstantiationAndAccess.prepareData(dataSource, "CREATE PROCEDURE insert_new_record(in first INTEGER, inout ioparam  VARCHAR(20)," +

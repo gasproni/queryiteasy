@@ -31,7 +31,7 @@ public abstract class SupportedTypesTestCommon {
     }
 
     @Test
-    public void handles_integers_correctly() throws SQLException {
+    public void stores_and_reads_integers_correctly() throws SQLException {
         Integer value = 10;
         List<Row> expectedValues = storeAndReadValuesBack("INTEGER", bind((Integer) null), bind(value));
         assertThat(expectedValues.size(), is(1));
@@ -40,7 +40,7 @@ public abstract class SupportedTypesTestCommon {
     }
 
     @Test
-    public void handles_short_integers_correctly() throws SQLException {
+    public void stores_and_reads_short_integers_correctly() throws SQLException {
         Short value = 10;
         List<Row> expectedValues = storeAndReadValuesBack("SMALLINT", bind((Short) null), bind(value));
         assertThat(expectedValues.size(), is(1));
@@ -49,7 +49,7 @@ public abstract class SupportedTypesTestCommon {
     }
 
     @Test
-    public void handles_doubles_mapped_to_float_correctly() throws SQLException {
+    public void stores_and_reads_doubles_mapped_to_float_correctly() throws SQLException {
         Double value = 10.0;
         List<Row> expectedValues = storeAndReadValuesBack("FLOAT", bind((Double) null), bind(value));
         assertThat(expectedValues.size(), is(1));
@@ -58,7 +58,7 @@ public abstract class SupportedTypesTestCommon {
     }
 
     @Test
-    public void handles_floats_correctly() throws SQLException {
+    public void stores_and_reads_floats_correctly() throws SQLException {
         Float value = 10.0F;
         List<Row> expectedValues = storeAndReadValuesBack("REAL", bind((Float) null), bind(value));
         assertThat(expectedValues.size(), is(1));
@@ -67,7 +67,7 @@ public abstract class SupportedTypesTestCommon {
     }
 
     @Test
-    public void handles_big_decimals_as_decimal_correctly() throws SQLException {
+    public void stores_and_reads_big_decimals_as_decimal_correctly() throws SQLException {
         BigDecimal value = BigDecimal.TEN;
         List<Row> expectedValues = storeAndReadValuesBack("DECIMAL", bind((BigDecimal) null), bind(value));
         assertThat(expectedValues.size(), is(1));
@@ -76,7 +76,7 @@ public abstract class SupportedTypesTestCommon {
     }
 
     @Test
-    public void handles_big_decimals_as_numeric_correctly() throws SQLException {
+    public void stores_and_reads_big_decimals_as_numeric_correctly() throws SQLException {
         BigDecimal value = BigDecimal.TEN;
         List<Row> expectedValues = storeAndReadValuesBack("NUMERIC", bind((BigDecimal) null), bind(value));
         assertThat(expectedValues.size(), is(1));
@@ -85,7 +85,7 @@ public abstract class SupportedTypesTestCommon {
     }
 
     @Test
-    public void handles_dates_correctly() throws SQLException {
+    public void stores_and_reads_dates_correctly() throws SQLException {
         // Fri, 01 Jan 2016 00:00:00 GMT It's important that the time is all zeroes
         // or that will be lost when putting the value in the db
         // and the assert will fail.
@@ -97,7 +97,7 @@ public abstract class SupportedTypesTestCommon {
     }
 
     @Test
-    public void can_handle_doubles_as_double_precision() throws SQLException {
+    public void stores_and_reads_doubles_as_double_precision() throws SQLException {
         Double value = 10.0;
         List<Row> expectedValues = storeAndReadValuesBack("DOUBLE PRECISION", bind((Double) null), bind(value));
         assertThat(expectedValues.size(), is(1));
@@ -106,7 +106,7 @@ public abstract class SupportedTypesTestCommon {
     }
 
     @Test
-    public void can_handle_bytes_as_smallints() throws SQLException {
+    public void stores_and_reads_bytes_as_smallints() throws SQLException {
         Byte value = 's';
         List<Row> expectedValues = storeAndReadValuesBack("SMALLINT", bind((Byte) null), bind(value));
         assertThat(expectedValues.size(), is(1));
@@ -115,7 +115,7 @@ public abstract class SupportedTypesTestCommon {
     }
 
     @Test
-    public void handles_blobs_correctly() throws SQLException, UnsupportedEncodingException {
+    public void stores_and_reads_blobs_correctly() throws SQLException, UnsupportedEncodingException {
         String blobContent = "this is the content of the blob";
         Charset charset = Charset.forName("UTF-8");
         Supplier<InputStream> value = () -> new ByteArrayInputStream(blobContent.getBytes(charset));

@@ -42,7 +42,7 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
     }
 
     @Test
-    public void can_handle_longs_as_numbers() throws SQLException {
+    public void stores_and_reads_longs_as_numbers() throws SQLException {
         Long value = 10L;
         List<Row> expectedValues = storeAndReadValuesBack("NUMBER", bind((Long) null), bind(value));
         assertThat(expectedValues.size(), is(1));
@@ -51,7 +51,7 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
     }
 
     @Test
-    public void handles_times_as_sql_dates() throws SQLException {
+    public void stores_and_reads_times_as_sql_dates() throws SQLException {
         // 01 Jan 1970 10:11:12.000 GMT. It's important that the milliseconds are all zeroes
         // or that will be lost when putting the value in the db
         // and the assert will fail.
@@ -63,7 +63,7 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
     }
 
     @Test
-    public void handles_sql_timestamps_as_dates() throws SQLException {
+    public void stores_and_reads_sql_timestamps_as_dates() throws SQLException {
         // Tue, 12 Jan 2016 10:11:12.000 GMT. Note that some DBs support the milliseconds.
         Timestamp value = new Timestamp(1452593472000L);
         List<Row> expectedValues = storeAndReadValuesBack("DATE", bind((Timestamp) null), bind(value));
