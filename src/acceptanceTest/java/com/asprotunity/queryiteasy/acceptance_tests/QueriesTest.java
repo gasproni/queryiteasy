@@ -18,6 +18,8 @@ import java.util.List;
 import static com.asprotunity.queryiteasy.acceptance_tests.HSQLInMemoryConfigurationAndSchemaDrop.dropHSQLPublicSchema;
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
 import static com.asprotunity.queryiteasy.connection.InputParameterDefaultBinders.bind;
+import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asInteger;
+import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asString;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -63,8 +65,8 @@ public class QueriesTest {
         List<Row> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT * FROM testtable");
 
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).asInteger("first"), is(10));
-        assertThat(expectedValues.get(0).asString("second"), is("asecond10"));
+        assertThat(asInteger(expectedValues.get(0).at("first")), is(10));
+        assertThat(asString(expectedValues.get(0).at("second")), is("asecond10"));
         assertThat(inputOutputParameter.value(), is("NewString"));
         assertThat(outputParameter.value(), is("OldString"));
     }
@@ -80,7 +82,7 @@ public class QueriesTest {
 
         List<Row> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT first FROM testtable");
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).asInteger("first"), is(10));
+        assertThat(asInteger(expectedValues.get(0).at("first")), is(10));
     }
 
     @Test
@@ -110,8 +112,8 @@ public class QueriesTest {
 
         List<Row> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT * FROM testtable");
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).asInteger("first"), is(10));
-        assertThat(expectedValues.get(0).asString("second"), is("asecond"));
+        assertThat(asInteger(expectedValues.get(0).at("first")), is(10));
+        assertThat(asString(expectedValues.get(0).at("second")), is("asecond"));
     }
 
     @Test
@@ -128,8 +130,8 @@ public class QueriesTest {
         List<Row> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT * FROM testtable ORDER BY first ASC");
         assertThat(expectedValues.size(), is(3));
         for (int index = 0; index < expectedValues.size(); ++index) {
-            assertThat(expectedValues.get(index).asInteger("first"), is(index + 10));
-            assertThat(expectedValues.get(index).asString("second"), is("asecond" + (index + 10)));
+            assertThat(asInteger(expectedValues.get(index).at("first")), is(index + 10));
+            assertThat(asString(expectedValues.get(index).at("second")), is("asecond" + (index + 10)));
         }
     }
 
@@ -159,7 +161,7 @@ public class QueriesTest {
 
         List<Integer> result = dataStore.executeWithResult(connection ->
                 connection.select("SELECT first FROM testtable ORDER BY first ASC",
-                        rowStream -> rowStream.map(row -> row.asInteger("first")).collect(toList()))
+                        rowStream -> rowStream.map(row -> asInteger(row.at("first"))).collect(toList()))
         );
 
         assertThat(result.size(), is(2));
@@ -180,8 +182,8 @@ public class QueriesTest {
         );
 
         assertThat(result.size(), is(1));
-        assertThat(result.get(0).asInteger("first"), is(10));
-        assertThat(result.get(0).asString("second"), is("asecond10"));
+        assertThat(asInteger(result.get(0).at("first")), is(10));
+        assertThat(asString(result.get(0).at("second")), is("asecond10"));
     }
 
 

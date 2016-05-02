@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.loadProperties;
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
 import static com.asprotunity.queryiteasy.connection.InputParameterDefaultBinders.bind;
+import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asString;
 import static org.junit.Assume.assumeTrue;
 
 public class MySQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon {
@@ -33,8 +34,9 @@ public class MySQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon
     protected void cleanup() throws Exception {
         getDataStore().execute(connection -> {
             List<String> dropTableStatements = connection.select("SELECT CONCAT('DROP TABLE ', table_name, ' CASCADE') as dropTableStatement" +
-                    " FROM information_schema.tables WHERE table_schema = ?",
-                    rowStream -> rowStream.map(row -> row.asString("dropTableStatement")).collect(Collectors.toList()), bind(dbName));
+                            " FROM information_schema.tables WHERE table_schema = ?",
+                    rowStream -> rowStream.map(row -> asString(row.at("dropTableStatement"))).collect(Collectors.toList()),
+                    bind(dbName));
             for (String statement : dropTableStatements) {
                 connection.update(statement);
             }
