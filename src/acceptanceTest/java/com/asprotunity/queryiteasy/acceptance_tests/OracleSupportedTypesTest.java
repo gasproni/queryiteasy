@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
 import static com.asprotunity.queryiteasy.connection.InputParameterDefaultBinders.bind;
+import static com.asprotunity.queryiteasy.connection.SQLDataConverters.*;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -45,8 +46,8 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
         Long value = 10L;
         List<Row> expectedValues = storeAndReadValuesBack("NUMBER", bind((Long) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).asLong("first"), is(nullValue()));
-        assertThat(expectedValues.get(0).asLong("second"), is(value));
+        assertThat(asLong(expectedValues.get(0).at("first")), is(nullValue()));
+        assertThat(asLong(expectedValues.get(0).at("second")), is(value));
     }
 
     @Test
@@ -57,8 +58,8 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
         Time value = new Time(36672000L);
         List<Row> expectedValues = storeAndReadValuesBack("DATE", bind((Time) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).asTime("first"), is(nullValue()));
-        assertThat(expectedValues.get(0).asTime("second"), is(value));
+        assertThat(asTime(expectedValues.get(0).at("first")), is(nullValue()));
+        assertThat(asTime(expectedValues.get(0).at("second")), is(value));
     }
 
     @Test
@@ -67,8 +68,8 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
         Timestamp value = new Timestamp(1452593472000L);
         List<Row> expectedValues = storeAndReadValuesBack("DATE", bind((Timestamp) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).asDate("first"), is(nullValue()));
-        assertThat(expectedValues.get(0).asDate("second"), is(value));
+        assertThat(asDate(expectedValues.get(0).at("first")), is(nullValue()));
+        assertThat(asDate(expectedValues.get(0).at("second")), is(value));
     }
 
 
@@ -86,7 +87,7 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
         getDataStore().execute(connection -> {
             List<String> dropStatements = connection.select("select 'drop '||object_type||' '|| object_name|| " +
                             "DECODE(OBJECT_TYPE,'TABLE',' CASCADE CONSTRAINTS','') as dropStatements from user_objects",
-                    rowStream -> rowStream.map(row -> row.asString("dropStatements")).collect(Collectors.toList()));
+                    rowStream -> rowStream.map(row -> asString(row.at("dropStatements"))).collect(Collectors.toList()));
             for (String statement : dropStatements) {
                 if (isNotDropOfSystemOrLobIndex(statement)) {
                     connection.update(statement);

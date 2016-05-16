@@ -1,5 +1,6 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
+import com.asprotunity.queryiteasy.connection.SQLDataConverters;
 import org.junit.Test;
 
 import java.sql.ResultSet;
@@ -29,7 +30,7 @@ public class RowFromResultSetTest {
 
         RowFromResultSet rowFromResultSet = new RowFromResultSet(rs);
 
-        assertThat(rowFromResultSet.asInteger(mixedCaseColumnName.toLowerCase()), is(1));
+        assertThat(SQLDataConverters.asInteger(rowFromResultSet.at(mixedCaseColumnName.toLowerCase())), is(1));
 
     }
 

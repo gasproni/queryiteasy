@@ -15,9 +15,11 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.asprotunity.queryiteasy.connection.InputParameterDefaultBinders.bind;
+import static com.asprotunity.queryiteasy.connection.SQLDataConverters.*;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -31,69 +33,69 @@ public abstract class SupportedTypesTestCommon {
     }
 
     @Test
-    public void stores_and_reads_integers_correctly() throws SQLException {
+    public void stores_and_reads_integers() throws SQLException {
         Integer value = 10;
         List<Row> expectedValues = storeAndReadValuesBack("INTEGER", bind((Integer) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).asInteger("first"), is(nullValue()));
-        assertThat(expectedValues.get(0).asInteger("second"), is(value));
+        assertThat(asInteger(expectedValues.get(0).at("first")), is(nullValue()));
+        assertThat(asInteger(expectedValues.get(0).at("second")), is(value));
     }
 
     @Test
-    public void stores_and_reads_short_integers_correctly() throws SQLException {
+    public void stores_and_reads_short_integers() throws SQLException {
         Short value = 10;
         List<Row> expectedValues = storeAndReadValuesBack("SMALLINT", bind((Short) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).asShort("first"), is(nullValue()));
-        assertThat(expectedValues.get(0).asShort("second"), is(value));
+        assertThat(asShort(expectedValues.get(0).at("first")), is(nullValue()));
+        assertThat(asShort(expectedValues.get(0).at("second")), is(value));
     }
 
     @Test
-    public void stores_and_reads_doubles_as_floats_correctly() throws SQLException {
+    public void stores_and_reads_doubles_as_floats() throws SQLException {
         Double value = 10.0;
         List<Row> expectedValues = storeAndReadValuesBack("FLOAT", bind((Double) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).asDouble("first"), is(nullValue()));
-        assertThat(expectedValues.get(0).asDouble("second"), is(value));
+        assertThat(asDouble(expectedValues.get(0).at("first")), is(nullValue()));
+        assertThat(asDouble(expectedValues.get(0).at("second")), is(value));
     }
 
     @Test
-    public void stores_and_reads_floats_correctly() throws SQLException {
+    public void stores_and_reads_floats() throws SQLException {
         Float value = 10.0F;
         List<Row> expectedValues = storeAndReadValuesBack("REAL", bind((Float) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).asFloat("first"), is(nullValue()));
-        assertThat(expectedValues.get(0).asFloat("second"), is(value));
+        assertThat(asFloat(expectedValues.get(0).at("first")), is(nullValue()));
+        assertThat(asFloat(expectedValues.get(0).at("second")), is(value));
     }
 
     @Test
-    public void stores_and_reads_big_decimals_as_decimal_correctly() throws SQLException {
+    public void stores_and_reads_big_decimals_as_decimal() throws SQLException {
         BigDecimal value = BigDecimal.TEN;
         List<Row> expectedValues = storeAndReadValuesBack("DECIMAL", bind((BigDecimal) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).asBigDecimal("first"), is(nullValue()));
-        assertThat(expectedValues.get(0).asBigDecimal("second"), is(value));
+        assertThat(asBigDecimal(expectedValues.get(0).at("first")), is(nullValue()));
+        assertThat(asBigDecimal(expectedValues.get(0).at("second")), is(value));
     }
 
     @Test
-    public void stores_and_reads_big_decimals_as_numeric_correctly() throws SQLException {
+    public void stores_and_reads_big_decimals_as_numeric() throws SQLException {
         BigDecimal value = BigDecimal.TEN;
         List<Row> expectedValues = storeAndReadValuesBack("NUMERIC", bind((BigDecimal) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).asBigDecimal("first"), is(nullValue()));
-        assertThat(expectedValues.get(0).asBigDecimal("second"), is(value));
+        assertThat(asBigDecimal(expectedValues.get(0).at("first")), is(nullValue()));
+        assertThat(asBigDecimal(expectedValues.get(0).at("second")), is(value));
     }
 
     @Test
-    public void stores_and_reads_dates_correctly() throws SQLException {
+    public void stores_and_reads_dates() throws SQLException {
         // Fri, 01 Jan 2016 00:00:00 GMT It's important that the time is all zeroes
         // or that will be lost when putting the value in the db
         // and the assert will fail.
         Date value = new Date(1451606400000L);
         List<Row> expectedValues = storeAndReadValuesBack("DATE", bind((Date) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).asDate("first"), is(nullValue()));
-        assertThat(expectedValues.get(0).asDate("second"), is(value));
+        assertThat(asDate(expectedValues.get(0).at("first")), is(nullValue()));
+        assertThat(asDate(expectedValues.get(0).at("second")), is(value));
     }
 
     @Test
@@ -101,8 +103,8 @@ public abstract class SupportedTypesTestCommon {
         Double value = 10.0;
         List<Row> expectedValues = storeAndReadValuesBack("DOUBLE PRECISION", bind((Double) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).asDouble("first"), is(nullValue()));
-        assertThat(expectedValues.get(0).asDouble("second"), is(value));
+        assertThat(asDouble(expectedValues.get(0).at("first")), is(nullValue()));
+        assertThat(asDouble(expectedValues.get(0).at("second")), is(value));
     }
 
     @Test
@@ -110,12 +112,12 @@ public abstract class SupportedTypesTestCommon {
         Byte value = 's';
         List<Row> expectedValues = storeAndReadValuesBack("SMALLINT", bind((Byte) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).asByte("first"), is(nullValue()));
-        assertThat(expectedValues.get(0).asByte("second"), is(value));
+        assertThat(asByte(expectedValues.get(0).at("first")), is(nullValue()));
+        assertThat(asByte(expectedValues.get(0).at("second")), is(value));
     }
 
     @Test
-    public void stores_and_reads_blobs_correctly() throws SQLException, UnsupportedEncodingException {
+    public void stores_and_reads_blobs() throws SQLException, UnsupportedEncodingException {
         String blobContent = "this is the content of the blob";
         Charset charset = Charset.forName("UTF-8");
         Supplier<InputStream> value = () -> new ByteArrayInputStream(blobContent.getBytes(charset));
@@ -129,12 +131,10 @@ public abstract class SupportedTypesTestCommon {
             List<Row> expectedValues = connection.select("SELECT * FROM testtable",
                     rowStream -> rowStream.collect(toList()));
             assertThat(expectedValues.size(), is(1));
-            assertThat(expectedValues.get(0).fromBlob("first", optInputStream ->
-                    readFrom(optInputStream, charset.name())), is(nullValue()));
-            assertThat(expectedValues.get(0).fromBlob("second",
-                    optInputStream -> readFrom(optInputStream, charset.name())), is(blobContent));
-            assertThat(expectedValues.get(0).fromBlob("second",
-                    optInputStream -> readFrom(optInputStream, charset.name())), is(blobContent));
+            Function<Optional<InputStream>, String> blobReader = optInputStream -> readFrom(optInputStream, charset.name());
+            assertThat(fromBlob(expectedValues.get(0).at("first"), blobReader), is(nullValue()));
+            assertThat(fromBlob(expectedValues.get(0).at("second"), blobReader), is(blobContent));
+            assertThat(fromBlob(expectedValues.get(0).at("second"), blobReader), is(blobContent));
 
         });
     }
@@ -151,7 +151,7 @@ public abstract class SupportedTypesTestCommon {
         );
     }
 
-    private static String readFrom(Optional<InputStream> inputStream, String charset) {
+    protected static String readFrom(Optional<InputStream> inputStream, String charset) {
         return inputStream.map(stream -> new java.util.Scanner(stream, charset).useDelimiter("\\A").next()).orElse(null);
     }
 
