@@ -3,8 +3,6 @@ package com.asprotunity.queryiteasy.internal.connection;
 import com.asprotunity.queryiteasy.connection.SQLDataConverters;
 import org.junit.Test;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -21,12 +19,10 @@ public class RowFromResultSetTest {
         String mixedCaseColumnName = "ThisIsAColumnName";
         assertThat(mixedCaseColumnName, not(RowFromResultSet.normaliseColumnLabel(mixedCaseColumnName)));
 
-        ResultSet rs = mock(ResultSet.class);
-        ResultSetMetaData rsm = mock(ResultSetMetaData.class);
-        when(rs.getMetaData()).thenReturn(rsm);
-        when(rsm.getColumnCount()).thenReturn(1);
-        when(rsm.getColumnLabel(1)).thenReturn(mixedCaseColumnName);
+        ResultSetWrapper rs = mock(ResultSetWrapper.class);
+        when(rs.columnCount()).thenReturn(1);
         when(rs.getObject(1)).thenReturn(1);
+        when(rs.columnLabel(1)).thenReturn(mixedCaseColumnName);
 
         RowFromResultSet rowFromResultSet = new RowFromResultSet(rs);
 

@@ -8,11 +8,11 @@ import java.sql.PreparedStatement;
 @FunctionalInterface
 public interface InputParameter extends Parameter {
 
-    void bind(PreparedStatement statement, int position, Closer closer);
+    void bind(PreparedStatement statement, int position, Closer statementCloser);
 
     @Override
-    default void bind(CallableStatement statement, int position, Closer closer) {
-        bind((PreparedStatement) statement, position, closer);
+    default void bind(CallableStatement statement, int position, Closer statementCloser) {
+        bind((PreparedStatement) statement, position, statementCloser);
     }
 
 }

@@ -115,7 +115,6 @@ public class WrappedJDBCConnectionTest {
         when(preparedStatement.executeQuery()).thenReturn(rs);
         when(rs.next()).thenReturn(false);
 
-
         wrappedJDBCConnection.select(sql, rowStream -> 1, bind(() -> blobStream));
 
         InOrder order = inOrder(preparedStatement, rs, blobStream);
@@ -157,7 +156,7 @@ public class WrappedJDBCConnectionTest {
         order.verify(preparedStatement, times(1)).close();
     }
 
-    public PreparedStatement prepareStatement(String sql) throws SQLException {
+    private PreparedStatement prepareStatement(String sql) throws SQLException {
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(jdbcConnection.prepareStatement(sql)).thenReturn(preparedStatement);
         return preparedStatement;

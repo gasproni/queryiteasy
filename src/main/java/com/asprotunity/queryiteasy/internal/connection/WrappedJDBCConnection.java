@@ -16,9 +16,11 @@ import java.util.stream.StreamSupport;
 
 public class WrappedJDBCConnection implements Connection, AutoCloseable {
     private final java.sql.Connection connection;
+    private final Closer connectionCloser;
 
     public WrappedJDBCConnection(java.sql.Connection connection) {
         this.connection = connection;
+        this.connectionCloser = new Closer();
         RuntimeSQLException.execute(() -> this.connection.setAutoCommit(false));
     }
 
@@ -30,6 +32,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     public void close() {
         RuntimeSQLException.execute(() -> {
             connection.rollback();
+            connectionCloser.close();
             connection.close();
         });
     }
@@ -52,9 +55,9 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         }
         RuntimeSQLException.execute(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql);
-                 Closer closer = new Closer()) {
+                 Closer statementCloser = new Closer()) {
                 for (Batch batch : batches) {
-                    addBatch(batch, statement, closer);
+                    addBatch(batch, statement, statementCloser);
                 }
                 statement.executeBatch();
             }
@@ -66,10 +69,10 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     public <ResultType> ResultType select(String sql, Function<Stream<Row>, ResultType> processRow, InputParameter... parameters) {
         return RuntimeSQLException.executeAndReturnResult(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql);
-                 Closer closer = new Closer()) {
-                bindParameters(parameters, statement, closer);
+                 Closer statementCloser = new Closer()) {
+                bindParameters(parameters, statement, statementCloser);
                 try (ResultSet rs = statement.executeQuery();
-                     Stream<Row> rowStream = StreamSupport.stream(new RowSpliterator(rs), false)) {
+                     Stream<Row> rowStream = StreamSupport.stream(new RowSpliterator(new WrappedJDBCResultSet(rs)), false)) {
                     return processRow.apply(rowStream);
                 }
             }
@@ -80,8 +83,8 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     public void call(String sql, Parameter... parameters) {
         RuntimeSQLException.execute(() -> {
             try (CallableStatement statement = connection.prepareCall(sql);
-                 Closer closer = new Closer()) {
-                bindCallableParameters(parameters, statement, closer);
+                 Closer statementCloser = new Closer()) {
+                bindCallableParameters(parameters, statement, statementCloser);
                 statement.execute();
             }
         });

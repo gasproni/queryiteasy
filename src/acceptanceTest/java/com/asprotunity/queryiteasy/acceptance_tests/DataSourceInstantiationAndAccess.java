@@ -2,6 +2,7 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 
 import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.internal.connection.RowFromResultSet;
+import com.asprotunity.queryiteasy.internal.connection.WrappedJDBCResultSet;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -24,7 +25,7 @@ public interface DataSourceInstantiationAndAccess {
              ResultSet rs = statement.executeQuery(sql)) {
             ArrayList<Row> result = new ArrayList<>();
             while (rs.next()) {
-                result.add(new RowFromResultSet(rs));
+                result.add(new RowFromResultSet(new WrappedJDBCResultSet(rs)));
             }
             if (!connection.getAutoCommit()) {
                 connection.commit();
