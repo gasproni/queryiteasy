@@ -10,12 +10,12 @@ import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.Types;
 
-import static com.asprotunity.queryiteasy.connection.InputParameterDefaultBinders.bind;
+import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
 
-public class InputParameterDefaultBindersTest {
+public class InputParameterBindersTest {
 
     private PreparedStatement preparedStatement;
     private int position;

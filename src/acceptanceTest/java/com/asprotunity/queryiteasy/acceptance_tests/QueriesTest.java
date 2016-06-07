@@ -17,7 +17,7 @@ import java.util.List;
 
 import static com.asprotunity.queryiteasy.acceptance_tests.HSQLInMemoryConfigurationAndSchemaDrop.dropHSQLPublicSchema;
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
-import static com.asprotunity.queryiteasy.connection.InputParameterDefaultBinders.bind;
+import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
 import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asInteger;
 import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asString;
 import static java.util.stream.Collectors.toList;

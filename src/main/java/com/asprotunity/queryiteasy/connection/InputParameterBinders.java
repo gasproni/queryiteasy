@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import java.sql.*;
 import java.util.function.Supplier;
 
-public class InputParameterDefaultBinders {
+public class InputParameterBinders {
 
 
     public static InputParameter bind(String value) {
