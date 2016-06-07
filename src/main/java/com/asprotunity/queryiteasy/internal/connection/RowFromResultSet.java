@@ -1,7 +1,9 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
+import com.asprotunity.queryiteasy.closer.Closer;
 import com.asprotunity.queryiteasy.connection.Row;
 
+import java.sql.Blob;
 import java.util.HashMap;
 
 public class RowFromResultSet implements Row {
@@ -9,13 +11,17 @@ public class RowFromResultSet implements Row {
     private Object columns[];
     private HashMap<String, Integer> labelToColumn;
 
-    public RowFromResultSet(ResultSetWrapper rs) {
-        columns = new Object[rs.columnCount()];
+    public RowFromResultSet(ResultSetWrapper resultSetWrapper, Closer connectionCloser) {
+        columns = new Object[resultSetWrapper.columnCount()];
         labelToColumn = new HashMap<>();
         for (int columnIndex = 1; columnIndex <= columns.length; ++columnIndex) {
             int position = columnIndex(columnIndex);
-            columns[position] = rs.getObject(columnIndex);
-            labelToColumn.put(normaliseColumnLabel(rs.columnLabel(columnIndex)), columnIndex);
+            Object object = resultSetWrapper.getObject(columnIndex);
+            if (object instanceof Blob) {
+                connectionCloser.onClose(((Blob)object)::free);
+            }
+            columns[position] = object;
+            labelToColumn.put(normaliseColumnLabel(resultSetWrapper.columnLabel(columnIndex)), columnIndex);
         }
     }
 

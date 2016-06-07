@@ -1,5 +1,6 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
+import com.asprotunity.queryiteasy.closer.Closer;
 import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.internal.connection.RowFromResultSet;
 import com.asprotunity.queryiteasy.internal.connection.WrappedJDBCResultSet;
@@ -21,11 +22,12 @@ public interface DataSourceInstantiationAndAccess {
 
     static List<Row> query(DataSource dataSource, String sql) throws SQLException {
         try (Connection connection = dataSource.getConnection();
+             Closer connectionCloser = new Closer();
              Statement statement = connection.createStatement();
              ResultSet rs = statement.executeQuery(sql)) {
             ArrayList<Row> result = new ArrayList<>();
             while (rs.next()) {
-                result.add(new RowFromResultSet(new WrappedJDBCResultSet(rs)));
+                result.add(new RowFromResultSet(new WrappedJDBCResultSet(rs), connectionCloser));
             }
             if (!connection.getAutoCommit()) {
                 connection.commit();

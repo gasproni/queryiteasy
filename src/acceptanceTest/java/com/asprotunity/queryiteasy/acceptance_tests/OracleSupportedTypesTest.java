@@ -8,19 +8,27 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.sql.DataSource;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
 import static com.asprotunity.queryiteasy.connection.InputParameterDefaultBinders.bind;
 import static com.asprotunity.queryiteasy.connection.SQLDataConverters.*;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -80,6 +88,29 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
         } catch (RuntimeSQLException exc) {
             assertThat(exc.getCause().getMessage(), is("ORA-00902: invalid datatype\n"));
         }
+    }
+
+    @Test
+    public void stores_and_reads_blobs() throws SQLException, UnsupportedEncodingException {
+        String blobContent = "this is the content of the blob";
+        Charset charset = Charset.forName("UTF-8");
+        Supplier<InputStream> value = () -> new ByteArrayInputStream(blobContent.getBytes(charset));
+        getDataStore().execute(connection -> {
+            connection.update("CREATE TABLE testtable (first BLOB NULL, second BLOB NULL)");
+            connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
+                    bind(() -> null), bind(value));
+        });
+
+        getDataStore().execute(connection -> {
+            List<Row> expectedValues = connection.select("SELECT * FROM testtable",
+                    rowStream -> rowStream.collect(toList()));
+            assertThat(expectedValues.size(), is(1));
+            Function<Optional<InputStream>, String> blobReader = optInputStream -> readFrom(optInputStream, charset.name());
+            assertThat(fromBlob(expectedValues.get(0).at("first"), blobReader), is(nullValue()));
+            assertThat(fromBlob(expectedValues.get(0).at("second"), blobReader), is(blobContent));
+            assertThat(fromBlob(expectedValues.get(0).at("second"), blobReader), is(blobContent));
+
+        });
     }
 
     @Override

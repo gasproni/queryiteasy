@@ -29,24 +29,6 @@ public abstract class NonStandardSupportedTypesTestCommon extends SupportedTypes
     }
 
     @Test
-    public void stores_and_reads_doubles_mapped_to_double() throws SQLException {
-        Double value = 10.0;
-        List<Row> expectedValues = storeAndReadValuesBack("DOUBLE", bind((Double) null), bind(value));
-        assertThat(expectedValues.size(), is(1));
-        assertThat(asDouble(expectedValues.get(0).at("first")), is(nullValue()));
-        assertThat(asDouble(expectedValues.get(0).at("second")), is(value));
-    }
-
-    @Test
-    public void stores_and_reads_bytes_as_tinyints() throws SQLException {
-        Byte value = 's';
-        List<Row> expectedValues = storeAndReadValuesBack("TINYINT", bind((Byte) null), bind(value));
-        assertThat(expectedValues.size(), is(1));
-        assertThat(asByte(expectedValues.get(0).at("first")), is(nullValue()));
-        assertThat(asByte(expectedValues.get(0).at("second")), is(value));
-    }
-
-    @Test
     public void stores_and_reads_booleans() throws SQLException {
         List<Row> expectedValues = storeAndReadValuesBack("BOOLEAN", bind((Boolean) null), bind(true));
         assertThat(expectedValues.size(), is(1));

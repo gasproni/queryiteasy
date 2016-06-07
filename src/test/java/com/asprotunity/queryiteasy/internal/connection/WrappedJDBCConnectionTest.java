@@ -4,6 +4,7 @@ import com.asprotunity.queryiteasy.connection.Row;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
+import org.mockito.Mockito;
 
 import java.io.InputStream;
 import java.sql.*;
@@ -11,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
@@ -26,7 +28,8 @@ public class WrappedJDBCConnectionTest {
     @Before
     public void setUp() {
         jdbcConnection = mock(Connection.class);
-        wrappedJDBCConnection = new WrappedJDBCConnection(jdbcConnection);
+        wrappedJDBCConnection = new WrappedJDBCConnection(jdbcConnection,
+                WrappedJDBCResultSet::new);
     }
 
     @Test
@@ -124,6 +127,32 @@ public class WrappedJDBCConnectionTest {
         order.verify(preparedStatement, times(1)).close();
     }
 
+    @Test
+    public void closes_selected_blobs_on_close() throws Exception {
+        String sql = "SELECT * FROM foo";
+
+        ResultSetWrapperFactory resultSetWrapperFactory = mock(ResultSetWrapperFactory.class);
+        wrappedJDBCConnection = new WrappedJDBCConnection(jdbcConnection,
+                resultSetWrapperFactory);
+
+        PreparedStatement preparedStatement = prepareStatement(sql);
+        when(preparedStatement.executeQuery()).thenReturn(mock(ResultSet.class));
+
+        ResultSetWrapper resultSetWrapper = mock(ResultSetWrapper.class);
+        when(resultSetWrapperFactory.make(Mockito.any())).thenReturn(resultSetWrapper);
+        when(resultSetWrapper.columnLabel(1)).thenReturn("colName");
+        when(resultSetWrapper.columnCount()).thenReturn(1);
+        when(resultSetWrapper.next()).thenReturn(true, false);
+
+        Blob blob = mock(Blob.class);
+        when(resultSetWrapper.getObject(1)).thenReturn(blob);
+
+        wrappedJDBCConnection.select(sql, rowStream -> rowStream.collect(Collectors.toList()));
+        wrappedJDBCConnection.close();
+        InOrder order = inOrder(blob, jdbcConnection);
+        order.verify(blob, times(1)).free();
+        order.verify(jdbcConnection, times(1)).close();
+    }
 
     @Test
     public void batch_update_executes_batch_and_closes_statement_correctly() throws Exception {

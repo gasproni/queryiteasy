@@ -17,10 +17,12 @@ import java.util.stream.StreamSupport;
 public class WrappedJDBCConnection implements Connection, AutoCloseable {
     private final java.sql.Connection connection;
     private final Closer connectionCloser;
+    private final ResultSetWrapperFactory resultSetWrapperFactory;
 
-    public WrappedJDBCConnection(java.sql.Connection connection) {
+    public WrappedJDBCConnection(java.sql.Connection connection, ResultSetWrapperFactory resultSetWrapperFactory) {
         this.connection = connection;
         this.connectionCloser = new Closer();
+        this.resultSetWrapperFactory = resultSetWrapperFactory;
         RuntimeSQLException.execute(() -> this.connection.setAutoCommit(false));
     }
 
@@ -72,7 +74,9 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
                  Closer statementCloser = new Closer()) {
                 bindParameters(parameters, statement, statementCloser);
                 try (ResultSet rs = statement.executeQuery();
-                     Stream<Row> rowStream = StreamSupport.stream(new RowSpliterator(new WrappedJDBCResultSet(rs)), false)) {
+                     Stream<Row> rowStream =
+                             StreamSupport.stream(new RowSpliterator(resultSetWrapperFactory.make(rs), connectionCloser),
+                                     false)) {
                     return processRow.apply(rowStream);
                 }
             }
