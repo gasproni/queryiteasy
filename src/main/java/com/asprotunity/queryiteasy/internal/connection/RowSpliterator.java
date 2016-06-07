@@ -35,7 +35,7 @@ public class RowSpliterator implements Spliterator<Row> {
 
     @Override
     public long estimateSize() {
-        return 0;
+        return Long.MAX_VALUE;
     }
 
     @Override
