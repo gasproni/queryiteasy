@@ -1,7 +1,7 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
-import com.asprotunity.queryiteasy.closer.Closer;
 import com.asprotunity.queryiteasy.connection.SQLDataConverters;
+import com.asprotunity.queryiteasy.scope.Scope;
 import org.junit.Test;
 
 import java.sql.SQLException;
@@ -25,8 +25,8 @@ public class RowFromResultSetTest {
         when(rs.getObject(1)).thenReturn(1);
         when(rs.columnLabel(1)).thenReturn(mixedCaseColumnName);
 
-        Closer dummyCloser = new Closer();
-        RowFromResultSet rowFromResultSet = new RowFromResultSet(rs, dummyCloser);
+        Scope dummyScope = new Scope();
+        RowFromResultSet rowFromResultSet = new RowFromResultSet(rs, dummyScope);
 
         assertThat(SQLDataConverters.asInteger(rowFromResultSet.at(mixedCaseColumnName.toLowerCase())), is(1));
 

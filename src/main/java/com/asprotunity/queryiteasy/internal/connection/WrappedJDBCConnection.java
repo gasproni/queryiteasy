@@ -1,7 +1,7 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
-import com.asprotunity.queryiteasy.closer.Closer;
 import com.asprotunity.queryiteasy.connection.*;
+import com.asprotunity.queryiteasy.scope.Scope;
 
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
@@ -16,12 +16,12 @@ import java.util.stream.StreamSupport;
 
 public class WrappedJDBCConnection implements Connection, AutoCloseable {
     private final java.sql.Connection connection;
-    private final Closer connectionCloser;
+    private final Scope connectionScope;
     private final ResultSetWrapperFactory resultSetWrapperFactory;
 
     public WrappedJDBCConnection(java.sql.Connection connection, ResultSetWrapperFactory resultSetWrapperFactory) {
         this.connection = connection;
-        this.connectionCloser = new Closer();
+        this.connectionScope = new Scope();
         this.resultSetWrapperFactory = resultSetWrapperFactory;
         RuntimeSQLException.execute(() -> this.connection.setAutoCommit(false));
     }
@@ -34,7 +34,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     public void close() {
         RuntimeSQLException.execute(() -> {
             connection.rollback();
-            connectionCloser.close();
+            connectionScope.close();
             connection.close();
         });
     }
@@ -43,8 +43,8 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     public void update(String sql, InputParameter... parameters) {
         RuntimeSQLException.execute(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql);
-                 Closer closer = new Closer()) {
-                bindParameters(parameters, statement, closer);
+                 Scope scope = new Scope()) {
+                bindParameters(parameters, statement, scope);
                 statement.execute();
             }
         });
@@ -57,9 +57,9 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         }
         RuntimeSQLException.execute(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql);
-                 Closer statementCloser = new Closer()) {
+                 Scope statementScope = new Scope()) {
                 for (Batch batch : batches) {
-                    addBatch(batch, statement, statementCloser);
+                    addBatch(batch, statement, statementScope);
                 }
                 statement.executeBatch();
             }
@@ -71,11 +71,11 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     public <ResultType> ResultType select(String sql, Function<Stream<Row>, ResultType> processRow, InputParameter... parameters) {
         return RuntimeSQLException.executeAndReturnResult(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql);
-                 Closer statementCloser = new Closer()) {
-                bindParameters(parameters, statement, statementCloser);
+                 Scope statementScope = new Scope()) {
+                bindParameters(parameters, statement, statementScope);
                 try (ResultSet rs = statement.executeQuery();
                      Stream<Row> rowStream =
-                             StreamSupport.stream(new RowSpliterator(resultSetWrapperFactory.make(rs), connectionCloser),
+                             StreamSupport.stream(new RowSpliterator(resultSetWrapperFactory.make(rs), connectionScope),
                                      false)) {
                     return processRow.apply(rowStream);
                 }
@@ -87,29 +87,29 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     public void call(String sql, Parameter... parameters) {
         RuntimeSQLException.execute(() -> {
             try (CallableStatement statement = connection.prepareCall(sql);
-                 Closer statementCloser = new Closer()) {
-                bindCallableParameters(parameters, statement, statementCloser);
+                 Scope statementScope = new Scope()) {
+                bindCallableParameters(parameters, statement, statementScope);
                 statement.execute();
             }
         });
     }
 
-    private static void addBatch(Batch batch, PreparedStatement preparedStatement, Closer closer) throws SQLException {
-        batch.forEachParameter(bindTo(preparedStatement, closer));
+    private static void addBatch(Batch batch, PreparedStatement preparedStatement, Scope scope) throws SQLException {
+        batch.forEachParameter(bindTo(preparedStatement, scope));
         preparedStatement.addBatch();
     }
 
-    private static void bindParameters(InputParameter[] parameters, PreparedStatement preparedStatement, Closer closer) {
-        IntStream.range(0, parameters.length).forEach(i -> parameters[i].bind(preparedStatement, i + 1, closer));
+    private static void bindParameters(InputParameter[] parameters, PreparedStatement preparedStatement, Scope scope) {
+        IntStream.range(0, parameters.length).forEach(i -> parameters[i].bind(preparedStatement, i + 1, scope));
     }
 
-    private static void bindCallableParameters(Parameter[] parameters, CallableStatement callableStatement, Closer closer) {
-        IntStream.range(0, parameters.length).forEach(i -> parameters[i].bind(callableStatement, i + 1, closer));
+    private static void bindCallableParameters(Parameter[] parameters, CallableStatement callableStatement, Scope scope) {
+        IntStream.range(0, parameters.length).forEach(i -> parameters[i].bind(callableStatement, i + 1, scope));
     }
 
-    private static BiConsumer<InputParameter, Integer> bindTo(PreparedStatement preparedStatement, Closer closer) {
+    private static BiConsumer<InputParameter, Integer> bindTo(PreparedStatement preparedStatement, Scope scope) {
         return (parameter, position) ->
-                parameter.bind(preparedStatement, position + 1, closer);
+                parameter.bind(preparedStatement, position + 1, scope);
     }
 
 }

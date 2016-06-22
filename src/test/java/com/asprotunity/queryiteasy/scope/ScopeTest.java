@@ -1,14 +1,12 @@
-package com.asprotunity.queryiteasy.closer;
+package com.asprotunity.queryiteasy.scope;
 
-import com.asprotunity.queryiteasy.closer.Closer;
-import com.asprotunity.queryiteasy.closer.CloserException;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.*;
 
-public class CloserTest {
+public class ScopeTest {
 
     static class Disposable {
         private Exception exception;
@@ -40,9 +38,9 @@ public class CloserTest {
         Disposable disposable = new Disposable();
         assertFalse(disposable.isDisposed());
 
-        Closer closer = new Closer();
-        closer.onClose(disposable::dispose);
-        closer.close();
+        Scope scope = new Scope();
+        scope.onLeave(disposable::dispose);
+        scope.close();
 
         assertTrue(disposable.isDisposed());
     }
@@ -52,20 +50,20 @@ public class CloserTest {
         Disposable disposable1 = new Disposable();
         Disposable disposable2 = new Disposable();
 
-        Closer closer = new Closer();
-        closer.onClose(disposable1::dispose);
-        closer.onClose(disposable2::dispose);
-        closer.close();
+        Scope scope = new Scope();
+        scope.onLeave(disposable1::dispose);
+        scope.onLeave(disposable2::dispose);
+        scope.close();
 
         assertThat(disposable1.disposeOrder, is(greaterThan(disposable2.disposeOrder)));
     }
 
     @Test
     public void works_correctly_when_no_handlers_registered() {
-        Closer closer = new Closer();
-        assertFalse(closer.isClosed());
-        closer.close();
-        assertTrue(closer.isClosed());
+        Scope scope = new Scope();
+        assertFalse(scope.isClosed());
+        scope.close();
+        assertTrue(scope.isClosed());
     }
 
 
@@ -74,15 +72,15 @@ public class CloserTest {
         Exception thrownByDisposable = new Exception();
         Disposable disposable = new Disposable(thrownByDisposable);
 
-        Closer closer = new Closer();
-        closer.onClose(disposable::dispose);
+        Scope scope = new Scope();
+        scope.onLeave(disposable::dispose);
 
         try {
-            closer.close();
+            scope.close();
             fail("DisposerExceptionExpected!");
         }
-        catch (CloserException exception) {
-            assertTrue(closer.isClosed());
+        catch (ScopeException exception) {
+            assertTrue(scope.isClosed());
             assertThat(exception.getCause(), is(thrownByDisposable));
         }
     }
@@ -97,17 +95,17 @@ public class CloserTest {
         Exception disposable2Exception = new Exception();
         Disposable disposable2 = new Disposable(disposable2Exception);
 
-        Closer closer = new Closer();
-        closer.onClose(disposable1::dispose);
-        closer.onClose(nonThrowingDisposable::dispose);
-        closer.onClose(disposable2::dispose);
+        Scope scope = new Scope();
+        scope.onLeave(disposable1::dispose);
+        scope.onLeave(nonThrowingDisposable::dispose);
+        scope.onLeave(disposable2::dispose);
 
         try {
-            closer.close();
+            scope.close();
             fail("DisposerExceptionExpected!");
         }
-        catch (CloserException exception) {
-            assertTrue(closer.isClosed());
+        catch (ScopeException exception) {
+            assertTrue(scope.isClosed());
             assertThat(exception.getCause(), is(disposable2Exception));
             assertThat(exception.getSuppressed().length, is(1));
             assertThat(exception.getSuppressed()[0], is(disposable1Exception));

@@ -1,6 +1,6 @@
 package com.asprotunity.queryiteasy.connection;
 
-import com.asprotunity.queryiteasy.closer.Closer;
+import com.asprotunity.queryiteasy.scope.Scope;
 
 import java.sql.CallableStatement;
 import java.sql.Types;
@@ -8,10 +8,10 @@ import java.sql.Types;
 public class StringOutputParameter extends OutputParameter<String> {
 
     @Override
-    public void bind(CallableStatement statement, int position, Closer closer) {
+    public void bind(CallableStatement statement, int position, Scope statementScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.VARCHAR);
-            closer.onClose(() -> setValue(statement.getString(position)));
+            statementScope.onLeave(() -> setValue(statement.getString(position)));
         });
     }
 }

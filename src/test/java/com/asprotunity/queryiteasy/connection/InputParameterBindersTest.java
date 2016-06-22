@@ -1,6 +1,6 @@
 package com.asprotunity.queryiteasy.connection;
 
-import com.asprotunity.queryiteasy.closer.Closer;
+import com.asprotunity.queryiteasy.scope.Scope;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,13 +19,13 @@ public class InputParameterBindersTest {
 
     private PreparedStatement preparedStatement;
     private int position;
-    private Closer closer;
+    private Scope scope;
 
     @Before
     public void setUp() {
         preparedStatement = mock(PreparedStatement.class);
         position = 1;
-        closer = new Closer();
+        scope = new Scope();
     }
 
     @After
@@ -36,108 +36,108 @@ public class InputParameterBindersTest {
     @Test
     public void binds_strings_correctly() throws Exception {
         String value = "astring";
-        bind(value).bind(preparedStatement, position, closer);
+        bind(value).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setString(position, value);
     }
 
     @Test
     public void binds_valid_shorts_correctly() throws Exception {
         short value = 10;
-        bind(value).bind(preparedStatement, position, closer);
+        bind(value).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, value, Types.SMALLINT);
     }
 
     @Test
     public void binds_null_shorts_correctly() throws Exception {
-        bind((Short) null).bind(preparedStatement, position, closer);
+        bind((Short) null).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, null, Types.SMALLINT);
     }
 
     @Test
     public void binds_valid_integers_correctly() throws Exception {
         int value = 10;
-        bind(value).bind(preparedStatement, position, closer);
+        bind(value).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, value, Types.INTEGER);
     }
 
     @Test
     public void binds_null_integers_correctly() throws Exception {
-        bind((Integer) null).bind(preparedStatement, position, closer);
+        bind((Integer) null).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, null, Types.INTEGER);
     }
 
     @Test
     public void binds_valid_longs_correctly() throws Exception {
         long value = 10;
-        bind(value).bind(preparedStatement, position, closer);
+        bind(value).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, value, Types.BIGINT);
     }
 
     @Test
     public void binds_null_longs_correctly() throws Exception {
-        bind((Long) null).bind(preparedStatement, position, closer);
+        bind((Long) null).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, null, Types.BIGINT);
     }
 
     @Test
     public void binds_valid_doubles_correctly() throws Exception {
         double value = 10;
-        bind(value).bind(preparedStatement, position, closer);
+        bind(value).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, value, Types.DOUBLE);
     }
 
     @Test
     public void binds_null_doubles_correctly() throws Exception {
-        bind((Double) null).bind(preparedStatement, position, closer);
+        bind((Double) null).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, null, Types.DOUBLE);
     }
 
     @Test
     public void binds_valid_floats_correctly() throws Exception {
         float value = 10;
-        bind(value).bind(preparedStatement, position, closer);
+        bind(value).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, value, Types.REAL);
     }
 
     @Test
     public void binds_null_floats_correctly() throws Exception {
-        bind((Float) null).bind(preparedStatement, position, closer);
+        bind((Float) null).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, null, Types.REAL);
     }
 
     @Test
     public void binds_valid_bytes_correctly() throws Exception {
         byte value = 10;
-        bind(value).bind(preparedStatement, position, closer);
+        bind(value).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, value, Types.TINYINT);
     }
 
     @Test
     public void binds_null_bytes_correctly() throws Exception {
-        bind((Byte) null).bind(preparedStatement, position, closer);
+        bind((Byte) null).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, null, Types.TINYINT);
     }
 
     @Test
     public void binds_valid_blobs_correctly() throws Exception {
         InputStream blobStream = mock(InputStream.class);
-        bind(() -> blobStream).bind(preparedStatement, position, closer);
+        bind(() -> blobStream).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setBlob(position, blobStream);
-        assertThat(this.closer.handlersCount(), is(1));
-        assertThatStreamCloseRegisteredCorrectly(closer, blobStream);
+        assertThat(this.scope.handlersCount(), is(1));
+        assertThatStreamCloseRegisteredCorrectly(scope, blobStream);
 
     }
 
     @Test
     public void binds_null_blobs_correctly() throws Exception {
-        bind(() -> null).bind(preparedStatement, position, closer);
+        bind(() -> null).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setNull(position, Types.BLOB);
-        assertThat(closer.handlersCount(), is(0));
+        assertThat(scope.handlersCount(), is(0));
     }
 
-    private void assertThatStreamCloseRegisteredCorrectly(Closer closer, InputStream blobStream) throws IOException {
+    private void assertThatStreamCloseRegisteredCorrectly(Scope scope, InputStream blobStream) throws IOException {
         verify(blobStream, times(0)).close();
-        closer.close();
+        scope.close();
         verify(blobStream, times(1)).close();
     }
 }
