@@ -4,7 +4,6 @@ import com.asprotunity.queryiteasy.connection.Row;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
-import org.mockito.Mockito;
 
 import java.io.InputStream;
 import java.sql.*;
@@ -131,26 +130,47 @@ public class WrappedJDBCConnectionTest {
     public void closes_selected_blobs_on_close() throws Exception {
         String sql = "SELECT * FROM foo";
 
-        ResultSetWrapperFactory resultSetWrapperFactory = mock(ResultSetWrapperFactory.class);
-        wrappedJDBCConnection = new WrappedJDBCConnection(jdbcConnection,
-                resultSetWrapperFactory);
-
-        PreparedStatement preparedStatement = prepareStatement(sql);
-        when(preparedStatement.executeQuery()).thenReturn(mock(ResultSet.class));
-
-        ResultSetWrapper resultSetWrapper = mock(ResultSetWrapper.class);
-        when(resultSetWrapperFactory.make(Mockito.any())).thenReturn(resultSetWrapper);
-        when(resultSetWrapper.columnLabel(1)).thenReturn("colName");
-        when(resultSetWrapper.columnCount()).thenReturn(1);
-        when(resultSetWrapper.next()).thenReturn(true, false);
-
         Blob blob = mock(Blob.class);
-        when(resultSetWrapper.getObject(1)).thenReturn(blob);
+        ResultSetWrapperFactory resultSetWrapperFactory = makeResultSetWrapperFactory(sql, blob);
+
+        wrappedJDBCConnection = new WrappedJDBCConnection(jdbcConnection, resultSetWrapperFactory);
 
         wrappedJDBCConnection.select(sql, rowStream -> rowStream.collect(Collectors.toList()));
         wrappedJDBCConnection.close();
         InOrder order = inOrder(blob, jdbcConnection);
         order.verify(blob, times(1)).free();
+        order.verify(jdbcConnection, times(1)).close();
+    }
+
+    @Test
+    public void closes_selected_nclobs_on_close() throws Exception {
+        String sql = "SELECT * FROM foo";
+
+        NClob nclob = mock(NClob.class);
+        ResultSetWrapperFactory resultSetWrapperFactory = makeResultSetWrapperFactory(sql, nclob);
+
+        wrappedJDBCConnection = new WrappedJDBCConnection(jdbcConnection, resultSetWrapperFactory);
+
+        wrappedJDBCConnection.select(sql, rowStream -> rowStream.collect(Collectors.toList()));
+        wrappedJDBCConnection.close();
+        InOrder order = inOrder(nclob, jdbcConnection);
+        order.verify(nclob, times(1)).free();
+        order.verify(jdbcConnection, times(1)).close();
+    }
+
+    @Test
+    public void closes_selected_clobs_on_close() throws Exception {
+        String sql = "SELECT * FROM foo";
+
+        Clob clob = mock(Clob.class);
+        ResultSetWrapperFactory resultSetWrapperFactory = makeResultSetWrapperFactory(sql, clob);
+
+        wrappedJDBCConnection = new WrappedJDBCConnection(jdbcConnection, resultSetWrapperFactory);
+
+        wrappedJDBCConnection.select(sql, rowStream -> rowStream.collect(Collectors.toList()));
+        wrappedJDBCConnection.close();
+        InOrder order = inOrder(clob, jdbcConnection);
+        order.verify(clob, times(1)).free();
         order.verify(jdbcConnection, times(1)).close();
     }
 
@@ -191,5 +211,25 @@ public class WrappedJDBCConnectionTest {
         return preparedStatement;
     }
 
+    private ResultSetWrapper makeResultSetWrapperWithOneRowAndOneColumn(Object columnValue) {
+        ResultSetWrapper result = mock(ResultSetWrapper.class);
+        when(result.columnLabel(1)).thenReturn("colName");
+        when(result.columnCount()).thenReturn(1);
+        when(result.next()).thenReturn(true, false);
+        when(result.getObject(1)).thenReturn(columnValue);
+        return result;
+    }
 
+    private ResultSetWrapperFactory makeResultSetWrapperFactory(String sql, Object columnValue) throws SQLException {
+        ResultSet resultSet = mock(ResultSet.class);
+        PreparedStatement preparedStatement = prepareStatement(sql);
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
+
+        ResultSetWrapper resultSetWrapper = makeResultSetWrapperWithOneRowAndOneColumn(columnValue);
+
+        ResultSetWrapperFactory resultSetWrapperFactory = mock(ResultSetWrapperFactory.class);
+
+        when(resultSetWrapperFactory.make(resultSet)).thenReturn(resultSetWrapper);
+        return resultSetWrapperFactory;
+    }
 }

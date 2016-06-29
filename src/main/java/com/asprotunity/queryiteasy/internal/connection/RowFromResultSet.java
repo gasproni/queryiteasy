@@ -4,6 +4,7 @@ import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.scope.Scope;
 
 import java.sql.Blob;
+import java.sql.Clob;
 import java.util.HashMap;
 
 public class RowFromResultSet implements Row {
@@ -19,6 +20,9 @@ public class RowFromResultSet implements Row {
             Object object = resultSetWrapper.getObject(columnIndex);
             if (object instanceof Blob) {
                 connectionScope.onLeave(((Blob)object)::free);
+            }
+            else if (object instanceof Clob) {
+                connectionScope.onLeave(((Clob)object)::free);
             }
             columns[position] = object;
             labelToColumn.put(normaliseColumnLabel(resultSetWrapper.columnLabel(columnIndex)), columnIndex);
