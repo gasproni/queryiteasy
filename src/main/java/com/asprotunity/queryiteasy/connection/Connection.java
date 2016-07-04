@@ -13,4 +13,6 @@ public interface Connection {
                                    InputParameter... parameters);
 
     void call(String sql, Parameter...parameters);
+
+    <ResultType> ResultType call(String sql, Function<Stream<Row>, ResultType> rowProcessor, Parameter...parameters);
 }

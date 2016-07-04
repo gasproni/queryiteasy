@@ -10,6 +10,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.sql.DataSource;
+import java.sql.Date;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,8 +19,7 @@ import java.util.List;
 import static com.asprotunity.queryiteasy.acceptance_tests.HSQLInMemoryConfigurationAndSchemaDrop.dropHSQLPublicSchema;
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asInteger;
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asString;
+import static com.asprotunity.queryiteasy.connection.SQLDataConverters.*;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -69,6 +69,24 @@ public class QueriesTest {
         assertThat(asString(expectedValues.get(0).at("second")), is("asecond10"));
         assertThat(inputOutputParameter.value(), is("NewString"));
         assertThat(outputParameter.value(), is("OldString"));
+    }
+
+    @Test
+    public void calls_function_with_input_parameters_and_returns_result_correctly() throws SQLException {
+
+        DataSourceInstantiationAndAccess.prepareData(dataSource, "CREATE TABLE testtable (first INTEGER NOT NULL)");
+        DataSourceInstantiationAndAccess.prepareData(dataSource, "CREATE FUNCTION insert_new_record(in first INTEGER)\n" +
+                "RETURNS DATE\n" +
+                "BEGIN ATOMIC \n" +
+                "   RETURN TO_DATE('2016-06-23', 'YYYY-MM-DD');\n" +
+                " END");
+
+
+        Date result = dataStore.executeWithResult(connection ->
+                connection.call("{call insert_new_record(?)}", rowStream -> asDate(rowStream.findFirst().get().at(1)), bind(10))
+        );
+
+        assertThat(result, is(new Date(123456)));
     }
 
 

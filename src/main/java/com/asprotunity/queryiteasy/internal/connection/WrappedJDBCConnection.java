@@ -94,6 +94,23 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         });
     }
 
+    @Override
+    public <ResultType> ResultType call(String sql, Function<Stream<Row>, ResultType> processRow, Parameter... parameters) {
+        return RuntimeSQLException.executeAndReturnResult(() -> {
+            try (CallableStatement statement = connection.prepareCall(sql);
+                 Scope statementScope = new Scope()) {
+                bindCallableParameters(parameters, statement, statementScope);
+                statement.execute();
+                try (ResultSet rs = statement.getResultSet();
+                     Stream<Row> rowStream =
+                             StreamSupport.stream(new RowSpliterator(resultSetWrapperFactory.make(rs), connectionScope),
+                                     false)) {
+                    return processRow.apply(rowStream);
+                }
+            }
+        });
+    }
+
     private static void addBatch(Batch batch, PreparedStatement preparedStatement, Scope scope) throws SQLException {
         batch.forEachParameter(bindTo(preparedStatement, scope));
         preparedStatement.addBatch();
