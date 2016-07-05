@@ -5,10 +5,16 @@ import com.asprotunity.queryiteasy.scope.Scope;
 import java.sql.CallableStatement;
 import java.sql.Types;
 
-public class StringInputOutputParameter extends InputOutputParameter<String> {
+public class StringInputOutputParameter implements InputOutputParameter {
+
+    private String value = null;
 
     public StringInputOutputParameter(String value) {
-        super(value);
+        this.value = value;
+    }
+
+    public String value() {
+        return value;
     }
 
     @Override
@@ -16,7 +22,8 @@ public class StringInputOutputParameter extends InputOutputParameter<String> {
         RuntimeSQLException.execute(() -> {
             statement.setString(position, value());
             statement.registerOutParameter(position, Types.VARCHAR);
-            statementScope.onLeave(() -> setValue(statement.getString(position)));
+            statementScope.onLeave(() -> value = statement.getString(position));
         });
     }
+
 }

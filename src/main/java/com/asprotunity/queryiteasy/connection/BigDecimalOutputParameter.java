@@ -11,19 +11,16 @@ import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asBigDeci
 public class BigDecimalOutputParameter implements OutputParameter {
     private BigDecimal value = null;
 
-    @Override
-    public void bind(CallableStatement statement, int position, Scope statementScope) {
-        RuntimeSQLException.execute(() -> {
-            statement.registerOutParameter(position, Types.DECIMAL);
-            statementScope.onLeave(() -> setValue(asBigDecimal(statement.getObject(position))));
-        });
-    }
-
     public BigDecimal value() {
         return value;
     }
 
-    protected void setValue(BigDecimal value) {
-        this.value = value;
+    @Override
+    public void bind(CallableStatement statement, int position, Scope statementScope) {
+        RuntimeSQLException.execute(() -> {
+            statement.registerOutParameter(position, Types.DECIMAL);
+            statementScope.onLeave(() -> this.value = asBigDecimal(statement.getObject(position)));
+        });
     }
+
 }

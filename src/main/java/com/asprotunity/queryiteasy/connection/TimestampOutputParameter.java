@@ -11,19 +11,16 @@ import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asTimesta
 public class TimestampOutputParameter implements OutputParameter {
     private Timestamp value = null;
 
-    @Override
-    public void bind(CallableStatement statement, int position, Scope statementScope) {
-        RuntimeSQLException.execute(() -> {
-            statement.registerOutParameter(position, Types.TIMESTAMP);
-            statementScope.onLeave(() -> setValue(asTimestamp(statement.getObject(position))));
-        });
-    }
-
     public Timestamp value() {
         return value;
     }
 
-    protected void setValue(Timestamp value) {
-        this.value = value;
+    @Override
+    public void bind(CallableStatement statement, int position, Scope statementScope) {
+        RuntimeSQLException.execute(() -> {
+            statement.registerOutParameter(position, Types.TIMESTAMP);
+            statementScope.onLeave(() -> this.value = asTimestamp(statement.getObject(position)));
+        });
     }
+
 }
