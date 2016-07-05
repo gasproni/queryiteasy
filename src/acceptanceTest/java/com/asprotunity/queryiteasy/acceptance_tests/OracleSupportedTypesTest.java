@@ -19,7 +19,6 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -105,7 +104,7 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
             List<Row> expectedValues = connection.select("SELECT * FROM testtable",
                     rowStream -> rowStream.collect(toList()));
             assertThat(expectedValues.size(), is(1));
-            Function<Optional<InputStream>, String> blobReader = optInputStream -> readFrom(optInputStream, charset.name());
+            Function<InputStream, String> blobReader = inputStream -> readFrom(inputStream, charset.name());
             assertThat(fromBlob(expectedValues.get(0).at("first"), blobReader), is(nullValue()));
             assertThat(fromBlob(expectedValues.get(0).at("second"), blobReader), is(blobContent));
             assertThat(fromBlob(expectedValues.get(0).at("second"), blobReader), is(blobContent));

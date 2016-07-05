@@ -73,12 +73,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
             try (PreparedStatement statement = connection.prepareStatement(sql);
                  Scope statementScope = new Scope()) {
                 bindParameters(parameters, statement, statementScope);
-                try (ResultSet rs = statement.executeQuery();
-                     Stream<Row> rowStream =
-                             StreamSupport.stream(new RowSpliterator(resultSetWrapperFactory.make(rs), connectionScope),
-                                     false)) {
-                    return processRow.apply(rowStream);
-                }
+                return executeQuery(processRow, statement);
             }
         });
     }
@@ -100,15 +95,18 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
             try (CallableStatement statement = connection.prepareCall(sql);
                  Scope statementScope = new Scope()) {
                 bindCallableParameters(parameters, statement, statementScope);
-                statement.execute();
-                try (ResultSet rs = statement.getResultSet();
-                     Stream<Row> rowStream =
-                             StreamSupport.stream(new RowSpliterator(resultSetWrapperFactory.make(rs), connectionScope),
-                                     false)) {
-                    return processRow.apply(rowStream);
-                }
+                return executeQuery(processRow, statement);
             }
         });
+    }
+
+    private <ResultType> ResultType executeQuery(Function<Stream<Row>, ResultType> processRow, PreparedStatement statement) throws SQLException {
+        try (ResultSet rs = statement.executeQuery();
+             Stream<Row> rowStream =
+                     StreamSupport.stream(new RowSpliterator(resultSetWrapperFactory.make(rs), connectionScope),
+                             false)) {
+            return processRow.apply(rowStream);
+        }
     }
 
     private static void addBatch(Batch batch, PreparedStatement preparedStatement, Scope scope) throws SQLException {

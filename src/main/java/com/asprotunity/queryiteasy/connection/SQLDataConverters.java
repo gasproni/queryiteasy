@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.*;
-import java.util.Optional;
 import java.util.function.Function;
 
 public final class SQLDataConverters {
@@ -32,13 +31,13 @@ public final class SQLDataConverters {
     }
 
     public static <ResultType> ResultType fromBlob(Object object,
-                                                   Function<Optional<InputStream>, ResultType> blobReader) {
+                                                   Function<InputStream, ResultType> blobReader) {
         if (object == null) {
-            return blobReader.apply(Optional.empty());
+            return blobReader.apply(null);
         } else if (object instanceof Blob) {
             Blob blob = (Blob) object;
             try (InputStream inputStream = blob.getBinaryStream()) {
-                return blobReader.apply(Optional.of(inputStream));
+                return blobReader.apply(inputStream);
             } catch (SQLException e) {
                 throw new RuntimeSQLException(e);
             } catch (IOException e) {
@@ -46,7 +45,7 @@ public final class SQLDataConverters {
             }
         } else if (object instanceof byte[]) {
             try (InputStream inputStream = new ByteArrayInputStream((byte[]) object)) {
-                return blobReader.apply(Optional.of(inputStream));
+                return blobReader.apply(inputStream);
             } catch (IOException e) {
                 throw new RuntimeIOException(e);
             }

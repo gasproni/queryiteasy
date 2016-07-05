@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
 import static com.asprotunity.queryiteasy.connection.SQLDataConverters.*;
@@ -124,8 +123,11 @@ public abstract class SupportedTypesTestCommon {
         );
     }
 
-    protected static String readFrom(Optional<InputStream> inputStream, String charset) {
-        return inputStream.map(stream -> new java.util.Scanner(stream, charset).useDelimiter("\\A").next()).orElse(null);
+    protected static String readFrom(InputStream inputStream, String charset) {
+        if (inputStream == null) {
+            return null;
+        }
+        return new java.util.Scanner(inputStream, charset).useDelimiter("\\A").next();
     }
 
     protected abstract void cleanup() throws Exception;

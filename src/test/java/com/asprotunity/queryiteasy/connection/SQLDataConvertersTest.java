@@ -199,7 +199,7 @@ public class SQLDataConvertersTest {
         String charset = "UTF-8";
         byte[] bytes = expected.getBytes(charset);
 
-        String converted = fromBlob(bytes, optInputStream -> new Scanner(optInputStream.get(), charset).useDelimiter("\\A").next());
+        String converted = fromBlob(bytes, inputStream -> new Scanner(inputStream, charset).useDelimiter("\\A").next());
 
         assertThat(converted, is(expected));
     }

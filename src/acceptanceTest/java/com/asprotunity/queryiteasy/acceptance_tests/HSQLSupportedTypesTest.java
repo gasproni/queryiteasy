@@ -13,7 +13,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -69,7 +68,7 @@ public class HSQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon 
             List<Row> expectedValues = connection.select("SELECT * FROM testtable",
                     rowStream -> rowStream.collect(toList()));
             assertThat(expectedValues.size(), is(1));
-            Function<Optional<InputStream>, String> blobReader = optInputStream -> readFrom(optInputStream, charset.name());
+            Function<InputStream, String> blobReader = inputStream -> readFrom(inputStream, charset.name());
             assertThat(fromBlob(expectedValues.get(0).at("first"), blobReader), is(nullValue()));
             assertThat(fromBlob(expectedValues.get(0).at("second"), blobReader), is(blobContent));
             assertThat(fromBlob(expectedValues.get(0).at("second"), blobReader), is(blobContent));
