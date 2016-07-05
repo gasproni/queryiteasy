@@ -10,8 +10,8 @@ import static org.mockito.Mockito.mock;
 public class OutputParameterTestBase {
 
     protected CallableStatement statement;
-    private Scope statementScope;
     protected int position;
+    private Scope statementScope;
 
     @Before
     public void setUp() throws Exception {

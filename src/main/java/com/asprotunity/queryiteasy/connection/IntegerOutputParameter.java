@@ -7,7 +7,9 @@ import java.sql.Types;
 
 import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asInteger;
 
-public class IntegerOutputParameter extends OutputParameter<Integer> {
+public class IntegerOutputParameter implements OutputParameter {
+
+    private Integer value = null;
 
     @Override
     public void bind(CallableStatement statement, int position, Scope statementScope) {
@@ -15,5 +17,13 @@ public class IntegerOutputParameter extends OutputParameter<Integer> {
             statement.registerOutParameter(position, Types.INTEGER);
             statementScope.onLeave(() -> setValue(asInteger(statement.getObject(position))));
         });
+    }
+
+    public Integer value() {
+        return value;
+    }
+
+    protected void setValue(Integer value) {
+        this.value = value;
     }
 }

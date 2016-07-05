@@ -7,12 +7,22 @@ import java.sql.Types;
 
 import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asLong;
 
-public class LongOutputParameter extends OutputParameter<Long> {
+public class LongOutputParameter implements OutputParameter {
+    private Long value = null;
+
     @Override
     public void bind(CallableStatement statement, int position, Scope statementScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.BIGINT);
             statementScope.onLeave(() -> setValue(asLong(statement.getObject(position))));
         });
+    }
+
+    public Long value() {
+        return value;
+    }
+
+    protected void setValue(Long value) {
+        this.value = value;
     }
 }

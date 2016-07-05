@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 import static com.asprotunity.queryiteasy.connection.SQLDataConverters.fromBlob;
 
-public class BlobOutputParameter<ResultType> implements Parameter {
+public class BlobOutputParameter<ResultType> implements OutputParameter {
 
     private Function<InputStream, ResultType> blobReader;
     private ResultType value = null;

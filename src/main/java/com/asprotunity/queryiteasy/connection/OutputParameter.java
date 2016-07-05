@@ -1,13 +1,8 @@
 package com.asprotunity.queryiteasy.connection;
 
-public abstract class OutputParameter<ValueType> implements Parameter {
-    private ValueType value = null;
 
-    public ValueType value() {
-        return value;
-    }
-
-    protected void setValue(ValueType value) {
-        this.value = value;
-    }
+/**
+ * Tag interface implemented by all output parameter classes
+ */
+public interface OutputParameter extends Parameter {
 }
