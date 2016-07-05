@@ -9,27 +9,6 @@ import java.util.function.Function;
 
 public final class SQLDataConverters {
 
-    public static <T extends Number> T convertNumber(Object object, Class<T> targetType, Function<String, T> valueOf, Function<Number, T>
-            toValueInstanceMethod) {
-        if (object == null) {
-            return null;
-        } else if (object.getClass().equals(targetType)) {
-            @SuppressWarnings("unchecked")
-            T result = (T) object;
-            return result;
-        } else if (object instanceof Number) {
-            return toValueInstanceMethod.apply((Number) object);
-        } else if (object instanceof String) {
-            return valueOf.apply((String) object);
-        }
-        throw new ClassCastException(classCastExceptionMessage(object, targetType));
-    }
-
-    private static <T> String classCastExceptionMessage(Object object, Class<T> targetType) {
-        return object.getClass().getCanonicalName() + " cannot be cast to " +
-                targetType.getCanonicalName();
-    }
-
     public static <ResultType> ResultType fromBlob(Object object,
                                                    Function<InputStream, ResultType> blobReader) {
         if (object == null) {
@@ -151,5 +130,26 @@ public final class SQLDataConverters {
             return Timestamp.valueOf((String) column);
         }
         throw new ClassCastException(classCastExceptionMessage(column, Timestamp.class));
+    }
+
+    public static <T extends Number> T convertNumber(Object object, Class<T> targetType, Function<String, T> valueOf, Function<Number, T>
+            toValueInstanceMethod) {
+        if (object == null) {
+            return null;
+        } else if (object.getClass().equals(targetType)) {
+            @SuppressWarnings("unchecked")
+            T result = (T) object;
+            return result;
+        } else if (object instanceof Number) {
+            return toValueInstanceMethod.apply((Number) object);
+        } else if (object instanceof String) {
+            return valueOf.apply((String) object);
+        }
+        throw new ClassCastException(classCastExceptionMessage(object, targetType));
+    }
+
+    private static <T> String classCastExceptionMessage(Object object, Class<T> targetType) {
+        return object.getClass().getCanonicalName() + " cannot be cast to " +
+                targetType.getCanonicalName();
     }
 }
