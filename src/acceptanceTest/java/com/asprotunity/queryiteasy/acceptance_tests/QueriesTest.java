@@ -1,15 +1,15 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
 import com.asprotunity.queryiteasy.DataStore;
-import com.asprotunity.queryiteasy.connection.Row;
-import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
-import com.asprotunity.queryiteasy.connection.StringInputOutputParameter;
-import com.asprotunity.queryiteasy.connection.StringOutputParameter;
+import com.asprotunity.queryiteasy.connection.*;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.sql.DataSource;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -18,8 +18,10 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static com.asprotunity.queryiteasy.acceptance_tests.HSQLInMemoryConfigurationAndSchemaDrop.dropHSQLPublicSchema;
+import static com.asprotunity.queryiteasy.acceptance_tests.SupportedTypesTestCommon.readFrom;
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
 import static com.asprotunity.queryiteasy.connection.SQLDataConverters.*;
@@ -73,6 +75,30 @@ public class QueriesTest {
         assertThat(inputOutputParameter.value(), is("NewString"));
         assertThat(outputParameter.value(), is("OldString"));
     }
+
+
+    @Test
+    public void calls_stored_procedure_with_blob_out_parameter() throws SQLException {
+
+        DataSourceInstantiationAndAccess.prepareData(dataSource, "CREATE PROCEDURE test_blob_out_param(in inparam BLOB, out outparam BLOB)\n" +
+                "MODIFIES SQL DATA\n" +
+                "BEGIN ATOMIC \n" +
+                "   SET outparam = inparam;\n" +
+                " END");
+
+        String blobContent = "this is the content of the blob";
+        Charset charset = Charset.forName("UTF-8");
+        Supplier<InputStream> inputBlobSupplier = () -> new ByteArrayInputStream(blobContent.getBytes(charset));
+
+        BlobOutputParameter<String> outputParameter = new BlobOutputParameter<>(inputStream -> readFrom(inputStream, charset.name()));
+
+        dataStore.execute(connection ->
+                connection.call("{call test_blob_out_param(?, ?)}", bind(inputBlobSupplier), outputParameter)
+        );
+
+        assertThat(outputParameter.value(), is(blobContent));
+    }
+
 
     @Test
     public void calls_function_with_no_input_parameters_and_returns_result_correctly() throws SQLException, ParseException {

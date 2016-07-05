@@ -10,7 +10,7 @@ import static org.mockito.Mockito.mock;
 public class OutputParameterTestBase {
 
     protected CallableStatement statement;
-    protected Scope statementScope;
+    private Scope statementScope;
     protected int position;
 
     @Before
@@ -20,8 +20,8 @@ public class OutputParameterTestBase {
         position = 1;
     }
 
-    protected <T> void bindParameterAndMakeCall(OutputParameter<T> outputParameter) {
-        outputParameter.bind(statement, position, statementScope);
+    protected void bindParameterAndMakeCall(Parameter parameter) {
+        parameter.bind(statement, position, statementScope);
         statementScope.close();
     }
 }
