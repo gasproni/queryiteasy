@@ -99,6 +99,39 @@ public class QueriesTest {
         assertThat(outputParameter.value(), is(blobContent));
     }
 
+    @Test
+    public void blob_input_out_parameter_works_correctly() throws SQLException {
+        Charset charset = Charset.forName("UTF-8");
+
+        String blobStoredInDb = "new blob value";
+        dataStore.execute(connection -> {
+            connection.update("CREATE TABLE testtable (first BLOB NOT NULL)");
+            connection.update("INSERT INTO testtable (first) VALUES (?)", bind(() -> new ByteArrayInputStream(blobStoredInDb.getBytes(charset))));
+
+            connection.update("CREATE PROCEDURE test_blob_out_param(inout inoutparam BLOB, out outparam BLOB)\n" +
+                    "MODIFIES SQL DATA\n" +
+                    "BEGIN ATOMIC \n" +
+                    "   SET outparam = inoutparam;\n" +
+                    "   SELECT first into inoutparam from testtable;\n" +
+                    " END");
+
+        });
+
+        String ioParamOriginalBlobContent = "this is the content of the blob";
+        BlobInputOutputParameter<String> inputOutputParameter =
+                new BlobInputOutputParameter<>(() -> new ByteArrayInputStream(ioParamOriginalBlobContent.getBytes(charset)),
+                                               inputStream -> readFrom(inputStream, charset.name()));
+
+        BlobOutputParameter<String> outputParameter = new BlobOutputParameter<>(inputStream -> readFrom(inputStream, charset.name()));
+
+        dataStore.execute(connection ->
+                connection.call("{call test_blob_out_param(?, ?)}", inputOutputParameter, outputParameter)
+        );
+
+        assertThat(outputParameter.value(), is(ioParamOriginalBlobContent));
+        assertThat(inputOutputParameter.value(), is(blobStoredInDb));
+    }
+
 
     @Test
     public void calls_function_with_no_input_parameters_and_returns_result_correctly() throws SQLException, ParseException {
