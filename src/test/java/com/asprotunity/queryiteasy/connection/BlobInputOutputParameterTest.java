@@ -14,18 +14,30 @@ import java.util.function.Supplier;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 public class BlobInputOutputParameterTest extends OutputParameterTestBase {
 
-    @Test(expected = InvalidArgumentException.class)
+    @Test
     public void throws_when_outputBlobReader_is_null() {
-        new BlobInputOutputParameter<String>(() -> null, null);
+        try {
+            new BlobInputOutputParameter<String>(() -> null, null);
+            fail("InvalidArgumentException expected");
+        } catch (InvalidArgumentException e) {
+            assertThat(e.getMessage(), is("outputBlobReader cannot be null"));
+        }
     }
 
-    @Test(expected = InvalidArgumentException.class)
+    @Test
     public void throws_when_inputBlobSupplier_is_null() {
-        new BlobInputOutputParameter<String>(null, InputStream -> null);
+        try {
+            new BlobInputOutputParameter<String>(null, InputStream -> null);
+            fail("InvalidArgumentException expected");
+
+        } catch (InvalidArgumentException e) {
+            assertThat(e.getMessage(), is("inputBlobSupplier cannot be null"));
+        }
     }
 
     @Test

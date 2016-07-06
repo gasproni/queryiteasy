@@ -107,7 +107,6 @@ public class QueriesTest {
         dataStore.execute(connection -> {
             connection.update("CREATE TABLE testtable (first BLOB NOT NULL)");
             connection.update("INSERT INTO testtable (first) VALUES (?)", bind(() -> new ByteArrayInputStream(blobStoredInDb.getBytes(charset))));
-
             connection.update("CREATE PROCEDURE test_blob_out_param(inout inoutparam BLOB, out outparam BLOB)\n" +
                     "MODIFIES SQL DATA\n" +
                     "BEGIN ATOMIC \n" +
