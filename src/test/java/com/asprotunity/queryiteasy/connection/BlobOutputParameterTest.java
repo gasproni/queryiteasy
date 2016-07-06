@@ -1,5 +1,6 @@
 package com.asprotunity.queryiteasy.connection;
 
+import com.asprotunity.queryiteasy.exception.InvalidArgumentException;
 import org.junit.Test;
 import org.mockito.InOrder;
 
@@ -14,6 +15,11 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
 public class BlobOutputParameterTest extends OutputParameterTestBase {
+
+    @Test(expected = InvalidArgumentException.class)
+    public void throws_when_blobreader_is_null() {
+        new BlobOutputParameter<String>(null);
+    }
 
     @Test
     public void binds_results_correctly_when_statement_leaves_scope() throws SQLException {
