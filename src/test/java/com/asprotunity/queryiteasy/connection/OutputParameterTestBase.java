@@ -20,7 +20,7 @@ public class OutputParameterTestBase {
         position = 1;
     }
 
-    protected void bindParameterAndMakeCall(Parameter parameter) {
+    protected void bindParameterAndEmulateCall(Parameter parameter) {
         parameter.bind(statement, position, statementScope);
         statementScope.close();
     }

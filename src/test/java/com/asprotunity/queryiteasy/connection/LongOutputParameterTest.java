@@ -19,7 +19,7 @@ public class LongOutputParameterTest extends OutputParameterTestBase {
         Long value = 10L;
         when(statement.getObject(position)).thenReturn(value);
 
-        bindParameterAndMakeCall(outputParameter);
+        bindParameterAndEmulateCall(outputParameter);
 
         assertThat(outputParameter.value(), is(value));
         InOrder order = inOrder(statement);

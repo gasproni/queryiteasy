@@ -20,7 +20,7 @@ public class BigDecimalOutputParameterTest extends OutputParameterTestBase {
         BigDecimal value = new BigDecimal(10.3);
         when(statement.getObject(position)).thenReturn(value);
 
-        bindParameterAndMakeCall(outputParameter);
+        bindParameterAndEmulateCall(outputParameter);
 
         assertThat(outputParameter.value(), is(value));
         InOrder order = inOrder(statement);

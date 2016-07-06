@@ -19,7 +19,7 @@ public class FloatOutputParameterTest extends OutputParameterTestBase {
         Float value = 10F;
         when(statement.getObject(position)).thenReturn(value);
 
-        bindParameterAndMakeCall(outputParameter);
+        bindParameterAndEmulateCall(outputParameter);
 
         assertThat(outputParameter.value(), is(value));
         InOrder order = inOrder(statement);

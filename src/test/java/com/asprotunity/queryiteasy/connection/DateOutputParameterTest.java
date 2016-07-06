@@ -21,7 +21,7 @@ public class DateOutputParameterTest extends OutputParameterTestBase {
         Date value = new Date(doesntMatter);
         when(statement.getObject(position)).thenReturn(value);
 
-        bindParameterAndMakeCall(outputParameter);
+        bindParameterAndEmulateCall(outputParameter);
 
         assertThat(outputParameter.value(), is(value));
         InOrder order = inOrder(statement);

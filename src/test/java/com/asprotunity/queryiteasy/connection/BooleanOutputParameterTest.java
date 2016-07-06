@@ -19,7 +19,7 @@ public class BooleanOutputParameterTest extends OutputParameterTestBase {
         Boolean value = true;
         when(statement.getObject(position)).thenReturn(value);
 
-        bindParameterAndMakeCall(outputParameter);
+        bindParameterAndEmulateCall(outputParameter);
 
         assertThat(outputParameter.value(), is(value));
         InOrder order = inOrder(statement);

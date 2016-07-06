@@ -31,7 +31,7 @@ public class BlobOutputParameterTest extends OutputParameterTestBase {
         Blob value = mock(Blob.class);
         when(statement.getObject(position)).thenReturn(value);
 
-        bindParameterAndMakeCall(outputParameter);
+        bindParameterAndEmulateCall(outputParameter);
 
         assertThat(outputParameter.value(), is(blobContent));
         InOrder order = inOrder(statement);

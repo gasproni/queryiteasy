@@ -21,7 +21,7 @@ public class TimestampOutputParameterTest extends OutputParameterTestBase {
         Timestamp value = new Timestamp(doesntMatter);
         when(statement.getObject(position)).thenReturn(value);
 
-        bindParameterAndMakeCall(outputParameter);
+        bindParameterAndEmulateCall(outputParameter);
 
         assertThat(outputParameter.value(), is(value));
         InOrder order = inOrder(statement);

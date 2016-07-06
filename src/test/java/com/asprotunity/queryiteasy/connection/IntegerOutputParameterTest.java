@@ -19,7 +19,7 @@ public class IntegerOutputParameterTest extends OutputParameterTestBase {
         Integer value = 10;
         when(statement.getObject(position)).thenReturn(value);
 
-        bindParameterAndMakeCall(outputParameter);
+        bindParameterAndEmulateCall(outputParameter);
 
         assertThat(outputParameter.value(), is(value));
         InOrder order = inOrder(statement);

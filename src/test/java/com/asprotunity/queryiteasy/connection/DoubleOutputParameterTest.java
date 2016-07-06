@@ -19,7 +19,7 @@ public class DoubleOutputParameterTest extends OutputParameterTestBase {
         Double value = 10.0;
         when(statement.getObject(position)).thenReturn(value);
 
-        bindParameterAndMakeCall(outputParameter);
+        bindParameterAndEmulateCall(outputParameter);
 
         assertThat(outputParameter.value(), is(value));
         InOrder order = inOrder(statement);

@@ -68,12 +68,12 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
 
 
     @Override
-    public <ResultType> ResultType select(String sql, Function<Stream<Row>, ResultType> processRow, InputParameter... parameters) {
+    public <ResultType> ResultType select(String sql, Function<Stream<Row>, ResultType> rowProcessor, InputParameter... parameters) {
         return RuntimeSQLException.executeAndReturnResult(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql);
                  Scope statementScope = new Scope()) {
                 bindParameters(parameters, statement, statementScope);
-                return executeQuery(processRow, statement);
+                return executeQuery(rowProcessor, statement);
             }
         });
     }
@@ -90,12 +90,12 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     }
 
     @Override
-    public <ResultType> ResultType call(String sql, Function<Stream<Row>, ResultType> processRow, Parameter... parameters) {
+    public <ResultType> ResultType call(String sql, Function<Stream<Row>, ResultType> rowProcessor, Parameter... parameters) {
         return RuntimeSQLException.executeAndReturnResult(() -> {
             try (CallableStatement statement = connection.prepareCall(sql);
                  Scope statementScope = new Scope()) {
                 bindCallableParameters(parameters, statement, statementScope);
-                return executeQuery(processRow, statement);
+                return executeQuery(rowProcessor, statement);
             }
         });
     }

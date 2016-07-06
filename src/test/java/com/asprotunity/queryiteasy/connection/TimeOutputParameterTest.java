@@ -21,7 +21,7 @@ public class TimeOutputParameterTest extends OutputParameterTestBase {
         Time value = new Time(doesntMatter);
         when(statement.getObject(position)).thenReturn(value);
 
-        bindParameterAndMakeCall(outputParameter);
+        bindParameterAndEmulateCall(outputParameter);
 
         assertThat(outputParameter.value(), is(value));
         InOrder order = inOrder(statement);

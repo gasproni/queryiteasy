@@ -9,11 +9,11 @@ public interface Connection {
 
     void update(String sql, List<Batch> batches);
 
-    <ResultType> ResultType select(String sql, Function<Stream<Row>, ResultType> processRows,
+    <ResultType> ResultType select(String sql, Function<Stream<Row>, ResultType> rowProcessor,
                                    InputParameter... parameters);
 
     void call(String sql, Parameter...parameters);
 
-    <ResultType> ResultType call(String sql, Function<Stream<Row>, ResultType> processRows,
+    <ResultType> ResultType call(String sql, Function<Stream<Row>, ResultType> rowProcessor,
                                  Parameter...parameters);
 }
