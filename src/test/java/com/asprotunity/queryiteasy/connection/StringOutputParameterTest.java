@@ -15,13 +15,13 @@ public class StringOutputParameterTest extends OutputParameterTestBase {
 
     @Test
     public void binds_results_correctly_when_statement_leaves_scope() throws SQLException {
-        StringOutputParameter outputParameter = new StringOutputParameter();
+        StringOutputParameter parameter = new StringOutputParameter();
         String value = "value";
         when(statement.getString(position)).thenReturn(value);
 
-        bindParameterAndEmulateCall(outputParameter);
+        bindParameterAndEmulateCall(parameter);
 
-        assertThat(outputParameter.value(), is(value));
+        assertThat(parameter.value(), is(value));
         InOrder order = inOrder(statement);
         order.verify(statement).registerOutParameter(position, Types.VARCHAR);
         order.verify(statement).getString(position);

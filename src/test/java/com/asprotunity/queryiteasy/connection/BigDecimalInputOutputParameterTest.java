@@ -17,12 +17,12 @@ public class BigDecimalInputOutputParameterTest extends OutputParameterTestBase 
     @Test
     public void binds_results_correctly_when_statement_leaves_scope() throws SQLException {
         BigDecimal value = new BigDecimal(10.3);
-        BigDecimalInputOutputParameter outputParameter = new BigDecimalInputOutputParameter(value);
+        BigDecimalInputOutputParameter parameter = new BigDecimalInputOutputParameter(value);
         when(statement.getObject(position)).thenReturn(value);
 
-        bindParameterAndEmulateCall(outputParameter);
+        bindParameterAndEmulateCall(parameter);
 
-        assertThat(outputParameter.value(), is(value));
+        assertThat(parameter.value(), is(value));
         InOrder order = inOrder(statement);
         order.verify(statement).setBigDecimal(position, value);
         order.verify(statement).registerOutParameter(position, Types.DECIMAL);

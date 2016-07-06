@@ -18,12 +18,12 @@ public class TimestampInputOutputParameterTest extends OutputParameterTestBase {
     public void binds_results_correctly_when_statement_leaves_scope() throws SQLException {
         long doesntMatter = 123456789L;
         Timestamp value = new Timestamp(doesntMatter);
-        TimestampInputOutputParameter outputParameter = new TimestampInputOutputParameter(value);
+        TimestampInputOutputParameter parameter = new TimestampInputOutputParameter(value);
         when(statement.getObject(position)).thenReturn(value);
 
-        bindParameterAndEmulateCall(outputParameter);
+        bindParameterAndEmulateCall(parameter);
 
-        assertThat(outputParameter.value(), is(value));
+        assertThat(parameter.value(), is(value));
         InOrder order = inOrder(statement);
         order.verify(statement).setTimestamp(position, value);
         order.verify(statement).registerOutParameter(position, Types.TIMESTAMP);

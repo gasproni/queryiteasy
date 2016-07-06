@@ -47,14 +47,14 @@ public class BlobInputOutputParameterTest extends OutputParameterTestBase {
         InputStream inputBlobStream = mock(InputStream.class);
         Supplier<InputStream> inputBlobSupplier = () -> inputBlobStream;
         Function<InputStream, String> outputBlobReader = inputStream -> blobContent;
-        BlobInputOutputParameter<String> outputParameter = new BlobInputOutputParameter<>(inputBlobSupplier, outputBlobReader);
+        BlobInputOutputParameter<String> parameter = new BlobInputOutputParameter<>(inputBlobSupplier, outputBlobReader);
 
         Blob value = mock(Blob.class);
         when(statement.getObject(position)).thenReturn(value);
 
-        bindParameterAndEmulateCall(outputParameter);
+        bindParameterAndEmulateCall(parameter);
 
-        assertThat(outputParameter.value(), is(blobContent));
+        assertThat(parameter.value(), is(blobContent));
         InOrder order = inOrder(statement, inputBlobStream);
         order.verify(statement).setBlob(position, inputBlobStream);
         order.verify(statement).registerOutParameter(position, Types.BLOB);
@@ -68,14 +68,14 @@ public class BlobInputOutputParameterTest extends OutputParameterTestBase {
         String blobContent = "this is the content of the blob";
         Supplier<InputStream> inputBlobSupplier = () -> null;
         Function<InputStream, String> outputBlobReader = inputStream -> blobContent;
-        BlobInputOutputParameter<String> outputParameter = new BlobInputOutputParameter<>(inputBlobSupplier, outputBlobReader);
+        BlobInputOutputParameter<String> parameter = new BlobInputOutputParameter<>(inputBlobSupplier, outputBlobReader);
 
         Blob value = mock(Blob.class);
         when(statement.getObject(position)).thenReturn(value);
 
-        bindParameterAndEmulateCall(outputParameter);
+        bindParameterAndEmulateCall(parameter);
 
-        assertThat(outputParameter.value(), is(blobContent));
+        assertThat(parameter.value(), is(blobContent));
         InOrder order = inOrder(statement);
         order.verify(statement).setNull(position, Types.BLOB);
         order.verify(statement).registerOutParameter(position, Types.BLOB);

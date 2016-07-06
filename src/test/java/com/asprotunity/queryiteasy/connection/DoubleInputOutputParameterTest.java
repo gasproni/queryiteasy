@@ -16,12 +16,12 @@ public class DoubleInputOutputParameterTest extends OutputParameterTestBase {
     @Test
     public void binds_results_correctly_when_statement_leaves_scope() throws SQLException {
         Double value = 10.0;
-        DoubleInputOutputParameter outputParameter = new DoubleInputOutputParameter(value);
+        DoubleInputOutputParameter parameter = new DoubleInputOutputParameter(value);
         when(statement.getObject(position)).thenReturn(value);
 
-        bindParameterAndEmulateCall(outputParameter);
+        bindParameterAndEmulateCall(parameter);
 
-        assertThat(outputParameter.value(), is(value));
+        assertThat(parameter.value(), is(value));
         InOrder order = inOrder(statement);
         order.verify(statement).setObject(position, value, Types.DOUBLE);
         order.verify(statement).registerOutParameter(position, Types.DOUBLE);

@@ -15,13 +15,13 @@ public class BooleanOutputParameterTest extends OutputParameterTestBase {
 
     @Test
     public void binds_results_correctly_when_statement_leaves_scope() throws SQLException {
-        BooleanOutputParameter outputParameter = new BooleanOutputParameter();
+        BooleanOutputParameter parameter = new BooleanOutputParameter();
         Boolean value = true;
         when(statement.getObject(position)).thenReturn(value);
 
-        bindParameterAndEmulateCall(outputParameter);
+        bindParameterAndEmulateCall(parameter);
 
-        assertThat(outputParameter.value(), is(value));
+        assertThat(parameter.value(), is(value));
         InOrder order = inOrder(statement);
         order.verify(statement).registerOutParameter(position, Types.BOOLEAN);
         order.verify(statement).getObject(position);

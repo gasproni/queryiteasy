@@ -26,14 +26,14 @@ public class BlobOutputParameterTest extends OutputParameterTestBase {
 
         String blobContent = "this is the content of the blob";
         Function<InputStream, String> blobReader = inputStream -> blobContent;
-        BlobOutputParameter<String> outputParameter = new BlobOutputParameter<>(blobReader);
+        BlobOutputParameter<String> parameter = new BlobOutputParameter<>(blobReader);
 
         Blob value = mock(Blob.class);
         when(statement.getObject(position)).thenReturn(value);
 
-        bindParameterAndEmulateCall(outputParameter);
+        bindParameterAndEmulateCall(parameter);
 
-        assertThat(outputParameter.value(), is(blobContent));
+        assertThat(parameter.value(), is(blobContent));
         InOrder order = inOrder(statement);
         order.verify(statement).registerOutParameter(position, Types.BLOB);
         order.verify(statement).getObject(position);

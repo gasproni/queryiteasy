@@ -15,13 +15,13 @@ public class FloatOutputParameterTest extends OutputParameterTestBase {
 
     @Test
     public void binds_results_correctly_when_statement_leaves_scope() throws SQLException {
-        FloatOutputParameter outputParameter = new FloatOutputParameter();
+        FloatOutputParameter parameter = new FloatOutputParameter();
         Float value = 10F;
         when(statement.getObject(position)).thenReturn(value);
 
-        bindParameterAndEmulateCall(outputParameter);
+        bindParameterAndEmulateCall(parameter);
 
-        assertThat(outputParameter.value(), is(value));
+        assertThat(parameter.value(), is(value));
         InOrder order = inOrder(statement);
         order.verify(statement).registerOutParameter(position, Types.REAL);
         order.verify(statement).getObject(position);
