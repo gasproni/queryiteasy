@@ -44,7 +44,7 @@ dataStore.execute(connection -> connection.select("SELECT title FROM song WHERE 
 ```
 
 `rowProcessor` in the code above is a function that will process the results of the select—basically doing what the while loop does in the JDBC example.
-The method `Datastore.execute` defines also the transaction boundary—f any calls inside the lambda throw an exception the transaction will be rolled back, otherwise, if everything goes well, it will be committed.
+The method `Datastore.execute` defines also the transaction boundary—if any call inside the function passed as parameter throws an exception the transaction will be rolled back, otherwise, if everything goes well, it will be committed, eliminating the need for explicit calls to commit and rollback. The connection is always closed at the end of `execute`, eliminating the need for an explicit call to `Connection.close`.
 The SQLException checked exception has been wrapped in a runtime exception, RuntimeSQLException, so it won't interfere with the use of lambdas.
 
 To see other examples, have a look at the acceptance test classes in 
