@@ -1,6 +1,7 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
 import com.asprotunity.queryiteasy.connection.*;
+import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
 import com.asprotunity.queryiteasy.scope.Scope;
 
 import java.sql.CallableStatement;
@@ -16,12 +17,12 @@ import java.util.stream.StreamSupport;
 
 public class WrappedJDBCConnection implements Connection, AutoCloseable {
     private final java.sql.Connection connection;
-    private final Scope connectionScope;
+    private final AutoCloseableScope connectionScope;
     private final ResultSetWrapperFactory resultSetWrapperFactory;
 
     public WrappedJDBCConnection(java.sql.Connection connection, ResultSetWrapperFactory resultSetWrapperFactory) {
         this.connection = connection;
-        this.connectionScope = new Scope();
+        this.connectionScope = new AutoCloseableScope();
         this.resultSetWrapperFactory = resultSetWrapperFactory;
         RuntimeSQLException.execute(() -> this.connection.setAutoCommit(false));
     }
@@ -43,7 +44,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     public void update(String sql, InputParameter... parameters) {
         RuntimeSQLException.execute(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql);
-                 Scope scope = new Scope()) {
+                 AutoCloseableScope scope = new AutoCloseableScope()) {
                 bindParameters(parameters, statement, scope);
                 statement.execute();
             }
@@ -57,7 +58,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         }
         RuntimeSQLException.execute(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql);
-                 Scope statementScope = new Scope()) {
+                 AutoCloseableScope statementScope = new AutoCloseableScope()) {
                 for (Batch batch : batches) {
                     addBatch(batch, statement, statementScope);
                 }
@@ -71,7 +72,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     public <ResultType> ResultType select(String sql, Function<Stream<Row>, ResultType> rowProcessor, InputParameter... parameters) {
         return RuntimeSQLException.executeAndReturnResult(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql);
-                 Scope statementScope = new Scope()) {
+                 AutoCloseableScope statementScope = new AutoCloseableScope()) {
                 bindParameters(parameters, statement, statementScope);
                 return executeQuery(rowProcessor, statement);
             }
@@ -82,7 +83,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     public void call(String sql, Parameter... parameters) {
         RuntimeSQLException.execute(() -> {
             try (CallableStatement statement = connection.prepareCall(sql);
-                 Scope statementScope = new Scope()) {
+                 AutoCloseableScope statementScope = new AutoCloseableScope()) {
                 bindCallableParameters(parameters, statement, statementScope);
                 statement.execute();
             }
@@ -93,7 +94,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     public <ResultType> ResultType call(String sql, Function<Stream<Row>, ResultType> rowProcessor, Parameter... parameters) {
         return RuntimeSQLException.executeAndReturnResult(() -> {
             try (CallableStatement statement = connection.prepareCall(sql);
-                 Scope statementScope = new Scope()) {
+                 AutoCloseableScope statementScope = new AutoCloseableScope()) {
                 bindCallableParameters(parameters, statement, statementScope);
                 return executeQuery(rowProcessor, statement);
             }

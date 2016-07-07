@@ -6,9 +6,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.*;
 
-public class ScopeTest {
+public class AutoCloseableScopeTest {
 
-    static class Disposable {
+    private static class Disposable {
         private Exception exception;
         public int disposeOrder = -1;
         private static int disposeOrderCounter = 1;
@@ -38,7 +38,7 @@ public class ScopeTest {
         Disposable disposable = new Disposable();
         assertFalse(disposable.isDisposed());
 
-        Scope scope = new Scope();
+        AutoCloseableScope scope = new AutoCloseableScope();
         scope.onLeave(disposable::dispose);
         scope.close();
 
@@ -50,7 +50,7 @@ public class ScopeTest {
         Disposable disposable1 = new Disposable();
         Disposable disposable2 = new Disposable();
 
-        Scope scope = new Scope();
+        AutoCloseableScope scope = new AutoCloseableScope();
         scope.onLeave(disposable1::dispose);
         scope.onLeave(disposable2::dispose);
         scope.close();
@@ -60,7 +60,7 @@ public class ScopeTest {
 
     @Test
     public void works_correctly_when_no_handlers_registered() {
-        Scope scope = new Scope();
+        AutoCloseableScope scope = new AutoCloseableScope();
         assertFalse(scope.isClosed());
         scope.close();
         assertTrue(scope.isClosed());
@@ -72,7 +72,7 @@ public class ScopeTest {
         Exception thrownByDisposable = new Exception();
         Disposable disposable = new Disposable(thrownByDisposable);
 
-        Scope scope = new Scope();
+        AutoCloseableScope scope = new AutoCloseableScope();
         scope.onLeave(disposable::dispose);
 
         try {
@@ -95,7 +95,7 @@ public class ScopeTest {
         Exception disposable2Exception = new Exception();
         Disposable disposable2 = new Disposable(disposable2Exception);
 
-        Scope scope = new Scope();
+        AutoCloseableScope scope = new AutoCloseableScope();
         scope.onLeave(disposable1::dispose);
         scope.onLeave(nonThrowingDisposable::dispose);
         scope.onLeave(disposable2::dispose);

@@ -1,6 +1,6 @@
 package com.asprotunity.queryiteasy.connection;
 
-import com.asprotunity.queryiteasy.scope.Scope;
+import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,13 +19,13 @@ public class InputParameterBindersTest {
 
     private PreparedStatement preparedStatement;
     private int position;
-    private Scope scope;
+    private AutoCloseableScope scope;
 
     @Before
     public void setUp() {
         preparedStatement = mock(PreparedStatement.class);
         position = 1;
-        scope = new Scope();
+        scope = new AutoCloseableScope();
     }
 
     @After
@@ -135,7 +135,7 @@ public class InputParameterBindersTest {
         assertThat(scope.handlersCount(), is(0));
     }
 
-    private void assertThatStreamCloseRegisteredCorrectly(Scope scope, InputStream blobStream) throws IOException {
+    private void assertThatStreamCloseRegisteredCorrectly(AutoCloseableScope scope, InputStream blobStream) throws IOException {
         verify(blobStream, times(0)).close();
         scope.close();
         verify(blobStream, times(1)).close();

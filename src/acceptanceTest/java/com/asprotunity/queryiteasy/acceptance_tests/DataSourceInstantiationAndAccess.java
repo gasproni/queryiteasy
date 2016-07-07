@@ -3,7 +3,7 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.internal.connection.RowFromResultSet;
 import com.asprotunity.queryiteasy.internal.connection.WrappedJDBCResultSet;
-import com.asprotunity.queryiteasy.scope.Scope;
+import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -22,7 +22,7 @@ public interface DataSourceInstantiationAndAccess {
 
     static List<Row> query(DataSource dataSource, String sql) throws SQLException {
         try (Connection connection = dataSource.getConnection();
-             Scope connectionScope = new Scope();
+             AutoCloseableScope connectionScope = new AutoCloseableScope();
              Statement statement = connection.createStatement();
              ResultSet rs = statement.executeQuery(sql)) {
             ArrayList<Row> result = new ArrayList<>();

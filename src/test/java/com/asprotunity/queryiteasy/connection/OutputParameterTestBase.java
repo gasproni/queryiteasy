@@ -1,6 +1,6 @@
 package com.asprotunity.queryiteasy.connection;
 
-import com.asprotunity.queryiteasy.scope.Scope;
+import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
 import org.junit.Before;
 
 import java.sql.CallableStatement;
@@ -11,12 +11,12 @@ public class OutputParameterTestBase {
 
     protected CallableStatement statement;
     protected int position;
-    private Scope statementScope;
+    private AutoCloseableScope statementScope;
 
     @Before
     public void setUp() throws Exception {
         statement = mock(CallableStatement.class);
-        statementScope = new Scope();
+        statementScope = new AutoCloseableScope();
         position = 1;
     }
 

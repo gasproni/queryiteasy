@@ -1,6 +1,7 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
 import com.asprotunity.queryiteasy.connection.SQLDataConverters;
+import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
 import com.asprotunity.queryiteasy.scope.Scope;
 import org.junit.Test;
 
@@ -25,7 +26,7 @@ public class RowFromResultSetTest {
         when(rs.getObject(1)).thenReturn(1);
         when(rs.columnLabel(1)).thenReturn(mixedCaseColumnName);
 
-        Scope dummyScope = new Scope();
+        Scope dummyScope = new AutoCloseableScope();
         RowFromResultSet rowFromResultSet = new RowFromResultSet(rs, dummyScope);
 
         assertThat(SQLDataConverters.asInteger(rowFromResultSet.at(mixedCaseColumnName.toLowerCase())), is(1));
