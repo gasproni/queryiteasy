@@ -53,6 +53,15 @@ To see other examples, have a look at the acceptance test classes in
 To compile execute the "gradlew build" (or "gradlew.bat build" if in Windows) script. That will download the necessary
 gradle packages, compile the project and run all the tests.
 
+## Databases used for testing ##
+
+Queryiteasy has been tested with:
+
+ * HSQLDB 2.3.3
+ * MySQL 5.7.10
+ * Postgres 9.5.1.0
+ * Oracle 12.1.0.2
+
 ## Credits ##
 
 [Rafal Ganczarek](https://github.com/ganczarek) provided a lot of useful feedback and great design suggestions.
