@@ -53,3 +53,7 @@ To see other examples, have a look at the acceptance test classes in
 To compile execute the "gradlew build" (or "gradlew.bat build" if in Windows) script. That will download the necessary
 gradle packages, compile the project and run all the tests.
 
+## Credits ##
+
+[Rafal Ganczarek](https://github.com/ganczarek) provided a lot of useful feedback and great design suggestions.
+
