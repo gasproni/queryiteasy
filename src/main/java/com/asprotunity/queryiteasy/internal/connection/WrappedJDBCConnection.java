@@ -69,7 +69,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
 
 
     @Override
-    public <ResultType> ResultType select(String sql, Function<Stream<Row>, ResultType> rowProcessor, InputParameter... parameters) {
+    public <ResultType> ResultType select(Function<Stream<Row>, ResultType> rowProcessor, String sql, InputParameter... parameters) {
         return RuntimeSQLException.executeAndReturnResult(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql);
                  AutoCloseableScope statementScope = new AutoCloseableScope()) {
@@ -91,7 +91,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     }
 
     @Override
-    public <ResultType> ResultType call(String sql, Function<Stream<Row>, ResultType> rowProcessor, Parameter... parameters) {
+    public <ResultType> ResultType call(Function<Stream<Row>, ResultType> rowProcessor, String sql, Parameter... parameters) {
         return RuntimeSQLException.executeAndReturnResult(() -> {
             try (CallableStatement statement = connection.prepareCall(sql);
                  AutoCloseableScope statementScope = new AutoCloseableScope()) {

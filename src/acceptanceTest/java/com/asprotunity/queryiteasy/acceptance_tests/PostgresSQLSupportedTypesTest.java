@@ -32,10 +32,10 @@ public class PostgresSQLSupportedTypesTest extends NonStandardSupportedTypesTest
     @Override
     protected void cleanup() throws Exception {
         getDataStore().execute(connection -> {
-            List<String> dropTableStatements = connection.select("select 'drop table if exists \"' || tablename || '\" cascade;' as dropTableStatement" +
+            List<String> dropTableStatements = connection.select(rowStream -> rowStream.map(row -> asString(row.at("dropTableStatement"))).collect(Collectors.toList()), "select 'drop table if exists \"' || tablename || '\" cascade;' as dropTableStatement" +
                             "  from pg_tables " +
-                            " where tableowner = 'testuser'",
-                    rowStream -> rowStream.map(row -> asString(row.at("dropTableStatement"))).collect(Collectors.toList()));
+                            " where tableowner = 'testuser'"
+            );
             for (String statement : dropTableStatements) {
                 connection.update(statement);
             }

@@ -119,7 +119,7 @@ public abstract class SupportedTypesTestCommon {
         });
 
         return getDataStore().executeWithResult(connection ->
-                connection.select("SELECT * FROM testtable", rowStream -> rowStream.collect(toList()))
+                connection.select(rowStream -> rowStream.collect(toList()), "SELECT * FROM testtable")
         );
     }
 

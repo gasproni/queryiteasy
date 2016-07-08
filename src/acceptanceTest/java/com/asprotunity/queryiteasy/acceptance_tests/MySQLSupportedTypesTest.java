@@ -73,8 +73,8 @@ public class MySQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon
         });
 
         getDataStore().execute(connection -> {
-            List<Row> expectedValues = connection.select("SELECT * FROM testtable",
-                    rowStream -> rowStream.collect(toList()));
+            List<Row> expectedValues = connection.select(rowStream -> rowStream.collect(toList()), "SELECT * FROM testtable"
+            );
             assertThat(expectedValues.size(), is(1));
             Function<InputStream, String> blobReader = inputStream -> readFrom(inputStream, charset.name());
             assertThat(fromBlob(expectedValues.get(0).at("first"), blobReader), is(nullValue()));
@@ -87,9 +87,8 @@ public class MySQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon
     @Override
     protected void cleanup() throws Exception {
         getDataStore().execute(connection -> {
-            List<String> dropTableStatements = connection.select("SELECT CONCAT('DROP TABLE ', table_name, ' CASCADE') as dropTableStatement" +
+            List<String> dropTableStatements = connection.select(rowStream -> rowStream.map(row -> asString(row.at("dropTableStatement"))).collect(Collectors.toList()), "SELECT CONCAT('DROP TABLE ', table_name, ' CASCADE') as dropTableStatement" +
                             " FROM information_schema.tables WHERE table_schema = ?",
-                    rowStream -> rowStream.map(row -> asString(row.at("dropTableStatement"))).collect(Collectors.toList()),
                     bind(dbName));
             for (String statement : dropTableStatements) {
                 connection.update(statement);

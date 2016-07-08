@@ -143,7 +143,7 @@ public class QueriesTest {
                 " END");
 
         Date result = dataStore.executeWithResult(connection ->
-                connection.call("{call return_date()}", rowStream -> asDate(rowStream.findFirst().get().at(1)))
+                connection.call(rowStream -> asDate(rowStream.findFirst().get().at(1)), "{call return_date()}")
         );
 
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
@@ -238,8 +238,8 @@ public class QueriesTest {
                 "INSERT INTO testtable (first) VALUES (11)");
 
         List<Integer> result = dataStore.executeWithResult(connection ->
-                connection.select("SELECT first FROM testtable ORDER BY first ASC",
-                        rowStream -> rowStream.map(row -> asInteger(row.at("first"))).collect(toList()))
+                connection.select(rowStream -> rowStream.map(row -> asInteger(row.at("first"))).collect(toList()),
+                        "SELECT first FROM testtable ORDER BY first ASC")
         );
 
         assertThat(result.size(), is(2));
@@ -254,8 +254,8 @@ public class QueriesTest {
                 "INSERT INTO testtable (first, second) VALUES (11, 'asecond11')");
 
         List<Row> result = dataStore.executeWithResult(connection ->
-                connection.select("SELECT first, second FROM testtable WHERE first = ? AND second = ?",
-                        rowStream -> rowStream.collect(toList()),
+                connection.select(rowStream -> rowStream.collect(toList()),
+                        "SELECT first, second FROM testtable WHERE first = ? AND second = ?",
                         bind(10), bind("asecond10"))
         );
 

@@ -65,8 +65,8 @@ public class HSQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon 
         });
 
         getDataStore().execute(connection -> {
-            List<Row> expectedValues = connection.select("SELECT * FROM testtable",
-                    rowStream -> rowStream.collect(toList()));
+            List<Row> expectedValues = connection.select(rowStream -> rowStream.collect(toList()), "SELECT * FROM testtable"
+            );
             assertThat(expectedValues.size(), is(1));
             Function<InputStream, String> blobReader = inputStream -> readFrom(inputStream, charset.name());
             assertThat(fromBlob(expectedValues.get(0).at("first"), blobReader), is(nullValue()));

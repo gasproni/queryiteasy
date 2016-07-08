@@ -97,7 +97,7 @@ public class WrappedJDBCConnectionTest {
                     return rowStream;
                 };
 
-        wrappedJDBCConnection.select(sql, setStreamOnCloseToVerifyResultSetNotClosedBeforeStreamAndMarkStreamClosed);
+        wrappedJDBCConnection.select(setStreamOnCloseToVerifyResultSetNotClosedBeforeStreamAndMarkStreamClosed, sql);
 
         assertTrue(streamClosed.get());
         InOrder order = inOrder(preparedStatement, rs);
@@ -117,7 +117,7 @@ public class WrappedJDBCConnectionTest {
         when(preparedStatement.executeQuery()).thenReturn(rs);
         when(rs.next()).thenReturn(false);
 
-        wrappedJDBCConnection.select(sql, rowStream -> 1, bind(() -> blobStream));
+        wrappedJDBCConnection.select(rowStream -> 1, sql, bind(() -> blobStream));
 
         InOrder order = inOrder(preparedStatement, rs, blobStream);
         order.verify(preparedStatement, times(1)).executeQuery();
@@ -135,7 +135,7 @@ public class WrappedJDBCConnectionTest {
 
         wrappedJDBCConnection = new WrappedJDBCConnection(jdbcConnection, resultSetWrapperFactory);
 
-        wrappedJDBCConnection.select(sql, rowStream -> rowStream.collect(Collectors.toList()));
+        wrappedJDBCConnection.select(rowStream -> rowStream.collect(Collectors.toList()), sql);
         wrappedJDBCConnection.close();
         InOrder order = inOrder(blob, jdbcConnection);
         order.verify(blob, times(1)).free();
@@ -151,7 +151,7 @@ public class WrappedJDBCConnectionTest {
 
         wrappedJDBCConnection = new WrappedJDBCConnection(jdbcConnection, resultSetWrapperFactory);
 
-        wrappedJDBCConnection.select(sql, rowStream -> rowStream.collect(Collectors.toList()));
+        wrappedJDBCConnection.select(rowStream -> rowStream.collect(Collectors.toList()), sql);
         wrappedJDBCConnection.close();
         InOrder order = inOrder(nclob, jdbcConnection);
         order.verify(nclob, times(1)).free();
@@ -167,7 +167,7 @@ public class WrappedJDBCConnectionTest {
 
         wrappedJDBCConnection = new WrappedJDBCConnection(jdbcConnection, resultSetWrapperFactory);
 
-        wrappedJDBCConnection.select(sql, rowStream -> rowStream.collect(Collectors.toList()));
+        wrappedJDBCConnection.select(rowStream -> rowStream.collect(Collectors.toList()), sql);
         wrappedJDBCConnection.close();
         InOrder order = inOrder(clob, jdbcConnection);
         order.verify(clob, times(1)).free();
