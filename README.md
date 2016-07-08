@@ -37,8 +37,8 @@ With Queryiteasy:
 DataSource dataSource = ...;
 // The dataStore is created once and passed around in your code.
 Datastore dataStore = new DataStore(dataSource);
-dataStore.execute(connection -> connection.select("SELECT title FROM song WHERE band = ? and year = ?", 
-                                                  rowProcessor, 
+dataStore.execute(connection -> connection.select(rowProcessor,
+                                                  "SELECT title FROM song WHERE band = ? and year = ?", 
                                                   bind("Rolling Stones"), bind(1975)));
 
 ```
