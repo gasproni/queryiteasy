@@ -1,6 +1,7 @@
 package com.asprotunity.queryiteasy.connection;
 
 import java.io.InputStream;
+import java.io.Reader;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.function.Supplier;
@@ -68,7 +69,7 @@ public class InputParameterBinders {
                 RuntimeSQLException.execute(() -> statement.setTimestamp(position, value));
     }
 
-    public static InputParameter bind(Supplier<InputStream> streamSupplier) {
+    public static InputParameter bindBlob(Supplier<InputStream> streamSupplier) {
         return (statement, position, statementScope) -> {
             InputStream inputStream = streamSupplier.get();
             RuntimeSQLException.execute(() -> {
@@ -77,6 +78,20 @@ public class InputParameterBinders {
                 } else {
                     statementScope.onLeave(inputStream::close);
                     statement.setBlob(position, inputStream);
+                }
+            });
+        };
+    }
+
+    public static InputParameter bindClob(Supplier<Reader> readerSupplier) {
+        return (statement, position, statementScope) -> {
+            Reader reader = readerSupplier.get();
+            RuntimeSQLException.execute(() -> {
+                if (reader == null) {
+                    statement.setNull(position, Types.CLOB);
+                } else {
+                    statementScope.onLeave(reader::close);
+                    statement.setClob(position, reader);
                 }
             });
         };

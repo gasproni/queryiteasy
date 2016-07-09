@@ -2,15 +2,14 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 
 
 import com.asprotunity.queryiteasy.DataStore;
+import com.asprotunity.queryiteasy.connection.InputParameterBinders;
 import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.sql.DataSource;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -26,6 +25,7 @@ import java.util.stream.Collectors;
 
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
+import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bindClob;
 import static com.asprotunity.queryiteasy.connection.SQLDataConverters.*;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -97,7 +97,7 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
         getDataStore().execute(connection -> {
             connection.update("CREATE TABLE testtable (first BLOB NULL, second BLOB NULL)");
             connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
-                    bind(() -> null), bind(value));
+                    InputParameterBinders.bindBlob(() -> null), InputParameterBinders.bindBlob(value));
         });
 
         getDataStore().execute(connection -> {
@@ -108,6 +108,31 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
             assertThat(fromBlob(expectedValues.get(0).at("first"), blobReader), is(nullValue()));
             assertThat(fromBlob(expectedValues.get(0).at("second"), blobReader), is(blobContent));
             assertThat(fromBlob(expectedValues.get(0).at("second"), blobReader), is(blobContent));
+
+        });
+    }
+
+    @Test
+    public void stores_and_reads_clobs() throws SQLException, UnsupportedEncodingException {
+        String clobContent = "this is the content of the blob";
+        Supplier<Reader> readerSupplier = () -> new StringReader(clobContent);
+
+        getDataStore().execute(connection -> {
+            connection.update("CREATE TABLE testtable (first CLOB NULL, second CLOB NULL)");
+            connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
+                    bindClob(() -> null), bindClob(readerSupplier));
+        });
+
+
+        getDataStore().execute(connection -> {
+            List<Row> expectedValues = connection.select(rowStream -> rowStream.collect(toList()),
+                    "SELECT * FROM testtable");
+
+
+            assertThat(expectedValues.size(), is(1));
+            assertThat(fromClob(expectedValues.get(0).at("first"), SupportedTypesTestCommon::readFrom), is(nullValue()));
+            assertThat(fromClob(expectedValues.get(0).at("second"), SupportedTypesTestCommon::readFrom), is(clobContent));
+            assertThat(fromClob(expectedValues.get(0).at("second"), SupportedTypesTestCommon::readFrom), is(clobContent));
 
         });
     }

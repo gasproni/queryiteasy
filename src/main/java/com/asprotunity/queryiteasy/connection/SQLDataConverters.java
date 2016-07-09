@@ -1,8 +1,6 @@
 package com.asprotunity.queryiteasy.connection;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.function.Function;
@@ -23,8 +21,34 @@ public final class SQLDataConverters {
                 throw new RuntimeIOException(e);
             }
         } else if (object instanceof byte[]) {
+            // This is for MySQL. Sometimes it returns blobs as byte[].
             try (InputStream inputStream = new ByteArrayInputStream((byte[]) object)) {
                 return blobReader.apply(inputStream);
+            } catch (IOException e) {
+                throw new RuntimeIOException(e);
+            }
+        } else {
+            throw new ClassCastException("Cannot extract blob data from " + object.getClass());
+        }
+    }
+
+    public static <ResultType> ResultType fromClob(Object object,
+                                                   Function<Reader, ResultType> clobReader) {
+        if (object == null) {
+            return clobReader.apply(null);
+        } else if (object instanceof Clob) {
+            Clob clob = (Clob) object;
+            try (Reader reader = clob.getCharacterStream()) {
+                return clobReader.apply(reader);
+            } catch (SQLException e) {
+                throw new RuntimeSQLException(e);
+            } catch (IOException e) {
+                throw new RuntimeIOException(e);
+            }
+        } else if (object instanceof String) {
+            // This is for MySQL 'TEXT' SQL type.
+            try (Reader reader = new StringReader((String) object)) {
+                return clobReader.apply(reader);
             } catch (IOException e) {
                 throw new RuntimeIOException(e);
             }

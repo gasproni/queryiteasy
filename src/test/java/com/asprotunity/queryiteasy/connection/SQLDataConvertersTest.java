@@ -2,11 +2,11 @@ package com.asprotunity.queryiteasy.connection;
 
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.Scanner;
 import java.util.function.Function;
 
@@ -15,6 +15,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class SQLDataConvertersTest {
 
@@ -194,12 +196,66 @@ public class SQLDataConvertersTest {
     }
 
     @Test
-    public void converts_from_blob_byte_array() throws UnsupportedEncodingException {
+    public void from_blob_converts_from_sql_blob() throws UnsupportedEncodingException, SQLException {
+        Blob blob = mock(Blob.class);
+        String expected = "this is a string to be converted;";
+        String charset = "UTF-8";
+        when(blob.getBinaryStream()).thenReturn(new ByteArrayInputStream(expected.getBytes(charset)));
+
+        String converted = fromBlob(blob, inputStream -> new Scanner(inputStream, charset).useDelimiter("\\A").next());
+
+        assertThat(converted, is(expected));
+    }
+
+    @Test
+    public void returns_null_if_blob_is_null() throws UnsupportedEncodingException, SQLException {
+        String converted = fromBlob(null, inputStream -> {
+            if (inputStream == null)
+                return null;
+            else throw new RuntimeException("Shouldn't get here!");
+        });
+
+        assertThat(converted, is(nullValue()));
+    }
+
+    @Test
+    public void from_blob_converts_from_byte_array() throws UnsupportedEncodingException {
         String expected = "this is a string to be converted;";
         String charset = "UTF-8";
         byte[] bytes = expected.getBytes(charset);
 
         String converted = fromBlob(bytes, inputStream -> new Scanner(inputStream, charset).useDelimiter("\\A").next());
+
+        assertThat(converted, is(expected));
+    }
+
+    @Test
+    public void from_clob_converts_from_sql_clob() throws UnsupportedEncodingException, SQLException {
+        Clob clob = mock(Clob.class);
+        String expected = "this is a string to be converted;";
+        when(clob.getCharacterStream()).thenReturn(new StringReader(expected));
+
+        String converted = fromClob(clob, reader -> new Scanner(reader).useDelimiter("\\A").next());
+
+        assertThat(converted, is(expected));
+    }
+
+    @Test
+    public void returns_null_if_clob_is_null() throws UnsupportedEncodingException, SQLException {
+        String converted = fromClob(null, reader -> {
+            if (reader == null)
+                return null;
+            else throw new RuntimeException("Shouldn't get here!");
+        });
+
+        assertThat(converted, is(nullValue()));
+    }
+
+    @Test
+    public void from_clob_converts_from_string() throws UnsupportedEncodingException {
+        String expected = "this is a string to be converted;";
+
+        String converted = fromClob(expected, reader -> new Scanner(reader).useDelimiter("\\A").next());
 
         assertThat(converted, is(expected));
     }

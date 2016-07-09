@@ -7,6 +7,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import java.io.InputStream;
+import java.io.Reader;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.SQLException;
@@ -128,6 +129,13 @@ public abstract class SupportedTypesTestCommon {
             return null;
         }
         return new java.util.Scanner(inputStream, charset).useDelimiter("\\A").next();
+    }
+
+    protected static String readFrom(Reader reader) {
+        if (reader == null) {
+            return null;
+        }
+        return new java.util.Scanner(reader).useDelimiter("\\A").next();
     }
 
     protected abstract void cleanup() throws Exception;

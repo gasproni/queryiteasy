@@ -93,7 +93,7 @@ public class QueriesTest {
         BlobOutputParameter<String> outputParameter = new BlobOutputParameter<>(inputStream -> readFrom(inputStream, charset.name()));
 
         dataStore.execute(connection ->
-                connection.call("{call test_blob_out_param(?, ?)}", bind(inputBlobSupplier), outputParameter)
+                connection.call("{call test_blob_out_param(?, ?)}", InputParameterBinders.bindBlob(inputBlobSupplier), outputParameter)
         );
 
         assertThat(outputParameter.value(), is(blobContent));
@@ -106,7 +106,7 @@ public class QueriesTest {
         String blobStoredInDb = "new blob value";
         dataStore.execute(connection -> {
             connection.update("CREATE TABLE testtable (first BLOB NOT NULL)");
-            connection.update("INSERT INTO testtable (first) VALUES (?)", bind(() -> new ByteArrayInputStream(blobStoredInDb.getBytes(charset))));
+            connection.update("INSERT INTO testtable (first) VALUES (?)", InputParameterBinders.bindBlob(() -> new ByteArrayInputStream(blobStoredInDb.getBytes(charset))));
             connection.update("CREATE PROCEDURE test_blob_out_param(inout inoutparam BLOB, out outparam BLOB)\n" +
                     "MODIFIES SQL DATA\n" +
                     "BEGIN ATOMIC \n" +

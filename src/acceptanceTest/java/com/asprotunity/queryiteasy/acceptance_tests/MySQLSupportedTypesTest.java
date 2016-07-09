@@ -7,9 +7,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.sql.DataSource;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -23,7 +21,7 @@ import java.util.stream.Collectors;
 
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.loadProperties;
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
-import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
+import static com.asprotunity.queryiteasy.connection.InputParameterBinders.*;
 import static com.asprotunity.queryiteasy.connection.SQLDataConverters.*;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -69,7 +67,7 @@ public class MySQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon
         getDataStore().execute(connection -> {
             connection.update("CREATE TABLE testtable (first BLOB NULL, second BLOB NULL)");
             connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
-                    bind(() -> null), bind(value));
+                    bindBlob(() -> null), bindBlob(value));
         });
 
         getDataStore().execute(connection -> {
@@ -80,6 +78,31 @@ public class MySQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon
             assertThat(fromBlob(expectedValues.get(0).at("first"), blobReader), is(nullValue()));
             assertThat(fromBlob(expectedValues.get(0).at("second"), blobReader), is(blobContent));
             assertThat(fromBlob(expectedValues.get(0).at("second"), blobReader), is(blobContent));
+
+        });
+    }
+
+    @Test
+    public void stores_and_reads_clobs_as_text() throws SQLException, UnsupportedEncodingException {
+        String clobContent = "this is the content of the blob";
+        Supplier<Reader> readerSupplier = () -> new StringReader(clobContent);
+
+        getDataStore().execute(connection -> {
+            connection.update("CREATE TABLE testtable (first TEXT NULL, second TEXT NULL)");
+            connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
+                    bindClob(() -> null), bindClob(readerSupplier));
+        });
+
+
+        getDataStore().execute(connection -> {
+            List<Row> expectedValues = connection.select(rowStream -> rowStream.collect(toList()),
+                    "SELECT * FROM testtable");
+
+
+            assertThat(expectedValues.size(), is(1));
+            assertThat(fromClob(expectedValues.get(0).at("first"), SupportedTypesTestCommon::readFrom), is(nullValue()));
+            assertThat(fromClob(expectedValues.get(0).at("second"), SupportedTypesTestCommon::readFrom), is(clobContent));
+            assertThat(fromClob(expectedValues.get(0).at("second"), SupportedTypesTestCommon::readFrom), is(clobContent));
 
         });
     }
