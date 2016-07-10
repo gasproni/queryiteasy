@@ -24,9 +24,9 @@ import java.util.stream.Collectors;
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.loadProperties;
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
-import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bindLongvarbinary;
+import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bindLongVarbinary;
 import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asString;
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.fromLongvarbinary;
+import static com.asprotunity.queryiteasy.connection.SQLDataConverters.fromLongVarbinary;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -79,7 +79,7 @@ public class PostgresSQLSupportedTypesTest extends NonStandardSupportedTypesTest
         getDataStore().execute(connection -> {
             connection.update("CREATE TABLE testtable (first BYTEA NULL, second BYTEA NULL)");
             connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
-                    bindLongvarbinary(() -> null), bindLongvarbinary(inputStreamSupplier));
+                    bindLongVarbinary(() -> null), bindLongVarbinary(inputStreamSupplier));
         });
 
         getDataStore().execute(connection -> {
@@ -87,8 +87,8 @@ public class PostgresSQLSupportedTypesTest extends NonStandardSupportedTypesTest
             );
             assertThat(expectedValues.size(), is(1));
             Function<InputStream, String> blobReader = inputStream -> readFrom(inputStream, charset.name());
-            assertThat(fromLongvarbinary(expectedValues.get(0).at("first"), blobReader), is(nullValue()));
-            assertThat(fromLongvarbinary(expectedValues.get(0).at("second"), blobReader), is(byteaContent));
+            assertThat(fromLongVarbinary(expectedValues.get(0).at("first"), blobReader), is(nullValue()));
+            assertThat(fromLongVarbinary(expectedValues.get(0).at("second"), blobReader), is(byteaContent));
 
         });
     }

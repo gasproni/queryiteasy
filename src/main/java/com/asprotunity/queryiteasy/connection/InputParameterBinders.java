@@ -97,7 +97,7 @@ public class InputParameterBinders {
         };
     }
 
-    public static InputParameter bindLongvarbinary(Supplier<InputStream> streamSupplier) {
+    public static InputParameter bindLongVarbinary(Supplier<InputStream> streamSupplier) {
         return (statement, position, statementScope) -> {
             InputStream inputStream = streamSupplier.get();
             RuntimeSQLException.execute(() -> {

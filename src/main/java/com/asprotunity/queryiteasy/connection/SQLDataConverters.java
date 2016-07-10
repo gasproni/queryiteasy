@@ -57,7 +57,7 @@ public final class SQLDataConverters {
         }
     }
 
-    public static <ResultType> ResultType fromLongvarbinary(Object object,
+    public static <ResultType> ResultType fromLongVarbinary(Object object,
                                                             Function<InputStream, ResultType> longvarbinaryReader) {
        return fromBlob(object, longvarbinaryReader);
     }
