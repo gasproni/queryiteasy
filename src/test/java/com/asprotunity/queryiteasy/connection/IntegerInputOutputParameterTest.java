@@ -15,15 +15,16 @@ public class IntegerInputOutputParameterTest extends OutputParameterTestBase {
 
     @Test
     public void binds_results_correctly_when_statement_leaves_scope() throws SQLException {
-        Integer value = 10;
-        IntegerInputOutputParameter parameter = new IntegerInputOutputParameter(value);
-        when(statement.getObject(position)).thenReturn(value);
+        Integer inputValue = 10;
+        Integer outputValue = 10;
+        IntegerInputOutputParameter parameter = new IntegerInputOutputParameter(inputValue);
+        when(statement.getObject(position)).thenReturn(outputValue);
 
         bindParameterAndEmulateCall(parameter);
 
-        assertThat(parameter.value(), is(value));
+        assertThat(parameter.value(), is(outputValue));
         InOrder order = inOrder(statement);
-        order.verify(statement).setObject(position, value, Types.INTEGER);
+        order.verify(statement).setObject(position, inputValue, Types.INTEGER);
         order.verify(statement).registerOutParameter(position, Types.INTEGER);
         order.verify(statement).getObject(position);
     }

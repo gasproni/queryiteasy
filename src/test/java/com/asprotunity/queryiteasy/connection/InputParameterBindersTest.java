@@ -153,6 +153,23 @@ public class InputParameterBindersTest {
         assertThat(scope.handlersCount(), is(0));
     }
 
+    @Test
+    public void binds_valid_longvarbinaries_correctly() throws Exception {
+        InputStream binaryStream = mock(InputStream.class);
+        InputParameterBinders.bindLongvarbinary(() -> binaryStream).bind(preparedStatement, position, scope);
+        verify(preparedStatement, times(1)).setBinaryStream(position, binaryStream);
+        assertThat(this.scope.handlersCount(), is(1));
+        assertThatStreamOnLeaveRegisteredCorrectly(scope, binaryStream);
+
+    }
+
+    @Test
+    public void binds_null_longvarbinaries_correctly() throws Exception {
+        InputParameterBinders.bindLongvarbinary(() -> null).bind(preparedStatement, position, scope);
+        verify(preparedStatement, times(1)).setNull(position, Types.LONGVARBINARY);
+        assertThat(scope.handlersCount(), is(0));
+    }
+
     private void assertThatStreamOnLeaveRegisteredCorrectly(AutoCloseableScope scope, InputStream blobStream) throws IOException {
         verify(blobStream, times(0)).close();
         scope.close();

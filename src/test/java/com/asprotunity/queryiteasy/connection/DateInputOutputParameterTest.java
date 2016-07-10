@@ -16,16 +16,16 @@ public class DateInputOutputParameterTest extends OutputParameterTestBase {
 
     @Test
     public void binds_results_correctly_when_statement_leaves_scope() throws SQLException {
-        long doesntMatter = 123456789L;
-        Date value = new Date(doesntMatter);
-        DateInputOutputParameter parameter = new DateInputOutputParameter(value);
-        when(statement.getObject(position)).thenReturn(value);
+        Date inputValue = new Date(123456789L);
+        Date outputValue = new Date(99999999L);
+        DateInputOutputParameter parameter = new DateInputOutputParameter(inputValue);
+        when(statement.getObject(position)).thenReturn(outputValue);
 
         bindParameterAndEmulateCall(parameter);
 
-        assertThat(parameter.value(), is(value));
+        assertThat(parameter.value(), is(outputValue));
         InOrder order = inOrder(statement);
-        order.verify(statement).setDate(position, value);
+        order.verify(statement).setDate(position, inputValue);
         order.verify(statement).registerOutParameter(position, Types.DATE);
         order.verify(statement).getObject(position);
     }

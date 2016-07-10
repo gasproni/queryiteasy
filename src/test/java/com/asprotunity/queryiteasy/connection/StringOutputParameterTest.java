@@ -23,7 +23,7 @@ public class StringOutputParameterTest extends OutputParameterTestBase {
 
         assertThat(parameter.value(), is(value));
         InOrder order = inOrder(statement);
-        order.verify(statement).registerOutParameter(position, Types.VARCHAR);
+        order.verify(statement).registerOutParameter(position, Types.LONGVARCHAR);
         order.verify(statement).getString(position);
     }
 

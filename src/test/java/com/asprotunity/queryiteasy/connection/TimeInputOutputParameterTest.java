@@ -16,16 +16,16 @@ public class TimeInputOutputParameterTest extends OutputParameterTestBase {
 
     @Test
     public void binds_results_correctly_when_statement_leaves_scope() throws SQLException {
-        long doesntMatter = 123456789L;
-        Time value = new Time(doesntMatter);
-        TimeInputOutputParameter parameter = new TimeInputOutputParameter(value);
-        when(statement.getObject(position)).thenReturn(value);
+        Time inputValue = new Time(123456789L);
+        Time outputValue = new Time(99999999L);
+        TimeInputOutputParameter parameter = new TimeInputOutputParameter(inputValue);
+        when(statement.getObject(position)).thenReturn(outputValue);
 
         bindParameterAndEmulateCall(parameter);
 
-        assertThat(parameter.value(), is(value));
+        assertThat(parameter.value(), is(outputValue));
         InOrder order = inOrder(statement);
-        order.verify(statement).setTime(position, value);
+        order.verify(statement).setTime(position, inputValue);
         order.verify(statement).registerOutParameter(position, Types.TIME);
         order.verify(statement).getObject(position);
     }

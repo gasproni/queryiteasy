@@ -15,15 +15,16 @@ public class ByteInputOutputParameterTest extends OutputParameterTestBase {
 
     @Test
     public void binds_results_correctly_when_statement_leaves_scope() throws SQLException {
-        Byte value = 10;
-        ByteInputOutputParameter parameter = new ByteInputOutputParameter(value);
-        when(statement.getObject(position)).thenReturn(value);
+        Byte inputValue = 10;
+        Byte outputValue = 12;
+        ByteInputOutputParameter parameter = new ByteInputOutputParameter(inputValue);
+        when(statement.getObject(position)).thenReturn(outputValue);
 
         bindParameterAndEmulateCall(parameter);
 
-        assertThat(parameter.value(), is(value));
+        assertThat(parameter.value(), is(outputValue));
         InOrder order = inOrder(statement);
-        order.verify(statement).setObject(position, value, Types.TINYINT);
+        order.verify(statement).setObject(position, inputValue, Types.TINYINT);
         order.verify(statement).registerOutParameter(position, Types.TINYINT);
         order.verify(statement).getObject(position);
     }

@@ -37,6 +37,15 @@ public abstract class SupportedTypesTestCommon {
     }
 
     @Test
+    public void stores_and_reads_strings() throws SQLException {
+        String value = "this is the text";
+        List<Row> expectedValues = storeAndReadValuesBack("VARCHAR(250)", bind((String) null), bind(value));
+        assertThat(expectedValues.size(), is(1));
+        assertThat(asString(expectedValues.get(0).at("first")), is(nullValue()));
+        assertThat(asString(expectedValues.get(0).at("second")), is(value));
+    }
+
+    @Test
     public void stores_and_reads_short_integers() throws SQLException {
         Short value = 10;
         List<Row> expectedValues = storeAndReadValuesBack("SMALLINT", bind((Short) null), bind(value));

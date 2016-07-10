@@ -43,10 +43,10 @@ public class BlobInputOutputParameterTest extends OutputParameterTestBase {
     @Test
     public void binds_results_correctly_when_input_blob_not_null_and_statement_leaves_scope() throws SQLException, IOException {
 
-        String blobContent = "this is the content of the blob";
+        String outputBlobContent = "this is the content of the blob";
         InputStream inputBlobStream = mock(InputStream.class);
         Supplier<InputStream> inputBlobSupplier = () -> inputBlobStream;
-        Function<InputStream, String> outputBlobReader = inputStream -> blobContent;
+        Function<InputStream, String> outputBlobReader = inputStream -> outputBlobContent;
         BlobInputOutputParameter<String> parameter = new BlobInputOutputParameter<>(inputBlobSupplier, outputBlobReader);
 
         Blob value = mock(Blob.class);
@@ -54,7 +54,7 @@ public class BlobInputOutputParameterTest extends OutputParameterTestBase {
 
         bindParameterAndEmulateCall(parameter);
 
-        assertThat(parameter.value(), is(blobContent));
+        assertThat(parameter.value(), is(outputBlobContent));
         InOrder order = inOrder(statement, inputBlobStream);
         order.verify(statement).setBlob(position, inputBlobStream);
         order.verify(statement).registerOutParameter(position, Types.BLOB);

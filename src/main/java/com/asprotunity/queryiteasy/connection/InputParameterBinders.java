@@ -97,6 +97,20 @@ public class InputParameterBinders {
         };
     }
 
+    public static InputParameter bindLongvarbinary(Supplier<InputStream> streamSupplier) {
+        return (statement, position, statementScope) -> {
+            InputStream inputStream = streamSupplier.get();
+            RuntimeSQLException.execute(() -> {
+                if (inputStream == null) {
+                    statement.setNull(position, Types.LONGVARBINARY);
+                } else {
+                    statementScope.onLeave(inputStream::close);
+                    statement.setBinaryStream(position, inputStream);
+                }
+            });
+        };
+    }
+
     private static void setValue(PreparedStatement statement, int position, Object value, int sqlType) {
         RuntimeSQLException.execute(() -> statement.setObject(position, value, sqlType));
     }

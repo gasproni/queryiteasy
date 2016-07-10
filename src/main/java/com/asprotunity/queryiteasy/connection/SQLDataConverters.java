@@ -53,11 +53,19 @@ public final class SQLDataConverters {
                 throw new RuntimeIOException(e);
             }
         } else {
-            throw new ClassCastException("Cannot extract blob data from " + object.getClass());
+            throw new ClassCastException("Cannot extract clob data from " + object.getClass());
         }
     }
 
+    public static <ResultType> ResultType fromLongvarbinary(Object object,
+                                                            Function<InputStream, ResultType> longvarbinaryReader) {
+       return fromBlob(object, longvarbinaryReader);
+    }
+
     public static String asString(Object column) {
+        if (column == null) {
+            return null;
+        }
         return String.valueOf(column);
     }
 

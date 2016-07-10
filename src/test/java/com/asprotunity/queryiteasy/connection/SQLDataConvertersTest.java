@@ -26,6 +26,16 @@ public class SQLDataConvertersTest {
     }
 
     @Test
+    public void converts_null_strings_correctly() {
+        assertThat(asString(null), is(nullValue()));
+    }
+
+    @Test
+    public void converts_strings_correctly() {
+        assertThat(asString("text"), is("text"));
+    }
+
+    @Test
     public void converts_to_boolean_correctly() {
         assertThat(asBoolean(Boolean.TRUE), is(Boolean.TRUE));
         assertThat(asBoolean(Boolean.FALSE), is(Boolean.FALSE));

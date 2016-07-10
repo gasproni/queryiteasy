@@ -11,22 +11,22 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.when;
 
-public class LongInputOutputParameterTest extends OutputParameterTestBase {
+public class StringInputOutputParameterTest extends OutputParameterTestBase {
 
     @Test
     public void binds_results_correctly_when_statement_leaves_scope() throws SQLException {
-        Long inputValue = 10L;
-        Long outputValue = 10L;
-        LongInputOutputParameter parameter = new LongInputOutputParameter(inputValue);
-        when(statement.getObject(position)).thenReturn(outputValue);
+        String inputValue = "input value";
+        String outputValue = "output value";
+        StringInputOutputParameter parameter = new StringInputOutputParameter(inputValue);
+        when(statement.getString(position)).thenReturn(outputValue);
 
         bindParameterAndEmulateCall(parameter);
 
         assertThat(parameter.value(), is(outputValue));
         InOrder order = inOrder(statement);
-        order.verify(statement).setObject(position, inputValue, Types.BIGINT);
-        order.verify(statement).registerOutParameter(position, Types.BIGINT);
-        order.verify(statement).getObject(position);
+        order.verify(statement).setString(position, inputValue);
+        order.verify(statement).registerOutParameter(position, Types.LONGVARCHAR);
+        order.verify(statement).getString(position);
     }
 
 }
