@@ -15,6 +15,13 @@ import static org.mockito.Mockito.when;
 public class TimeInputOutputParameterTest extends OutputParameterTestBase {
 
     @Test
+    public void value_is_initialized_with_constructor_parameter() {
+        Time inputValue = new Time(123456789L);
+        TimeInputOutputParameter parameter = new TimeInputOutputParameter(inputValue);
+        assertThat(parameter.value(), is(inputValue));
+    }
+
+    @Test
     public void binds_results_correctly_when_statement_leaves_scope() throws SQLException {
         Time inputValue = new Time(123456789L);
         Time outputValue = new Time(99999999L);

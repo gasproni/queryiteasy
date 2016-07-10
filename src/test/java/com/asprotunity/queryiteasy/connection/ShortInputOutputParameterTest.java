@@ -14,6 +14,13 @@ import static org.mockito.Mockito.when;
 public class ShortInputOutputParameterTest extends OutputParameterTestBase {
 
     @Test
+    public void value_is_initialized_with_constructor_parameter() {
+        Short inputValue = 10;
+        ShortInputOutputParameter parameter = new ShortInputOutputParameter(inputValue);
+        assertThat(parameter.value(), is(inputValue));
+    }
+
+    @Test
     public void binds_results_correctly_when_statement_leaves_scope() throws SQLException {
         Short inputValue = 10;
         Short outputValue = 10;

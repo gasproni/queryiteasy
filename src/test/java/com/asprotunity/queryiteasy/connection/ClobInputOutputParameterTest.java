@@ -13,11 +13,22 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 public class ClobInputOutputParameterTest extends OutputParameterTestBase {
+
+    @Test
+    public void value_is_initialized_with_null() {
+        Reader inputClobReader = mock(Reader.class);
+        ClobInputOutputParameter<String> parameter = new ClobInputOutputParameter<>(() -> inputClobReader,
+                outputClobReader -> "doesn't matter");
+
+        assertThat(parameter.value(), is(nullValue()));
+        verifyZeroInteractions(inputClobReader);
+    }
 
     @Test
     public void throws_when_outputClobReader_is_null() {

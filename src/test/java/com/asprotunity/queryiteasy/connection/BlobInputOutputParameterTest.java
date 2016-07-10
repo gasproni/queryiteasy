@@ -13,11 +13,22 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 public class BlobInputOutputParameterTest extends OutputParameterTestBase {
+
+    @Test
+    public void value_is_initialized_with_null() {
+        InputStream inputBlobStream = mock(InputStream.class);
+        BlobInputOutputParameter<String> parameter = new BlobInputOutputParameter<>(() -> inputBlobStream,
+                outputBlobStream -> "doesn't matter");
+
+        assertThat(parameter.value(), is(nullValue()));
+        verifyZeroInteractions(inputBlobStream);
+    }
 
     @Test
     public void throws_when_outputBlobReader_is_null() {

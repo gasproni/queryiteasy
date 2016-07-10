@@ -14,6 +14,13 @@ import static org.mockito.Mockito.when;
 public class LongInputOutputParameterTest extends OutputParameterTestBase {
 
     @Test
+    public void value_is_initialized_with_constructor_parameter() {
+        Long inputValue = 10L;
+        LongInputOutputParameter parameter = new LongInputOutputParameter(inputValue);
+        assertThat(parameter.value(), is(inputValue));
+    }
+
+    @Test
     public void binds_results_correctly_when_statement_leaves_scope() throws SQLException {
         Long inputValue = 10L;
         Long outputValue = 10L;

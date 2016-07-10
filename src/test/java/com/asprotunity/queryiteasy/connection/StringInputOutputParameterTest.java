@@ -14,6 +14,13 @@ import static org.mockito.Mockito.when;
 public class StringInputOutputParameterTest extends OutputParameterTestBase {
 
     @Test
+    public void value_is_initialized_with_constructor_parameter() {
+        String inputValue = "input value";
+        StringInputOutputParameter parameter = new StringInputOutputParameter(inputValue);
+        assertThat(parameter.value(), is(inputValue));
+    }
+
+    @Test
     public void binds_results_correctly_when_statement_leaves_scope() throws SQLException {
         String inputValue = "input value";
         String outputValue = "output value";

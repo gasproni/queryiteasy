@@ -14,6 +14,13 @@ import static org.mockito.Mockito.when;
 public class ByteInputOutputParameterTest extends OutputParameterTestBase {
 
     @Test
+    public void value_is_initialized_with_constructor_parameter() {
+        Byte inputValue = 10;
+        ByteInputOutputParameter parameter = new ByteInputOutputParameter(inputValue);
+        assertThat(parameter.value(), is(inputValue));
+    }
+
+    @Test
     public void binds_results_correctly_when_statement_leaves_scope() throws SQLException {
         Byte inputValue = 10;
         Byte outputValue = 12;

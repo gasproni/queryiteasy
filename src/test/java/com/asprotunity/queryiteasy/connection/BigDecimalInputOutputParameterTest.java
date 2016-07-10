@@ -15,6 +15,13 @@ import static org.mockito.Mockito.when;
 public class BigDecimalInputOutputParameterTest extends OutputParameterTestBase {
 
     @Test
+    public void value_is_initialized_with_constructor_parameter() {
+        BigDecimal inputValue = new BigDecimal(10.3);
+        BigDecimalInputOutputParameter parameter = new BigDecimalInputOutputParameter(inputValue);
+        assertThat(parameter.value(), is(inputValue));
+    }
+
+    @Test
     public void binds_results_correctly_when_statement_leaves_scope() throws SQLException {
         BigDecimal inputValue = new BigDecimal(10.3);
         BigDecimal outputValue = new BigDecimal(12.5);

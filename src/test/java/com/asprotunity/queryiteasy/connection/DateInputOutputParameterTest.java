@@ -15,6 +15,13 @@ import static org.mockito.Mockito.when;
 public class DateInputOutputParameterTest extends OutputParameterTestBase {
 
     @Test
+    public void value_is_initialized_with_constructor_parameter() {
+        Date inputValue = new Date(123456789L);
+        DateInputOutputParameter parameter = new DateInputOutputParameter(inputValue);
+        assertThat(parameter.value(), is(inputValue));
+    }
+
+    @Test
     public void binds_results_correctly_when_statement_leaves_scope() throws SQLException {
         Date inputValue = new Date(123456789L);
         Date outputValue = new Date(99999999L);
