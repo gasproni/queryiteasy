@@ -3,6 +3,7 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 
 import com.asprotunity.queryiteasy.DataStore;
 import com.asprotunity.queryiteasy.connection.Row;
+import com.asprotunity.queryiteasy.stringio.StringIO;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -36,7 +37,6 @@ import static org.junit.Assume.assumeTrue;
 public class PostgresSQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon {
 
     private static DataStore dataStore;
-    private static String dbName;
 
     @BeforeClass
     public static void setUp() throws Exception {
@@ -55,7 +55,7 @@ public class PostgresSQLSupportedTypesTest extends NonStandardSupportedTypesTest
 
         DataSource result = DataSourceInstantiationAndAccess.instantiateDataSource(properties.getProperty("queryiteasy.postgresql.datasource.class"));
 
-        dbName = properties.getProperty("queryiteasy.postgresql.databaseName");
+        String dbName = properties.getProperty("queryiteasy.postgresql.databaseName");
         Method setDbName = result.getClass().getMethod("setDatabaseName", String.class);
         setDbName.invoke(result, dbName);
 
@@ -86,7 +86,7 @@ public class PostgresSQLSupportedTypesTest extends NonStandardSupportedTypesTest
             List<Row> expectedValues = connection.select(rowStream -> rowStream.collect(toList()), "SELECT * FROM testtable"
             );
             assertThat(expectedValues.size(), is(1));
-            Function<InputStream, String> blobReader = inputStream -> readFrom(inputStream, charset.name());
+            Function<InputStream, String> blobReader = inputStream -> StringIO.readFrom(inputStream, charset);
             assertThat(fromLongVarbinary(expectedValues.get(0).at("first"), blobReader), is(nullValue()));
             assertThat(fromLongVarbinary(expectedValues.get(0).at("second"), blobReader), is(byteaContent));
 
@@ -115,10 +115,10 @@ public class PostgresSQLSupportedTypesTest extends NonStandardSupportedTypesTest
     protected void cleanup() throws Exception {
         getDataStore().execute(connection -> {
             List<String> dropTableStatements = connection.select(rowStream ->
-                    rowStream.map(row -> asString(row.at("dropTableStatement"))).collect(Collectors.toList()),
+                            rowStream.map(row -> asString(row.at("dropTableStatement"))).collect(Collectors.toList()),
                     "select 'drop table if exists \"' || tablename || '\" cascade;' as dropTableStatement" +
-                    "  from pg_tables " +
-                    " where tableowner = 'testuser'"
+                            "  from pg_tables " +
+                            " where tableowner = 'testuser'"
             );
             for (String statement : dropTableStatements) {
                 connection.update(statement);

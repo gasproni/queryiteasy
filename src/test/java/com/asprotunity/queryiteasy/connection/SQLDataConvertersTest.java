@@ -1,16 +1,19 @@
 package com.asprotunity.queryiteasy.connection;
 
+import com.asprotunity.queryiteasy.stringio.StringIO;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.sql.*;
 import java.util.Scanner;
 import java.util.function.Function;
 
 import static com.asprotunity.queryiteasy.connection.SQLDataConverters.*;
+import static com.asprotunity.queryiteasy.stringio.StringIO.readFrom;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -209,10 +212,10 @@ public class SQLDataConvertersTest {
     public void from_blob_converts_from_sql_blob() throws UnsupportedEncodingException, SQLException {
         Blob blob = mock(Blob.class);
         String expected = "this is a string to be converted;";
-        String charset = "UTF-8";
-        when(blob.getBinaryStream()).thenReturn(new ByteArrayInputStream(expected.getBytes(charset)));
+        Charset charset = Charset.forName("UTF-8");
+        when(blob.getBinaryStream()).thenReturn(new ByteArrayInputStream(expected.getBytes("UTF-8")));
 
-        String converted = fromBlob(blob, inputStream -> new Scanner(inputStream, charset).useDelimiter("\\A").next());
+        String converted = fromBlob(blob, inputStream -> readFrom(inputStream, charset));
 
         assertThat(converted, is(expected));
     }
@@ -231,10 +234,10 @@ public class SQLDataConvertersTest {
     @Test
     public void from_blob_converts_from_byte_array() throws UnsupportedEncodingException {
         String expected = "this is a string to be converted;";
-        String charset = "UTF-8";
-        byte[] bytes = expected.getBytes(charset);
+        Charset charset = Charset.forName("UTF-8");
+        byte[] bytes = expected.getBytes("UTF-8");
 
-        String converted = fromBlob(bytes, inputStream -> new Scanner(inputStream, charset).useDelimiter("\\A").next());
+        String converted = fromBlob(bytes, inputStream -> readFrom(inputStream, charset));
 
         assertThat(converted, is(expected));
     }
@@ -245,7 +248,7 @@ public class SQLDataConvertersTest {
         String expected = "this is a string to be converted;";
         when(clob.getCharacterStream()).thenReturn(new StringReader(expected));
 
-        String converted = fromClob(clob, reader -> new Scanner(reader).useDelimiter("\\A").next());
+        String converted = fromClob(clob, StringIO::readFrom);
 
         assertThat(converted, is(expected));
     }

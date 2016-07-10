@@ -3,6 +3,7 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 
 import com.asprotunity.queryiteasy.DataStore;
 import com.asprotunity.queryiteasy.connection.Row;
+import com.asprotunity.queryiteasy.stringio.StringIO;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -66,7 +67,7 @@ public class HSQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon 
             List<Row> expectedValues = connection.select(rowStream -> rowStream.collect(toList()), "SELECT * FROM testtable"
             );
             assertThat(expectedValues.size(), is(1));
-            Function<InputStream, String> blobReader = inputStream -> readFrom(inputStream, charset.name());
+            Function<InputStream, String> blobReader = inputStream -> StringIO.readFrom(inputStream, charset);
             assertThat(fromBlob(expectedValues.get(0).at("first"), blobReader), is(nullValue()));
             assertThat(fromBlob(expectedValues.get(0).at("second"), blobReader), is(blobContent));
             assertThat(fromBlob(expectedValues.get(0).at("second"), blobReader), is(blobContent));
@@ -93,9 +94,9 @@ public class HSQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon 
 
 
             assertThat(expectedValues.size(), is(1));
-            assertThat(fromClob(expectedValues.get(0).at("first"), SupportedTypesTestCommon::readFrom), is(nullValue()));
-            assertThat(fromClob(expectedValues.get(0).at("second"), SupportedTypesTestCommon::readFrom), is(clobContent));
-            assertThat(fromClob(expectedValues.get(0).at("second"), SupportedTypesTestCommon::readFrom), is(clobContent));
+            assertThat(fromClob(expectedValues.get(0).at("first"), StringIO::readFrom), is(nullValue()));
+            assertThat(fromClob(expectedValues.get(0).at("second"), StringIO::readFrom), is(clobContent));
+            assertThat(fromClob(expectedValues.get(0).at("second"), StringIO::readFrom), is(clobContent));
 
         });
     }

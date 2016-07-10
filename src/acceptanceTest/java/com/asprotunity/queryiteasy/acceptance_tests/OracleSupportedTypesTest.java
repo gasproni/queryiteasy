@@ -5,6 +5,7 @@ import com.asprotunity.queryiteasy.DataStore;
 import com.asprotunity.queryiteasy.connection.InputParameterBinders;
 import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
+import com.asprotunity.queryiteasy.stringio.StringIO;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -44,6 +45,33 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
         dataStore = new DataStore(dataSource);
     }
 
+    private static boolean isNotDropOfSystemOrLobIndex(String statement) {
+        String statementToLower = statement.toLowerCase();
+        return !statementToLower.startsWith("drop index sys_") && !statementToLower.startsWith("drop lob");
+    }
+
+    private static DataSource configureDataSource() throws Exception {
+
+        Path path = prependTestDatasourcesConfigFolderPath("oracle.properties");
+        if (!Files.exists(path)) {
+            return null;
+        }
+        Properties properties = TestPropertiesLoader.loadProperties(path);
+
+        DataSource result = DataSourceInstantiationAndAccess.instantiateDataSource(properties.getProperty("queryiteasy.oracle.datasource.class"));
+
+        Method setUrl = result.getClass().getMethod("setURL", String.class);
+        setUrl.invoke(result, properties.getProperty("queryiteasy.oracle.datasource.url"));
+
+        Method setUser = result.getClass().getMethod("setUser", String.class);
+        setUser.invoke(result, properties.getProperty("queryiteasy.oracle.datasource.user"));
+
+        Method setPassword = result.getClass().getMethod("setPassword", String.class);
+        setPassword.invoke(result, properties.getProperty("queryiteasy.oracle.datasource.password"));
+        return result;
+
+    }
+
     protected DataStore getDataStore() {
         return dataStore;
     }
@@ -79,7 +107,6 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
         assertThat(asDate(expectedValues.get(0).at("second")), is(value));
     }
 
-
     @Test
     public void doesnt_support_booleans() throws SQLException {
         try {
@@ -104,7 +131,7 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
             List<Row> expectedValues = connection.select(rowStream -> rowStream.collect(toList()), "SELECT * FROM testtable"
             );
             assertThat(expectedValues.size(), is(1));
-            Function<InputStream, String> blobReader = inputStream -> readFrom(inputStream, charset.name());
+            Function<InputStream, String> blobReader = inputStream -> StringIO.readFrom(inputStream, charset);
             assertThat(fromBlob(expectedValues.get(0).at("first"), blobReader), is(nullValue()));
             assertThat(fromBlob(expectedValues.get(0).at("second"), blobReader), is(blobContent));
             assertThat(fromBlob(expectedValues.get(0).at("second"), blobReader), is(blobContent));
@@ -130,9 +157,9 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
 
 
             assertThat(expectedValues.size(), is(1));
-            assertThat(fromClob(expectedValues.get(0).at("first"), SupportedTypesTestCommon::readFrom), is(nullValue()));
-            assertThat(fromClob(expectedValues.get(0).at("second"), SupportedTypesTestCommon::readFrom), is(clobContent));
-            assertThat(fromClob(expectedValues.get(0).at("second"), SupportedTypesTestCommon::readFrom), is(clobContent));
+            assertThat(fromClob(expectedValues.get(0).at("first"), StringIO::readFrom), is(nullValue()));
+            assertThat(fromClob(expectedValues.get(0).at("second"), StringIO::readFrom), is(clobContent));
+            assertThat(fromClob(expectedValues.get(0).at("second"), StringIO::readFrom), is(clobContent));
 
         });
     }
@@ -140,8 +167,10 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
     @Override
     protected void cleanup() throws Exception {
         getDataStore().execute(connection -> {
-            List<String> dropStatements = connection.select(rowStream -> rowStream.map(row -> asString(row.at("dropStatements"))).collect(Collectors.toList()), "select 'drop '||object_type||' '|| object_name|| " +
-                            "DECODE(OBJECT_TYPE,'TABLE',' CASCADE CONSTRAINTS','') as dropStatements from user_objects"
+            List<String> dropStatements = connection.select(rowStream ->
+                    rowStream.map(row -> asString(row.at("dropStatements"))).collect(Collectors.toList()),
+                    "select 'drop '||object_type||' '|| object_name|| " +
+                    "DECODE(OBJECT_TYPE,'TABLE',' CASCADE CONSTRAINTS','') as dropStatements from user_objects"
             );
             for (String statement : dropStatements) {
                 if (isNotDropOfSystemOrLobIndex(statement)) {
@@ -149,33 +178,6 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
                 }
             }
         });
-    }
-
-    private static boolean isNotDropOfSystemOrLobIndex(String statement) {
-        String statementToLower = statement.toLowerCase();
-        return !statementToLower.startsWith("drop index sys_") && !statementToLower.startsWith("drop lob");
-    }
-
-    private static DataSource configureDataSource() throws Exception {
-
-        Path path = prependTestDatasourcesConfigFolderPath("oracle.properties");
-        if (!Files.exists(path)) {
-            return null;
-        }
-        Properties properties = TestPropertiesLoader.loadProperties(path);
-
-        DataSource result = DataSourceInstantiationAndAccess.instantiateDataSource(properties.getProperty("queryiteasy.oracle.datasource.class"));
-
-        Method setUrl = result.getClass().getMethod("setURL", String.class);
-        setUrl.invoke(result, properties.getProperty("queryiteasy.oracle.datasource.url"));
-
-        Method setUser = result.getClass().getMethod("setUser", String.class);
-        setUser.invoke(result, properties.getProperty("queryiteasy.oracle.datasource.user"));
-
-        Method setPassword = result.getClass().getMethod("setPassword", String.class);
-        setPassword.invoke(result, properties.getProperty("queryiteasy.oracle.datasource.password"));
-        return result;
-
     }
 
 }

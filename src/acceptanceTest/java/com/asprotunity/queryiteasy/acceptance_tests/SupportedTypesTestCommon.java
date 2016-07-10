@@ -6,8 +6,6 @@ import com.asprotunity.queryiteasy.connection.Row;
 import org.junit.After;
 import org.junit.Test;
 
-import java.io.InputStream;
-import java.io.Reader;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.SQLException;
@@ -131,20 +129,6 @@ public abstract class SupportedTypesTestCommon {
         return getDataStore().executeWithResult(connection ->
                 connection.select(rowStream -> rowStream.collect(toList()), "SELECT * FROM testtable")
         );
-    }
-
-    protected static String readFrom(InputStream inputStream, String charset) {
-        if (inputStream == null) {
-            return null;
-        }
-        return new java.util.Scanner(inputStream, charset).useDelimiter("\\A").next();
-    }
-
-    protected static String readFrom(Reader reader) {
-        if (reader == null) {
-            return null;
-        }
-        return new java.util.Scanner(reader).useDelimiter("\\A").next();
     }
 
     protected abstract void cleanup() throws Exception;

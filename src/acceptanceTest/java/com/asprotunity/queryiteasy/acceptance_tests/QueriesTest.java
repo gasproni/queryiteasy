@@ -2,6 +2,7 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 
 import com.asprotunity.queryiteasy.DataStore;
 import com.asprotunity.queryiteasy.connection.*;
+import com.asprotunity.queryiteasy.stringio.StringIO;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -21,10 +22,8 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import static com.asprotunity.queryiteasy.acceptance_tests.HSQLInMemoryConfigurationAndSchemaDrop.dropHSQLPublicSchema;
-import static com.asprotunity.queryiteasy.acceptance_tests.SupportedTypesTestCommon.readFrom;
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
-import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
-import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bindBlob;
+import static com.asprotunity.queryiteasy.connection.InputParameterBinders.*;
 import static com.asprotunity.queryiteasy.connection.SQLDataConverters.*;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.core.Is.is;
@@ -91,7 +90,7 @@ public class QueriesTest {
         Charset charset = Charset.forName("UTF-8");
         Supplier<InputStream> inputBlobSupplier = () -> new ByteArrayInputStream(blobContent.getBytes(charset));
 
-        BlobOutputParameter<String> outputParameter = new BlobOutputParameter<>(inputStream -> readFrom(inputStream, charset.name()));
+        BlobOutputParameter<String> outputParameter = new BlobOutputParameter<>(inputStream -> StringIO.readFrom(inputStream, charset));
 
         dataStore.execute(connection ->
                 connection.call("{call test_blob_out_param(?, ?)}", bindBlob(inputBlobSupplier), outputParameter)
@@ -121,9 +120,9 @@ public class QueriesTest {
         String ioParamOriginalBlobContent = "this is the content of the blob";
         BlobInputOutputParameter<String> inputOutputParameter =
                 new BlobInputOutputParameter<>(() -> new ByteArrayInputStream(ioParamOriginalBlobContent.getBytes(charset)),
-                                               inputStream -> readFrom(inputStream, charset.name()));
+                        inputStream -> StringIO.readFrom(inputStream, charset));
 
-        BlobOutputParameter<String> outputParameter = new BlobOutputParameter<>(inputStream -> readFrom(inputStream, charset.name()));
+        BlobOutputParameter<String> outputParameter = new BlobOutputParameter<>(inputStream -> StringIO.readFrom(inputStream, charset));
 
         dataStore.execute(connection ->
                 connection.call("{call test_blob_out_param(?, ?)}", inputOutputParameter, outputParameter)
@@ -131,6 +130,42 @@ public class QueriesTest {
 
         assertThat(outputParameter.value(), is(ioParamOriginalBlobContent));
         assertThat(inputOutputParameter.value(), is(blobStoredInDb));
+    }
+
+
+    @Test
+    public void longvarbinary_input_out_parameter_works_correctly() throws SQLException {
+
+        String binaryStoredInDb = "binary stored in db value";
+        Charset charset = Charset.forName("UTF-8");
+        dataStore.execute(connection -> {
+            connection.update("CREATE TABLE testtable (first LONGVARBINARY NOT NULL)");
+            connection.update("INSERT INTO testtable (first) VALUES (?)",
+                    bindLongVarbinary(() -> new ByteArrayInputStream(binaryStoredInDb.getBytes(charset))));
+            connection.update("CREATE PROCEDURE test_binary_out_param(inout inoutparam LONGVARBINARY, out outparam LONGVARBINARY)\n" +
+                    "MODIFIES SQL DATA\n" +
+                    "BEGIN ATOMIC \n" +
+                    "   SET outparam = inoutparam;\n" +
+                    "   SELECT first into inoutparam from testtable;\n" +
+                    " END");
+
+        });
+
+        String ioParamOriginalBinaryContent = "this is the content of the blob";
+        LongVarBinaryInputOutputParameter<String> inputOutputParameter =
+                new LongVarBinaryInputOutputParameter<>(
+                        () -> new ByteArrayInputStream(ioParamOriginalBinaryContent.getBytes(charset)),
+                        inputStream -> StringIO.readFrom(inputStream, charset));
+
+        LongVarBinaryOutputParameter<String> outputParameter =
+                new LongVarBinaryOutputParameter<>(inputStream -> StringIO.readFrom(inputStream, charset));
+
+        dataStore.execute(connection ->
+                connection.call("{call test_binary_out_param(?, ?)}", inputOutputParameter, outputParameter)
+        );
+
+        assertThat(outputParameter.value(), is(ioParamOriginalBinaryContent));
+        assertThat(inputOutputParameter.value(), is(binaryStoredInDb));
     }
 
 
