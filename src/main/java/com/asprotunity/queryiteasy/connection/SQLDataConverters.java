@@ -62,106 +62,106 @@ public final class SQLDataConverters {
        return fromBlob(object, longvarbinaryReader);
     }
 
-    public static String asString(Object column) {
-        if (column == null) {
+    public static String asString(Object value) {
+        if (value == null) {
             return null;
         }
-        return String.valueOf(column);
+        return String.valueOf(value);
     }
 
-    public static Short asShort(Object column) {
-        return convertNumber(column,
+    public static Short asShort(Object value) {
+        return convertNumber(value,
                 Short.class, Short::valueOf, Number::shortValue);
     }
 
-    public static Integer asInteger(Object column) {
-        return convertNumber(column,
+    public static Integer asInteger(Object value) {
+        return convertNumber(value,
                 Integer.class, Integer::valueOf, Number::intValue);
     }
 
-    public static Long asLong(Object column) {
-        return convertNumber(column,
+    public static Long asLong(Object value) {
+        return convertNumber(value,
                 Long.class, Long::valueOf, Number::longValue);
     }
 
-    public static Double asDouble(Object column) {
-        return convertNumber(column,
+    public static Double asDouble(Object value) {
+        return convertNumber(value,
                 Double.class, Double::valueOf, Number::doubleValue);
     }
 
-    public static Float asFloat(Object column) {
-        return convertNumber(column,
+    public static Float asFloat(Object value) {
+        return convertNumber(value,
                 Float.class, Float::valueOf, Number::floatValue);
     }
 
-    public static Byte asByte(Object column) {
-        return convertNumber(column,
+    public static Byte asByte(Object value) {
+        return convertNumber(value,
                 Byte.class, Byte::valueOf, Number::byteValue);
     }
 
-    public static BigDecimal asBigDecimal(Object column) {
-        if (column == null) {
+    public static BigDecimal asBigDecimal(Object value) {
+        if (value == null) {
             return null;
-        } else if (column instanceof BigDecimal) {
-            return (BigDecimal) column;
-        } else if (column instanceof String) {
-            return new BigDecimal((String) column);
-        } else if (column instanceof Number) {
-            return BigDecimal.valueOf(((Number) column).doubleValue());
+        } else if (value instanceof BigDecimal) {
+            return (BigDecimal) value;
+        } else if (value instanceof String) {
+            return new BigDecimal((String) value);
+        } else if (value instanceof Number) {
+            return BigDecimal.valueOf(((Number) value).doubleValue());
         }
-        throw new ClassCastException(classCastExceptionMessage(column, BigDecimal.class));
+        throw new ClassCastException(classCastExceptionMessage(value, BigDecimal.class));
     }
 
-    public static Boolean asBoolean(Object column) {
-        if (column == null) {
+    public static Boolean asBoolean(Object value) {
+        if (value == null) {
             return null;
-        } else if (column instanceof Boolean) {
-            return (Boolean) column;
-        } else if (column instanceof String) {
-            return Boolean.valueOf((String) column);
+        } else if (value instanceof Boolean) {
+            return (Boolean) value;
+        } else if (value instanceof String) {
+            return Boolean.valueOf((String) value);
         }
-        throw new ClassCastException(classCastExceptionMessage(column, Boolean.class));
+        throw new ClassCastException(classCastExceptionMessage(value, Boolean.class));
     }
 
-    public static Date asDate(Object column) {
-        if (column == null) {
+    public static Date asDate(Object value) {
+        if (value == null) {
             return null;
-        } else if (column instanceof Date) {
-            return (Date) column;
-        } else if (column instanceof String) {
-            return Date.valueOf((String) column);
-        } else if (column instanceof Timestamp) {
-            Timestamp timestamp = (Timestamp) column;
+        } else if (value instanceof Date) {
+            return (Date) value;
+        } else if (value instanceof String) {
+            return Date.valueOf((String) value);
+        } else if (value instanceof Timestamp) {
+            Timestamp timestamp = (Timestamp) value;
             return new Date(timestamp.getTime());
         }
-        throw new ClassCastException(classCastExceptionMessage(column, Date.class));
+        throw new ClassCastException(classCastExceptionMessage(value, Date.class));
     }
 
-    public static Time asTime(Object column) {
-        if (column == null) {
+    public static Time asTime(Object value) {
+        if (value == null) {
             return null;
-        } else if (column instanceof Time) {
-            return (Time) column;
-        } else if (column instanceof String) {
-            return Time.valueOf((String) column);
-        } else if (column instanceof Timestamp) {
-            Timestamp timestamp = (Timestamp) column;
+        } else if (value instanceof Time) {
+            return (Time) value;
+        } else if (value instanceof String) {
+            return Time.valueOf((String) value);
+        } else if (value instanceof Timestamp) {
+            Timestamp timestamp = (Timestamp) value;
             return new Time(timestamp.getTime());
         }
-        throw new ClassCastException(classCastExceptionMessage(column, Time.class));
+        throw new ClassCastException(classCastExceptionMessage(value, Time.class));
     }
 
-    public static Timestamp asTimestamp(Object column) {
-        if (column == null) {
+    public static Timestamp asTimestamp(Object value) {
+        if (value == null) {
             return null;
-        } else if (column instanceof Timestamp) {
-            return (Timestamp) column;
-        } else if (column instanceof java.util.Date) {
-            return Timestamp.from(((java.util.Date) column).toInstant());
-        } else if (column instanceof String) {
-            return Timestamp.valueOf((String) column);
+        } else if (value instanceof Timestamp) {
+            return (Timestamp) value;
+        } else if (value instanceof java.util.Date) {
+            return Timestamp.from(((java.util.Date) value).toInstant());
+        } else if (value instanceof String) {
+            return Timestamp.valueOf((String) value);
         }
-        throw new ClassCastException(classCastExceptionMessage(column, Timestamp.class));
+        throw new ClassCastException(classCastExceptionMessage(value, Timestamp.class));
     }
 
     public static <T extends Number> T convertNumber(Object object, Class<T> targetType, Function<String, T> valueOf, Function<Number, T>
