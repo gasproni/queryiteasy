@@ -78,8 +78,6 @@ public class MySQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon
             Function<InputStream, String> blobReader = inputStream -> StringIO.readFrom(inputStream, charset);
             assertThat(fromBlob(expectedValues.get(0).at("first"), blobReader), is(nullValue()));
             assertThat(fromBlob(expectedValues.get(0).at("second"), blobReader), is(blobContent));
-            assertThat(fromBlob(expectedValues.get(0).at("second"), blobReader), is(blobContent));
-
         });
     }
 
@@ -103,8 +101,6 @@ public class MySQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon
             assertThat(expectedValues.size(), is(1));
             assertThat(fromClob(expectedValues.get(0).at("first"), StringIO::readFrom), is(nullValue()));
             assertThat(fromClob(expectedValues.get(0).at("second"), StringIO::readFrom), is(clobContent));
-            assertThat(fromClob(expectedValues.get(0).at("second"), StringIO::readFrom), is(clobContent));
-
         });
     }
 
