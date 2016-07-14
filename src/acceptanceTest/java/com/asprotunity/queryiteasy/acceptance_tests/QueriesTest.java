@@ -67,7 +67,7 @@ public class QueriesTest {
                         bind("asecond10"), outputParameter)
         );
 
-        List<Row> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT * FROM testtable");
+        List<FlexibleTuple> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT * FROM testtable");
 
         assertThat(expectedValues.size(), is(1));
         assertThat(asInteger(expectedValues.get(0).at("first")), is(10));
@@ -195,7 +195,7 @@ public class QueriesTest {
             connection.update("INSERT INTO testtable (first) VALUES (10)");
         });
 
-        List<Row> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT first FROM testtable");
+        List<FlexibleTuple> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT first FROM testtable");
         assertThat(expectedValues.size(), is(1));
         assertThat(asInteger(expectedValues.get(0).at("first")), is(10));
     }
@@ -211,7 +211,7 @@ public class QueriesTest {
             });
             fail("Exception expected");
         } catch (RuntimeException ex) {
-            List<Row> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT first FROM testtable");
+            List<FlexibleTuple> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT first FROM testtable");
             assertThat(expectedValues.size(), is(0));
         }
     }
@@ -225,7 +225,7 @@ public class QueriesTest {
                     bind(10), bind("asecond"));
         });
 
-        List<Row> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT * FROM testtable");
+        List<FlexibleTuple> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT * FROM testtable");
         assertThat(expectedValues.size(), is(1));
         assertThat(asInteger(expectedValues.get(0).at("first")), is(10));
         assertThat(asString(expectedValues.get(0).at("second")), is("asecond"));
@@ -242,7 +242,7 @@ public class QueriesTest {
                             batch(bind(12), bind("asecond12"))));
         });
 
-        List<Row> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT * FROM testtable ORDER BY first ASC");
+        List<FlexibleTuple> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT * FROM testtable ORDER BY first ASC");
         assertThat(expectedValues.size(), is(3));
         for (int index = 0; index < expectedValues.size(); ++index) {
             assertThat(asInteger(expectedValues.get(index).at("first")), is(index + 10));
@@ -261,7 +261,7 @@ public class QueriesTest {
             });
             fail("RuntimeSQLException expected!");
         } catch (RuntimeSQLException exception) {
-            List<Row> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT * FROM testtable");
+            List<FlexibleTuple> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT * FROM testtable");
             assertThat(expectedValues.size(), is(0));
             assertThat(exception.getMessage(), is("Batch is empty."));
         }

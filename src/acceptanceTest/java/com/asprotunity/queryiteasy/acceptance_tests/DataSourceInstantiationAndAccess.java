@@ -1,8 +1,5 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
-import com.asprotunity.queryiteasy.connection.Row;
-import com.asprotunity.queryiteasy.internal.connection.RowFromResultSet;
-import com.asprotunity.queryiteasy.internal.connection.WrappedJDBCResultSet;
 import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
 
 import javax.sql.DataSource;
@@ -20,14 +17,14 @@ public interface DataSourceInstantiationAndAccess {
         return (DataSource) clazz.newInstance();
     }
 
-    static List<Row> query(DataSource dataSource, String sql) throws SQLException {
+    static List<FlexibleTuple> query(DataSource dataSource, String sql) throws SQLException {
         try (Connection connection = dataSource.getConnection();
              AutoCloseableScope connectionScope = new AutoCloseableScope();
              Statement statement = connection.createStatement();
              ResultSet rs = statement.executeQuery(sql)) {
-            ArrayList<Row> result = new ArrayList<>();
+            ArrayList<FlexibleTuple> result = new ArrayList<>();
             while (rs.next()) {
-                result.add(new RowFromResultSet(new WrappedJDBCResultSet(rs), connectionScope));
+                result.add(new FlexibleTupleFromResultSet(rs));
             }
             if (!connection.getAutoCommit()) {
                 connection.commit();
