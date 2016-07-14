@@ -2,6 +2,7 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 
 
 import com.asprotunity.queryiteasy.DataStore;
+import com.asprotunity.queryiteasy.connection.SQLDataConverters;
 import com.asprotunity.queryiteasy.stringio.StringIO;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -25,7 +26,6 @@ import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bindLongVarbinary;
 import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asString;
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.fromLongVarbinary;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -83,7 +83,8 @@ public class PostgresSQLSupportedTypesTest extends NonStandardSupportedTypesTest
         Function<InputStream, String> binaryReader = inputStream -> StringIO.readFrom(inputStream, charset);
 
         List<Tuple2> expectedValues = getDataStore().executeWithResult(connection ->
-                connection.select(row -> new Tuple2<>(fromLongVarbinary(row.at(1), binaryReader), fromLongVarbinary(row.at(2), binaryReader)),
+                connection.select(row -> new Tuple2<>(SQLDataConverters.fromBinaryStream(row.binaryStreamAt(1), binaryReader),
+                                SQLDataConverters.fromBinaryStream(row.binaryStreamAt(2), binaryReader)),
                         "SELECT * FROM testtable").collect(toList()));
 
         assertThat(expectedValues.size(), is(1));

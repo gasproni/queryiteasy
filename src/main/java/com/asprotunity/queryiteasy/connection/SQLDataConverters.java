@@ -65,7 +65,18 @@ public final class SQLDataConverters {
 
     public static <ResultType> ResultType fromLongVarbinary(Object object,
                                                             Function<InputStream, ResultType> longvarbinaryReader) {
-       return fromBlob(object, longvarbinaryReader);
+        return fromBlob(object, longvarbinaryReader);
+    }
+
+    public static <ResultType> ResultType fromBinaryStream(InputStream inputStream,
+                                                           Function<InputStream, ResultType> binaryReader) {
+        if (inputStream == null) {
+            return null;
+        }
+        try (AutoCloseableScope scope = new AutoCloseableScope()) {
+            scope.add(inputStream::close);
+            return binaryReader.apply(inputStream);
+        }
     }
 
     public static String asString(Object value) {
