@@ -14,6 +14,5 @@ public interface Connection {
 
     void call(String sql, Parameter... parameters);
 
-    <ResultType> ResultType call(Function<Stream<Row>, ResultType> rowProcessor, String sql,
-                                 Parameter... parameters);
+    <MappedRow> Stream<MappedRow> call(Function<Row, MappedRow> rowMapper, String sql, Parameter... parameters);
 }

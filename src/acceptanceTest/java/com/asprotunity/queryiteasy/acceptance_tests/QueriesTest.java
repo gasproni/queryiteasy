@@ -179,12 +179,12 @@ public class QueriesTest {
                 "   RETURN TO_DATE('2016-06-23', 'YYYY-MM-DD');\n" +
                 " END");
 
-        Date result = dataStore.executeWithResult(connection ->
-                connection.call(rowStream -> asDate(rowStream.findFirst().get().at(1)), "{call return_date()}")
-        );
+        Date found = dataStore.executeWithResult(connection ->
+                connection.call(row -> asDate(row.at(1)), "{call return_date()}").findFirst().orElse(null));
 
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        assertThat(result, is(new Date(df.parse("2016-06-23").getTime())));
+        Date expected = new Date(df.parse("2016-06-23").getTime());
+        assertThat(found, is(expected));
     }
 
     @Test

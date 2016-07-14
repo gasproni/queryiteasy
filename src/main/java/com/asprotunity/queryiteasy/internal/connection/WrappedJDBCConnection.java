@@ -90,20 +90,12 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
                                                 InputParameter... parameters) {
         return RuntimeSQLException.executeAndReturnResult(() -> {
             AutoCloseableScope scope = connectionScope.make(new AutoCloseableScope(), AutoCloseableScope::close);
-            Stream<Row> rowStream = null;
             try (AutoCloseableScope executeQueryScope = new AutoCloseableScope()) {
                 PreparedStatement statement = scope.make(connection.prepareStatement(sql), PreparedStatement::close);
                 bindParameters(parameters, statement, executeQueryScope);
-                ResultSet rs = scope.make(statement.executeQuery(), ResultSet::close);
-                rowStream = StreamSupport.stream(new RowSpliterator(resultSetWrapperFactory.make(rs), connectionScope),
-                        false)
-                        .onClose(scope::close);
-                return rowStream.map(rowMapper);
+                return executeQuery(rowMapper, scope, statement);
             } catch (Exception ex) {
                 scope.close();
-                if (rowStream != null) {
-                    rowStream.close();
-                }
                 throw ex;
             }
         });
@@ -121,23 +113,28 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     }
 
     @Override
-    public <ResultType> ResultType call(Function<Stream<Row>, ResultType> rowProcessor, String sql, Parameter... parameters) {
+    public <MappedRow> Stream<MappedRow> call(Function<Row, MappedRow> rowMapper, String sql, Parameter... parameters) {
         return RuntimeSQLException.executeAndReturnResult(() -> {
-            try (CallableStatement statement = connection.prepareCall(sql);
-                 AutoCloseableScope statementScope = new AutoCloseableScope()) {
-                bindCallableParameters(parameters, statement, statementScope);
-                return executeQuery(rowProcessor, statement);
+            AutoCloseableScope scope = connectionScope.make(new AutoCloseableScope(), AutoCloseableScope::close);
+            try (AutoCloseableScope executeQueryScope = new AutoCloseableScope()) {
+                CallableStatement statement = scope.make(connection.prepareCall(sql), CallableStatement::close);
+                bindCallableParameters(parameters, statement, executeQueryScope);
+                return executeQuery(rowMapper, scope, statement);
+            } catch (Exception ex) {
+                scope.close();
+                throw ex;
             }
         });
     }
 
-    private <ResultType> ResultType executeQuery(Function<Stream<Row>, ResultType> processRow, PreparedStatement statement) throws SQLException {
-        try (ResultSet rs = statement.executeQuery();
-             Stream<Row> rowStream =
-                     StreamSupport.stream(new RowSpliterator(resultSetWrapperFactory.make(rs), connectionScope),
-                             false)) {
-            return processRow.apply(rowStream);
-        }
+    private <MappedRow> Stream<MappedRow> executeQuery(Function<Row, MappedRow> rowMapper,
+                                                       AutoCloseableScope scope,
+                                                       PreparedStatement statement) throws SQLException {
+        ResultSet rs = scope.make(statement.executeQuery(), ResultSet::close);
+        return StreamSupport.stream(new RowSpliterator(resultSetWrapperFactory.make(rs), connectionScope),
+                false)
+                .onClose(scope::close)
+                .map(rowMapper);
     }
 
 }
