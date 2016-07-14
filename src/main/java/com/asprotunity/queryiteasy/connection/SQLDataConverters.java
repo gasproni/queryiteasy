@@ -1,5 +1,7 @@
 package com.asprotunity.queryiteasy.connection;
 
+import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
+
 import java.io.*;
 import java.math.BigDecimal;
 import java.sql.*;
@@ -13,7 +15,9 @@ public final class SQLDataConverters {
             return blobReader.apply(null);
         } else if (object instanceof Blob) {
             Blob blob = (Blob) object;
-            try (InputStream inputStream = blob.getBinaryStream()) {
+            try (AutoCloseableScope scope = new AutoCloseableScope();
+                 InputStream inputStream = blob.getBinaryStream()) {
+                scope.onLeave(blob::free);
                 return blobReader.apply(inputStream);
             } catch (SQLException e) {
                 throw new RuntimeSQLException(e);
@@ -38,7 +42,9 @@ public final class SQLDataConverters {
             return clobReader.apply(null);
         } else if (object instanceof Clob) {
             Clob clob = (Clob) object;
-            try (Reader reader = clob.getCharacterStream()) {
+            try (AutoCloseableScope scope = new AutoCloseableScope();
+                 Reader reader = clob.getCharacterStream()) {
+                scope.onLeave(clob::free);
                 return clobReader.apply(reader);
             } catch (SQLException e) {
                 throw new RuntimeSQLException(e);

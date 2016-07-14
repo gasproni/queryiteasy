@@ -131,7 +131,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
                                                        AutoCloseableScope scope,
                                                        PreparedStatement statement) throws SQLException {
         ResultSet rs = scope.make(statement.executeQuery(), ResultSet::close);
-        return StreamSupport.stream(new RowSpliterator(resultSetWrapperFactory.make(rs), connectionScope),
+        return StreamSupport.stream(new RowSpliterator(resultSetWrapperFactory.make(rs)),
                 false)
                 .onClose(scope::close)
                 .map(rowMapper);

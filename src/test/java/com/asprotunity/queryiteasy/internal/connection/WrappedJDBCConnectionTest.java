@@ -12,7 +12,6 @@ import java.util.Collections;
 
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
-import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
 
 public class WrappedJDBCConnectionTest {
@@ -103,55 +102,6 @@ public class WrappedJDBCConnectionTest {
         InOrder order = inOrder(preparedStatement, rs, blobStream);
         order.verify(preparedStatement, times(1)).executeQuery();
         order.verify(blobStream, times(1)).close();
-    }
-
-    @Test
-    public void closes_selected_blobs_on_close() throws Exception {
-        String sql = "SELECT * FROM foo";
-
-        Blob blob = mock(Blob.class);
-        ResultSetWrapperFactory resultSetWrapperFactory = makeResultSetWrapperFactory(sql, blob);
-
-        wrappedJDBCConnection = new WrappedJDBCConnection(jdbcConnection, resultSetWrapperFactory);
-
-        wrappedJDBCConnection.select(row -> row.at(1), sql).collect(toList());
-        wrappedJDBCConnection.close();
-
-        InOrder order = inOrder(blob, jdbcConnection);
-        order.verify(blob, times(1)).free();
-        order.verify(jdbcConnection, times(1)).close();
-    }
-
-    @Test
-    public void closes_selected_nclobs_on_close() throws Exception {
-        String sql = "SELECT * FROM foo";
-
-        NClob nclob = mock(NClob.class);
-        ResultSetWrapperFactory resultSetWrapperFactory = makeResultSetWrapperFactory(sql, nclob);
-
-        wrappedJDBCConnection = new WrappedJDBCConnection(jdbcConnection, resultSetWrapperFactory);
-
-        wrappedJDBCConnection.select(row -> row.at(1), sql).collect(toList());
-        wrappedJDBCConnection.close();
-        InOrder order = inOrder(nclob, jdbcConnection);
-        order.verify(nclob, times(1)).free();
-        order.verify(jdbcConnection, times(1)).close();
-    }
-
-    @Test
-    public void closes_selected_clobs_on_close() throws Exception {
-        String sql = "SELECT * FROM foo";
-
-        Clob clob = mock(Clob.class);
-        ResultSetWrapperFactory resultSetWrapperFactory = makeResultSetWrapperFactory(sql, clob);
-
-        wrappedJDBCConnection = new WrappedJDBCConnection(jdbcConnection, resultSetWrapperFactory);
-
-        wrappedJDBCConnection.select(row -> row.at(1), sql).collect(toList());
-        wrappedJDBCConnection.close();
-        InOrder order = inOrder(clob, jdbcConnection);
-        order.verify(clob, times(1)).free();
-        order.verify(jdbcConnection, times(1)).close();
     }
 
     @Test

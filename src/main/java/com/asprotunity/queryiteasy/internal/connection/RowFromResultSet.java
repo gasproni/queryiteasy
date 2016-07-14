@@ -1,10 +1,7 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
 import com.asprotunity.queryiteasy.connection.Row;
-import com.asprotunity.queryiteasy.scope.Scope;
 
-import java.sql.Blob;
-import java.sql.Clob;
 import java.util.HashMap;
 
 public class RowFromResultSet implements Row {
@@ -12,18 +9,12 @@ public class RowFromResultSet implements Row {
     private Object columns[];
     private HashMap<String, Integer> labelToColumn;
 
-    public RowFromResultSet(ResultSetWrapper resultSetWrapper, Scope connectionScope) {
+    public RowFromResultSet(ResultSetWrapper resultSetWrapper) {
         columns = new Object[resultSetWrapper.columnCount()];
         labelToColumn = new HashMap<>();
         for (int columnIndex = 1; columnIndex <= columns.length; ++columnIndex) {
             int position = columnIndex(columnIndex);
             Object object = resultSetWrapper.getObject(columnIndex);
-            if (object instanceof Blob) {
-                connectionScope.onLeave(((Blob)object)::free);
-            }
-            else if (object instanceof Clob) {
-                connectionScope.onLeave(((Clob)object)::free);
-            }
             columns[position] = object;
             labelToColumn.put(normaliseColumnLabel(resultSetWrapper.columnLabel(columnIndex)), columnIndex);
         }

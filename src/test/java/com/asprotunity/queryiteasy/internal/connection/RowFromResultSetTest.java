@@ -27,7 +27,7 @@ public class RowFromResultSetTest {
         when(rs.columnLabel(1)).thenReturn(mixedCaseColumnName);
 
         Scope dummyScope = new AutoCloseableScope();
-        RowFromResultSet rowFromResultSet = new RowFromResultSet(rs, dummyScope);
+        RowFromResultSet rowFromResultSet = new RowFromResultSet(rs);
 
         assertThat(SQLDataConverters.asInteger(rowFromResultSet.at(mixedCaseColumnName.toLowerCase())), is(1));
 

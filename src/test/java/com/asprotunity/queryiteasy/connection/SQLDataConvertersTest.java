@@ -2,10 +2,9 @@ package com.asprotunity.queryiteasy.connection;
 
 import com.asprotunity.queryiteasy.stringio.StringIO;
 import org.junit.Test;
+import org.mockito.InOrder;
 
-import java.io.ByteArrayInputStream;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.sql.*;
@@ -18,8 +17,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class SQLDataConvertersTest {
 
@@ -209,7 +207,7 @@ public class SQLDataConvertersTest {
     }
 
     @Test
-    public void from_blob_converts_from_sql_blob() throws UnsupportedEncodingException, SQLException {
+    public void from_blob_converts_from_sql_blob() throws IOException, SQLException {
         Blob blob = mock(Blob.class);
         String expected = "this is a string to be converted;";
         Charset charset = Charset.forName("UTF-8");
@@ -218,6 +216,20 @@ public class SQLDataConvertersTest {
         String converted = fromBlob(blob, inputStream -> readFrom(inputStream, charset));
 
         assertThat(converted, is(expected));
+    }
+
+    @Test
+    public void from_blob_frees_resources_correctly() throws IOException, SQLException {
+        Blob blob = mock(Blob.class);
+        ByteArrayInputStream blobInputStream = mock(ByteArrayInputStream.class);
+        when(blob.getBinaryStream()).thenReturn(blobInputStream);
+
+        fromBlob(blob, inputStream -> "doesn't matter");
+
+        InOrder order = inOrder(blob, blobInputStream);
+        order.verify(blob, times(1)).getBinaryStream();
+        order.verify(blobInputStream, times(1)).close();
+        order.verify(blob, times(1)).free();
     }
 
     @Test
@@ -251,6 +263,20 @@ public class SQLDataConvertersTest {
         String converted = fromClob(clob, StringIO::readFrom);
 
         assertThat(converted, is(expected));
+    }
+
+    @Test
+    public void from_clob_frees_resources_correctly() throws IOException, SQLException {
+        Clob clob = mock(Clob.class);
+        Reader reader = mock(Reader.class);
+        when(clob.getCharacterStream()).thenReturn(reader);
+
+        fromClob(clob, stream -> "doesn't matter");
+
+        InOrder order = inOrder(clob, reader);
+        order.verify(clob, times(1)).getCharacterStream();
+        order.verify(reader, times(1)).close();
+        order.verify(clob, times(1)).free();
     }
 
     @Test
