@@ -14,7 +14,7 @@ public class AutoCloseableScope implements AutoCloseable, Scope {
     }
 
     @Override
-    public <RType> RType add(RType obj, ThrowingConsumer<RType> consumer) {
+    public <RType> RType add(RType obj, OnCloseActionConsumer<RType> consumer) {
         add(() -> consumer.apply(obj));
         return obj;
     }
