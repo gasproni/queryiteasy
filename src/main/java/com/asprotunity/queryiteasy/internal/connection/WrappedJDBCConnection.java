@@ -18,12 +18,10 @@ import java.util.stream.StreamSupport;
 public class WrappedJDBCConnection implements Connection, AutoCloseable {
     private final java.sql.Connection connection;
     private final AutoCloseableScope connectionScope;
-    private final ResultSetWrapperFactory resultSetWrapperFactory;
 
-    public WrappedJDBCConnection(java.sql.Connection connection, ResultSetWrapperFactory resultSetWrapperFactory) {
+    public WrappedJDBCConnection(java.sql.Connection connection) {
         this.connection = connection;
         this.connectionScope = new AutoCloseableScope();
-        this.resultSetWrapperFactory = resultSetWrapperFactory;
         RuntimeSQLException.execute(() -> this.connection.setAutoCommit(false));
     }
 
@@ -130,8 +128,8 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     private <MappedRow> Stream<MappedRow> executeQuery(Function<Row, MappedRow> rowMapper,
                                                        AutoCloseableScope scope,
                                                        PreparedStatement statement) throws SQLException {
-        ResultSet rs = scope.make(statement.executeQuery(), ResultSet::close);
-        return StreamSupport.stream(new RowSpliterator(resultSetWrapperFactory.make(rs)),
+        ResultSet resultSet = scope.make(statement.executeQuery(), ResultSet::close);
+        return StreamSupport.stream(new RowSpliterator(resultSet),
                 false)
                 .onClose(scope::close)
                 .map(rowMapper);

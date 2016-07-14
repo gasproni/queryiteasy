@@ -1,7 +1,10 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
 import com.asprotunity.queryiteasy.connection.Row;
+import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.util.HashMap;
 
 public class RowFromResultSet implements Row {
@@ -9,15 +12,18 @@ public class RowFromResultSet implements Row {
     private Object columns[];
     private HashMap<String, Integer> labelToColumn;
 
-    public RowFromResultSet(ResultSetWrapper resultSetWrapper) {
-        columns = new Object[resultSetWrapper.columnCount()];
-        labelToColumn = new HashMap<>();
-        for (int columnIndex = 1; columnIndex <= columns.length; ++columnIndex) {
-            int position = columnIndex(columnIndex);
-            Object object = resultSetWrapper.getObject(columnIndex);
-            columns[position] = object;
-            labelToColumn.put(normaliseColumnLabel(resultSetWrapper.columnLabel(columnIndex)), columnIndex);
-        }
+    public RowFromResultSet(ResultSet resultSet) {
+        RuntimeSQLException.execute(() -> {
+            ResultSetMetaData metadata = resultSet.getMetaData();
+            columns = new Object[metadata.getColumnCount()];
+            labelToColumn = new HashMap<>();
+            for (int columnIndex = 1; columnIndex <= columns.length; ++columnIndex) {
+                int position = columnIndex(columnIndex);
+                Object object = resultSet.getObject(columnIndex);
+                columns[position] = object;
+                labelToColumn.put(normaliseColumnLabel(metadata.getColumnLabel(columnIndex)), columnIndex);
+            }
+        });
     }
 
     @Override

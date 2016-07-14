@@ -3,22 +3,23 @@ package com.asprotunity.queryiteasy.internal.connection;
 import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
 
+import java.sql.ResultSet;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 
 public class RowSpliterator implements Spliterator<Row> {
 
-    private ResultSetWrapper rs;
+    private ResultSet resultSet;
 
-    public RowSpliterator(ResultSetWrapper resultSetWrapper) {
-        this.rs = resultSetWrapper;
+    public RowSpliterator(ResultSet resultSet) {
+        this.resultSet = resultSet;
     }
 
     @Override
     public boolean tryAdvance(Consumer<? super Row> action) {
         return RuntimeSQLException.executeAndReturnResult(() -> {
-            if (rs.next()) {
-                action.accept(new RowFromResultSet(rs));
+            if (resultSet.next()) {
+                action.accept(new RowFromResultSet(resultSet));
                 return true;
             }
             return false;

@@ -22,8 +22,8 @@ public class WrappedJDBCConnectionTest {
     @Before
     public void setUp() {
         jdbcConnection = mock(Connection.class);
-        wrappedJDBCConnection = new WrappedJDBCConnection(jdbcConnection,
-                WrappedJDBCResultSet::new);
+        wrappedJDBCConnection = new WrappedJDBCConnection(jdbcConnection
+        );
     }
 
     @Test
@@ -141,25 +141,4 @@ public class WrappedJDBCConnectionTest {
         return preparedStatement;
     }
 
-    private ResultSetWrapper makeResultSetWrapperWithOneRowAndOneColumn(Object columnValue) {
-        ResultSetWrapper result = mock(ResultSetWrapper.class);
-        when(result.columnLabel(1)).thenReturn("colName");
-        when(result.columnCount()).thenReturn(1);
-        when(result.next()).thenReturn(true, false);
-        when(result.getObject(1)).thenReturn(columnValue);
-        return result;
-    }
-
-    private ResultSetWrapperFactory makeResultSetWrapperFactory(String sql, Object columnValue) throws SQLException {
-        ResultSet resultSet = mock(ResultSet.class);
-        PreparedStatement preparedStatement = prepareStatement(sql);
-        when(preparedStatement.executeQuery()).thenReturn(resultSet);
-
-        ResultSetWrapper resultSetWrapper = makeResultSetWrapperWithOneRowAndOneColumn(columnValue);
-
-        ResultSetWrapperFactory resultSetWrapperFactory = mock(ResultSetWrapperFactory.class);
-
-        when(resultSetWrapperFactory.make(resultSet)).thenReturn(resultSetWrapper);
-        return resultSetWrapperFactory;
-    }
 }
