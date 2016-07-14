@@ -41,10 +41,10 @@ public class BlobInputOutputParameter<ResultType> implements InputOutputParamete
                 statement.setNull(position, Types.BLOB);
             } else {
                 statement.setBlob(position, inputStream);
-                statementScope.onLeave(inputStream::close);
+                statementScope.add(inputStream::close);
             }
             statement.registerOutParameter(position, Types.BLOB);
-            statementScope.onLeave(() -> value = fromBlob(statement.getObject(position), outputBlobReader));
+            statementScope.add(() -> value = fromBlob(statement.getObject(position), outputBlobReader));
         });
     }
 }

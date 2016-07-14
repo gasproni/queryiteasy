@@ -18,7 +18,7 @@ public class ByteOutputParameter implements OutputParameter {
     public void bind(CallableStatement statement, int position, Scope statementScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.TINYINT);
-            statementScope.onLeave(() -> this.value = asByte(statement.getObject(position)));
+            statementScope.add(() -> this.value = asByte(statement.getObject(position)));
         });
     }
 

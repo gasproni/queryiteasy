@@ -87,9 +87,9 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     public <MappedRow> Stream<MappedRow> select(Function<Row, MappedRow> rowMapper, String sql,
                                                 InputParameter... parameters) {
         return RuntimeSQLException.executeAndReturnResult(() -> {
-            AutoCloseableScope scope = connectionScope.make(new AutoCloseableScope(), AutoCloseableScope::close);
+            AutoCloseableScope scope = connectionScope.add(new AutoCloseableScope(), AutoCloseableScope::close);
             try (AutoCloseableScope executeQueryScope = new AutoCloseableScope()) {
-                PreparedStatement statement = scope.make(connection.prepareStatement(sql), PreparedStatement::close);
+                PreparedStatement statement = scope.add(connection.prepareStatement(sql), PreparedStatement::close);
                 bindParameters(parameters, statement, executeQueryScope);
                 return executeQuery(rowMapper, scope, statement);
             } catch (Exception ex) {
@@ -113,9 +113,9 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     @Override
     public <MappedRow> Stream<MappedRow> call(Function<Row, MappedRow> rowMapper, String sql, Parameter... parameters) {
         return RuntimeSQLException.executeAndReturnResult(() -> {
-            AutoCloseableScope scope = connectionScope.make(new AutoCloseableScope(), AutoCloseableScope::close);
+            AutoCloseableScope scope = connectionScope.add(new AutoCloseableScope(), AutoCloseableScope::close);
             try (AutoCloseableScope executeQueryScope = new AutoCloseableScope()) {
-                CallableStatement statement = scope.make(connection.prepareCall(sql), CallableStatement::close);
+                CallableStatement statement = scope.add(connection.prepareCall(sql), CallableStatement::close);
                 bindCallableParameters(parameters, statement, executeQueryScope);
                 return executeQuery(rowMapper, scope, statement);
             } catch (Exception ex) {
@@ -128,7 +128,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     private <MappedRow> Stream<MappedRow> executeQuery(Function<Row, MappedRow> rowMapper,
                                                        AutoCloseableScope scope,
                                                        PreparedStatement statement) throws SQLException {
-        ResultSet resultSet = scope.make(statement.executeQuery(), ResultSet::close);
+        ResultSet resultSet = scope.add(statement.executeQuery(), ResultSet::close);
         return StreamSupport.stream(new RowSpliterator(resultSet),
                 false)
                 .onClose(scope::close)

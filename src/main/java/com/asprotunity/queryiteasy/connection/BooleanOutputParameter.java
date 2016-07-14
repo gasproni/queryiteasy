@@ -18,7 +18,7 @@ public class BooleanOutputParameter implements OutputParameter {
     public void bind(CallableStatement statement, int position, Scope statementScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.BOOLEAN);
-            statementScope.onLeave(() -> this.value = asBoolean(statement.getObject(position)));
+            statementScope.add(() -> this.value = asBoolean(statement.getObject(position)));
         });
     }
 

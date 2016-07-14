@@ -39,7 +39,7 @@ public class AutoCloseableScopeTest {
         assertFalse(disposable.isDisposed());
 
         AutoCloseableScope scope = new AutoCloseableScope();
-        scope.onLeave(disposable::dispose);
+        scope.add(disposable::dispose);
         scope.close();
 
         assertTrue(disposable.isDisposed());
@@ -51,8 +51,8 @@ public class AutoCloseableScopeTest {
         Disposable disposable2 = new Disposable();
 
         AutoCloseableScope scope = new AutoCloseableScope();
-        scope.onLeave(disposable1::dispose);
-        scope.onLeave(disposable2::dispose);
+        scope.add(disposable1::dispose);
+        scope.add(disposable2::dispose);
         scope.close();
 
         assertThat(disposable1.disposeOrder, is(greaterThan(disposable2.disposeOrder)));
@@ -73,7 +73,7 @@ public class AutoCloseableScopeTest {
         Disposable disposable = new Disposable(thrownByDisposable);
 
         AutoCloseableScope scope = new AutoCloseableScope();
-        scope.onLeave(disposable::dispose);
+        scope.add(disposable::dispose);
 
         try {
             scope.close();
@@ -96,9 +96,9 @@ public class AutoCloseableScopeTest {
         Disposable disposable2 = new Disposable(disposable2Exception);
 
         AutoCloseableScope scope = new AutoCloseableScope();
-        scope.onLeave(disposable1::dispose);
-        scope.onLeave(nonThrowingDisposable::dispose);
-        scope.onLeave(disposable2::dispose);
+        scope.add(disposable1::dispose);
+        scope.add(nonThrowingDisposable::dispose);
+        scope.add(disposable2::dispose);
 
         try {
             scope.close();

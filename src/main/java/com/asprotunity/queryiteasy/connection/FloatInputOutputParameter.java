@@ -23,7 +23,7 @@ public class FloatInputOutputParameter implements InputOutputParameter {
         RuntimeSQLException.execute(() -> {
             statement.setObject(position, this.value, Types.REAL);
             statement.registerOutParameter(position, Types.REAL);
-            statementScope.onLeave(() -> this.value = asFloat(statement.getObject(position)));
+            statementScope.add(() -> this.value = asFloat(statement.getObject(position)));
         });
     }
 

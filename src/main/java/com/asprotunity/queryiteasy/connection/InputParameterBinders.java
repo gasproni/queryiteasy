@@ -76,7 +76,7 @@ public class InputParameterBinders {
                 if (inputStream == null) {
                     statement.setNull(position, Types.BLOB);
                 } else {
-                    statementScope.onLeave(inputStream::close);
+                    statementScope.add(inputStream::close);
                     statement.setBlob(position, inputStream);
                 }
             });
@@ -90,7 +90,7 @@ public class InputParameterBinders {
                 if (reader == null) {
                     statement.setNull(position, Types.CLOB);
                 } else {
-                    statementScope.onLeave(reader::close);
+                    statementScope.add(reader::close);
                     statement.setClob(position, reader);
                 }
             });
@@ -104,7 +104,7 @@ public class InputParameterBinders {
                 if (inputStream == null) {
                     statement.setNull(position, Types.LONGVARBINARY);
                 } else {
-                    statementScope.onLeave(inputStream::close);
+                    statementScope.add(inputStream::close);
                     statement.setBinaryStream(position, inputStream);
                 }
             });

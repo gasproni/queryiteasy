@@ -19,7 +19,7 @@ public class BigDecimalOutputParameter implements OutputParameter {
     public void bind(CallableStatement statement, int position, Scope statementScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.DECIMAL);
-            statementScope.onLeave(() -> this.value = asBigDecimal(statement.getObject(position)));
+            statementScope.add(() -> this.value = asBigDecimal(statement.getObject(position)));
         });
     }
 

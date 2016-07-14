@@ -24,7 +24,7 @@ public class TimestampInputOutputParameter implements InputOutputParameter {
         RuntimeSQLException.execute(() -> {
             statement.setTimestamp(position, this.value);
             statement.registerOutParameter(position, Types.TIMESTAMP);
-            statementScope.onLeave(() -> this.value = asTimestamp(statement.getObject(position)));
+            statementScope.add(() -> this.value = asTimestamp(statement.getObject(position)));
         });
     }
 

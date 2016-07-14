@@ -17,7 +17,7 @@ public class StringOutputParameter implements OutputParameter {
     public void bind(CallableStatement statement, int position, Scope statementScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.LONGVARCHAR);
-            statementScope.onLeave(() -> this.value = statement.getString(position));
+            statementScope.add(() -> this.value = statement.getString(position));
         });
     }
 

@@ -23,7 +23,7 @@ public class BooleanInputOutputParameter implements InputOutputParameter {
         RuntimeSQLException.execute(() -> {
             statement.setObject(position, this.value, Types.BOOLEAN);
             statement.registerOutParameter(position, Types.BOOLEAN);
-            statementScope.onLeave(() -> this.value = asBoolean(statement.getObject(position)));
+            statementScope.add(() -> this.value = asBoolean(statement.getObject(position)));
         });
     }
 

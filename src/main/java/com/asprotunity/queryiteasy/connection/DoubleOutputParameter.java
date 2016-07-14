@@ -18,7 +18,7 @@ public class DoubleOutputParameter implements OutputParameter {
     public void bind(CallableStatement statement, int position, Scope statementScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.DOUBLE);
-            statementScope.onLeave(() -> this.value = asDouble(statement.getObject(position)));
+            statementScope.add(() -> this.value = asDouble(statement.getObject(position)));
         });
     }
 

@@ -17,7 +17,7 @@ public final class SQLDataConverters {
             Blob blob = (Blob) object;
             try (AutoCloseableScope scope = new AutoCloseableScope();
                  InputStream inputStream = blob.getBinaryStream()) {
-                scope.onLeave(blob::free);
+                scope.add(blob::free);
                 return blobReader.apply(inputStream);
             } catch (SQLException e) {
                 throw new RuntimeSQLException(e);
@@ -44,7 +44,7 @@ public final class SQLDataConverters {
             Clob clob = (Clob) object;
             try (AutoCloseableScope scope = new AutoCloseableScope();
                  Reader reader = clob.getCharacterStream()) {
-                scope.onLeave(clob::free);
+                scope.add(clob::free);
                 return clobReader.apply(reader);
             } catch (SQLException e) {
                 throw new RuntimeSQLException(e);

@@ -30,7 +30,7 @@ public class LongVarBinaryOutputParameter<ResultType> implements OutputParameter
     public void bind(CallableStatement statement, int position, Scope statementScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.LONGVARBINARY);
-            statementScope.onLeave(() -> value = fromLongVarbinary(statement.getObject(position), longVarBinaryReader));
+            statementScope.add(() -> value = fromLongVarbinary(statement.getObject(position), longVarBinaryReader));
         });
     }
 }

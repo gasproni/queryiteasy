@@ -23,7 +23,7 @@ public class ShortInputOutputParameter implements InputOutputParameter {
         RuntimeSQLException.execute(() -> {
             statement.setObject(position, this.value, Types.SMALLINT);
             statement.registerOutParameter(position, Types.SMALLINT);
-            statementScope.onLeave(() -> this.value = asShort(statement.getObject(position)));
+            statementScope.add(() -> this.value = asShort(statement.getObject(position)));
         });
     }
 

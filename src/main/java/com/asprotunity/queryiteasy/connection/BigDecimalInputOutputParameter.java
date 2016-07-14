@@ -24,7 +24,7 @@ public class BigDecimalInputOutputParameter implements InputOutputParameter {
         RuntimeSQLException.execute(() -> {
             statement.setBigDecimal(position, this.value);
             statement.registerOutParameter(position, Types.DECIMAL);
-            statementScope.onLeave(() -> this.value = asBigDecimal(statement.getObject(position)));
+            statementScope.add(() -> this.value = asBigDecimal(statement.getObject(position)));
         });
     }
 

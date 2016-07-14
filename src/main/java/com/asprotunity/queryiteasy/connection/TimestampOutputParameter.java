@@ -19,7 +19,7 @@ public class TimestampOutputParameter implements OutputParameter {
     public void bind(CallableStatement statement, int position, Scope statementScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.TIMESTAMP);
-            statementScope.onLeave(() -> this.value = asTimestamp(statement.getObject(position)));
+            statementScope.add(() -> this.value = asTimestamp(statement.getObject(position)));
         });
     }
 

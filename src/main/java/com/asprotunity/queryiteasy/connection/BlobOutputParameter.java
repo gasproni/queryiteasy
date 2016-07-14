@@ -30,7 +30,7 @@ public class BlobOutputParameter<ResultType> implements OutputParameter {
     public void bind(CallableStatement statement, int position, Scope statementScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.BLOB);
-            statementScope.onLeave(() -> value = fromBlob(statement.getObject(position), blobReader));
+            statementScope.add(() -> value = fromBlob(statement.getObject(position), blobReader));
         });
     }
 }

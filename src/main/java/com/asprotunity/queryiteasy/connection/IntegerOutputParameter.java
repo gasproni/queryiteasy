@@ -19,7 +19,7 @@ public class IntegerOutputParameter implements OutputParameter {
     public void bind(CallableStatement statement, int position, Scope statementScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.INTEGER);
-            statementScope.onLeave(() -> this.value = asInteger(statement.getObject(position)));
+            statementScope.add(() -> this.value = asInteger(statement.getObject(position)));
         });
     }
 

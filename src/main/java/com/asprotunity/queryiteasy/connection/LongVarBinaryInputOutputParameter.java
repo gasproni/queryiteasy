@@ -42,10 +42,10 @@ public class LongVarBinaryInputOutputParameter<ResultType> implements InputOutpu
                 statement.setNull(position, Types.LONGVARBINARY);
             } else {
                 statement.setBinaryStream(position, inputStream);
-                statementScope.onLeave(inputStream::close);
+                statementScope.add(inputStream::close);
             }
             statement.registerOutParameter(position, Types.LONGVARBINARY);
-            statementScope.onLeave(() -> value = fromLongVarbinary(statement.getObject(position), outputLongVarBinaryReader));
+            statementScope.add(() -> value = fromLongVarbinary(statement.getObject(position), outputLongVarBinaryReader));
         });
     }
 }

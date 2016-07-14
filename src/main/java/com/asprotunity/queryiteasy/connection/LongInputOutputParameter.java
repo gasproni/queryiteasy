@@ -24,7 +24,7 @@ public class LongInputOutputParameter implements InputOutputParameter {
         RuntimeSQLException.execute(() -> {
             statement.setObject(position, this.value, Types.BIGINT);
             statement.registerOutParameter(position, Types.BIGINT);
-            statementScope.onLeave(() -> this.value = asLong(statement.getObject(position)));
+            statementScope.add(() -> this.value = asLong(statement.getObject(position)));
         });
     }
 

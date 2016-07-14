@@ -19,7 +19,7 @@ public class TimeOutputParameter implements OutputParameter {
     public void bind(CallableStatement statement, int position, Scope statementScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.TIME);
-            statementScope.onLeave(() -> this.value = asTime(statement.getObject(position)));
+            statementScope.add(() -> this.value = asTime(statement.getObject(position)));
         });
     }
 

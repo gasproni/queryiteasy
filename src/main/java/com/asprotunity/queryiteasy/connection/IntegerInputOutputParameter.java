@@ -24,7 +24,7 @@ public class IntegerInputOutputParameter implements InputOutputParameter {
         RuntimeSQLException.execute(() -> {
             statement.setObject(position, this.value, Types.INTEGER);
             statement.registerOutParameter(position, Types.INTEGER);
-            statementScope.onLeave(() -> this.value = asInteger(statement.getObject(position)));
+            statementScope.add(() -> this.value = asInteger(statement.getObject(position)));
         });
     }
 

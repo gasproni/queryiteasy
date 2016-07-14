@@ -24,7 +24,7 @@ public class DateInputOutputParameter implements InputOutputParameter {
         RuntimeSQLException.execute(() -> {
             statement.setDate(position, value);
             statement.registerOutParameter(position, Types.DATE);
-            statementScope.onLeave(() -> this.value = asDate(statement.getObject(position)));
+            statementScope.add(() -> this.value = asDate(statement.getObject(position)));
         });
     }
 

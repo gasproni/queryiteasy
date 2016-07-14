@@ -6,16 +6,16 @@ import java.util.ArrayList;
 public class AutoCloseableScope implements AutoCloseable, Scope {
 
     private boolean isClosed = false;
-    private ArrayList<LeaveAction> leaveActions = new ArrayList<>();
+    private ArrayList<OnCloseAction> onCloseActions = new ArrayList<>();
 
     @Override
-    public void onLeave(LeaveAction caller) {
-        this.leaveActions.add(caller);
+    public void add(OnCloseAction caller) {
+        this.onCloseActions.add(caller);
     }
 
     @Override
-    public <RType> RType make(RType obj, ThrowingConsumer<RType> consumer) {
-        onLeave(() -> consumer.apply(obj));
+    public <RType> RType add(RType obj, ThrowingConsumer<RType> consumer) {
+        add(() -> consumer.apply(obj));
         return obj;
     }
 
@@ -25,9 +25,9 @@ public class AutoCloseableScope implements AutoCloseable, Scope {
             return;
         }
         ScopeException toThrow = null;
-        for (int position = leaveActions.size() - 1; position >= 0; --position) {
+        for (int position = onCloseActions.size() - 1; position >= 0; --position) {
             try {
-                leaveActions.get(position).perform();
+                onCloseActions.get(position).perform();
             } catch (Exception exception) {
                 if (toThrow == null) {
                     toThrow = new ScopeException(exception);
@@ -47,7 +47,7 @@ public class AutoCloseableScope implements AutoCloseable, Scope {
     }
 
     public int handlersCount() {
-        return leaveActions.size();
+        return onCloseActions.size();
     }
 
 }

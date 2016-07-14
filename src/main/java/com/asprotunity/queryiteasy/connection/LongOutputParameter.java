@@ -18,7 +18,7 @@ public class LongOutputParameter implements OutputParameter {
     public void bind(CallableStatement statement, int position, Scope statementScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.BIGINT);
-            statementScope.onLeave(() -> this.value = asLong(statement.getObject(position)));
+            statementScope.add(() -> this.value = asLong(statement.getObject(position)));
         });
     }
 

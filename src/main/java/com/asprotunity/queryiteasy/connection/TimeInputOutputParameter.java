@@ -24,7 +24,7 @@ public class TimeInputOutputParameter implements InputOutputParameter {
         RuntimeSQLException.execute(() -> {
             statement.setTime(position, this.value);
             statement.registerOutParameter(position, Types.TIME);
-            statementScope.onLeave(() -> this.value = asTime(statement.getObject(position)));
+            statementScope.add(() -> this.value = asTime(statement.getObject(position)));
         });
     }
 
