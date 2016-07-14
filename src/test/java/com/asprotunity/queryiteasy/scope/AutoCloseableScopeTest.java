@@ -37,6 +37,20 @@ public class AutoCloseableScopeTest {
     }
 
     @Test
+    public void close_calls_close_on_close_handlers_only_once() throws Exception {
+        Closeable closeable = mock(Closeable.class);
+
+        AutoCloseableScope scope = new AutoCloseableScope();
+        scope.add(closeable::close);
+        scope.close();
+        scope.close();
+
+        verify(closeable, times(1)).close();
+        assertTrue(scope.isClosed());
+
+    }
+
+    @Test
     public void calls_registered_close_handlers_in_reverse_registration_order() throws Exception {
         Closeable closeable1 = mock(Closeable.class);
         Closeable closeable2 = mock(Closeable.class);
