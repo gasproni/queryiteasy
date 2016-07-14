@@ -2,8 +2,6 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 
 
 import com.asprotunity.queryiteasy.DataStore;
-import com.asprotunity.queryiteasy.connection.InputParameterBinders;
-import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
 import com.asprotunity.queryiteasy.stringio.StringIO;
 import org.junit.BeforeClass;
@@ -22,11 +20,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
-import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
-import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bindClob;
+import static com.asprotunity.queryiteasy.connection.InputParameterBinders.*;
 import static com.asprotunity.queryiteasy.connection.SQLDataConverters.*;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -79,10 +75,10 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
     @Test
     public void stores_and_reads_longs_as_numbers() throws SQLException {
         Long value = 10L;
-        List<Row> expectedValues = storeAndReadValuesBack("NUMBER", bind((Long) null), bind(value));
+        List<Tuple2> expectedValues = storeAndReadValuesBack("NUMBER", bind((Long) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asLong(expectedValues.get(0).at("first")), is(nullValue()));
-        assertThat(asLong(expectedValues.get(0).at("second")), is(value));
+        assertThat(asLong(expectedValues.get(0)._1), is(nullValue()));
+        assertThat(asLong(expectedValues.get(0)._2), is(value));
     }
 
     @Test
@@ -91,20 +87,20 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
         // or that will be lost when putting the value in the db
         // and the assert will fail.
         Time value = new Time(36672000L);
-        List<Row> expectedValues = storeAndReadValuesBack("DATE", bind((Time) null), bind(value));
+        List<Tuple2> expectedValues = storeAndReadValuesBack("DATE", bind((Time) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asTime(expectedValues.get(0).at("first")), is(nullValue()));
-        assertThat(asTime(expectedValues.get(0).at("second")), is(value));
+        assertThat(asTime(expectedValues.get(0)._1), is(nullValue()));
+        assertThat(asTime(expectedValues.get(0)._2), is(value));
     }
 
     @Test
     public void stores_and_reads_sql_timestamps_as_dates() throws SQLException {
         // Tue, 12 Jan 2016 10:11:12.000 GMT. Note that some DBs support the milliseconds.
         Timestamp value = new Timestamp(1452593472000L);
-        List<Row> expectedValues = storeAndReadValuesBack("DATE", bind((Timestamp) null), bind(value));
+        List<Tuple2> expectedValues = storeAndReadValuesBack("DATE", bind((Timestamp) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asDate(expectedValues.get(0).at("first")), is(nullValue()));
-        assertThat(asDate(expectedValues.get(0).at("second")), is(value));
+        assertThat(asDate(expectedValues.get(0)._1), is(nullValue()));
+        assertThat(asDate(expectedValues.get(0)._2), is(value));
     }
 
     @Test
@@ -120,22 +116,24 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
     public void stores_and_reads_blobs() throws SQLException, UnsupportedEncodingException {
         String blobContent = "this is the content of the blob";
         Charset charset = Charset.forName("UTF-8");
-        Supplier<InputStream> value = () -> new ByteArrayInputStream(blobContent.getBytes(charset));
+        Supplier<InputStream> inputStreamSupplier = () -> new ByteArrayInputStream(blobContent.getBytes(charset));
         getDataStore().execute(connection -> {
             connection.update("CREATE TABLE testtable (first BLOB NULL, second BLOB NULL)");
             connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
-                    InputParameterBinders.bindBlob(() -> null), InputParameterBinders.bindBlob(value));
+                    bindBlob(() -> null), bindBlob(inputStreamSupplier));
         });
 
-        getDataStore().execute(connection -> {
-            List<Row> expectedValues = connection.select(rowStream -> rowStream.collect(toList()), "SELECT * FROM testtable"
-            );
-            assertThat(expectedValues.size(), is(1));
-            Function<InputStream, String> blobReader = inputStream -> StringIO.readFrom(inputStream, charset);
-            assertThat(fromBlob(expectedValues.get(0).at("first"), blobReader), is(nullValue()));
-            assertThat(fromBlob(expectedValues.get(0).at("second"), blobReader), is(blobContent));
-        });
+        Function<InputStream, String> blobReader = inputStream -> StringIO.readFrom(inputStream, charset);
+
+        List<Tuple2> expectedValues = getDataStore().executeWithResult(connection ->
+                connection.select(row -> new Tuple2<>(fromBlob(row.at(1), blobReader), fromBlob(row.at(2), blobReader)),
+                        "SELECT * FROM testtable").collect(toList()));
+
+        assertThat(expectedValues.size(), is(1));
+        assertThat(expectedValues.get(0)._1, is(nullValue()));
+        assertThat(expectedValues.get(0)._2, is(blobContent));
     }
+
 
     @Test
     public void stores_and_reads_clobs() throws SQLException, UnsupportedEncodingException {
@@ -149,25 +147,23 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
         });
 
 
-        getDataStore().execute(connection -> {
-            List<Row> expectedValues = connection.select(rowStream -> rowStream.collect(toList()),
-                    "SELECT * FROM testtable");
+        List<Tuple2> expectedValues = getDataStore().executeWithResult(connection ->
+                connection.select(row -> new Tuple2<>(fromClob(row.at(1), StringIO::readFrom),
+                                fromClob(row.at(2), StringIO::readFrom)),
+                        "SELECT * FROM testtable").collect(toList()));
 
-
-            assertThat(expectedValues.size(), is(1));
-            assertThat(fromClob(expectedValues.get(0).at("first"), StringIO::readFrom), is(nullValue()));
-            assertThat(fromClob(expectedValues.get(0).at("second"), StringIO::readFrom), is(clobContent));
-        });
+        assertThat(expectedValues.size(), is(1));
+        assertThat(expectedValues.get(0)._1, is(nullValue()));
+        assertThat(expectedValues.get(0)._2, is(clobContent));
     }
 
     @Override
     protected void cleanup() throws Exception {
         getDataStore().execute(connection -> {
-            List<String> dropStatements = connection.select(rowStream ->
-                    rowStream.map(row -> asString(row.at("dropStatements"))).collect(Collectors.toList()),
+            List<String> dropStatements = connection.select(row -> asString(row.at("dropStatements")),
                     "select 'drop '||object_type||' '|| object_name|| " +
                     "DECODE(OBJECT_TYPE,'TABLE',' CASCADE CONSTRAINTS','') as dropStatements from user_objects"
-            );
+            ).collect(toList());
             for (String statement : dropStatements) {
                 if (isNotDropOfSystemOrLobIndex(statement)) {
                     connection.update(statement);

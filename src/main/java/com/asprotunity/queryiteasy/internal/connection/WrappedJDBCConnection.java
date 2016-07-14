@@ -27,6 +27,24 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         RuntimeSQLException.execute(() -> this.connection.setAutoCommit(false));
     }
 
+    private static void addBatch(Batch batch, PreparedStatement preparedStatement, Scope scope) throws SQLException {
+        batch.forEachParameter(bindTo(preparedStatement, scope));
+        preparedStatement.addBatch();
+    }
+
+    private static void bindParameters(InputParameter[] parameters, PreparedStatement preparedStatement, Scope scope) {
+        IntStream.range(0, parameters.length).forEach(i -> parameters[i].bind(preparedStatement, i + 1, scope));
+    }
+
+    private static void bindCallableParameters(Parameter[] parameters, CallableStatement callableStatement, Scope scope) {
+        IntStream.range(0, parameters.length).forEach(i -> parameters[i].bind(callableStatement, i + 1, scope));
+    }
+
+    private static BiConsumer<InputParameter, Integer> bindTo(PreparedStatement preparedStatement, Scope scope) {
+        return (parameter, position) ->
+                parameter.bind(preparedStatement, position + 1, scope);
+    }
+
     public void commit() {
         RuntimeSQLException.execute(connection::commit);
     }
@@ -67,14 +85,26 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         });
     }
 
-
     @Override
-    public <ResultType> ResultType select(Function<Stream<Row>, ResultType> rowProcessor, String sql, InputParameter... parameters) {
+    public <MappedRow> Stream<MappedRow> select(Function<Row, MappedRow> rowMapper, String sql,
+                                                InputParameter... parameters) {
         return RuntimeSQLException.executeAndReturnResult(() -> {
-            try (PreparedStatement statement = connection.prepareStatement(sql);
-                 AutoCloseableScope statementScope = new AutoCloseableScope()) {
-                bindParameters(parameters, statement, statementScope);
-                return executeQuery(rowProcessor, statement);
+            AutoCloseableScope scope = connectionScope.make(new AutoCloseableScope(), AutoCloseableScope::close);
+            Stream<Row> rowStream = null;
+            try (AutoCloseableScope executeQueryScope = new AutoCloseableScope()) {
+                PreparedStatement statement = scope.make(connection.prepareStatement(sql), PreparedStatement::close);
+                bindParameters(parameters, statement, executeQueryScope);
+                ResultSet rs = scope.make(statement.executeQuery(), ResultSet::close);
+                rowStream = StreamSupport.stream(new RowSpliterator(resultSetWrapperFactory.make(rs), connectionScope),
+                        false)
+                        .onClose(scope::close);
+                return rowStream.map(rowMapper);
+            } catch (Exception ex) {
+                scope.close();
+                if (rowStream != null) {
+                    rowStream.close();
+                }
+                throw ex;
             }
         });
     }
@@ -108,24 +138,6 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
                              false)) {
             return processRow.apply(rowStream);
         }
-    }
-
-    private static void addBatch(Batch batch, PreparedStatement preparedStatement, Scope scope) throws SQLException {
-        batch.forEachParameter(bindTo(preparedStatement, scope));
-        preparedStatement.addBatch();
-    }
-
-    private static void bindParameters(InputParameter[] parameters, PreparedStatement preparedStatement, Scope scope) {
-        IntStream.range(0, parameters.length).forEach(i -> parameters[i].bind(preparedStatement, i + 1, scope));
-    }
-
-    private static void bindCallableParameters(Parameter[] parameters, CallableStatement callableStatement, Scope scope) {
-        IntStream.range(0, parameters.length).forEach(i -> parameters[i].bind(callableStatement, i + 1, scope));
-    }
-
-    private static BiConsumer<InputParameter, Integer> bindTo(PreparedStatement preparedStatement, Scope scope) {
-        return (parameter, position) ->
-                parameter.bind(preparedStatement, position + 1, scope);
     }
 
 }

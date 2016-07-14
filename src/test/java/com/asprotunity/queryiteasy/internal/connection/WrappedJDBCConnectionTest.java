@@ -1,7 +1,6 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
 import com.asprotunity.queryiteasy.connection.InputParameterBinders;
-import com.asprotunity.queryiteasy.connection.Row;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -10,14 +9,10 @@ import java.io.InputStream;
 import java.sql.*;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
-import static org.junit.Assert.assertTrue;
+import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
 
 public class WrappedJDBCConnectionTest {
@@ -76,7 +71,7 @@ public class WrappedJDBCConnectionTest {
     }
 
     @Test
-    public void select_executes_and_closes_result_set_stream_and_statement_in_the_right_order() throws Exception {
+    public void result_stream_closes_result_set_and_statement_in_the_right_order() throws Exception {
         String sql = "SELECT * FROM foo";
         PreparedStatement preparedStatement = prepareStatement(sql);
 
@@ -84,23 +79,8 @@ public class WrappedJDBCConnectionTest {
         when(preparedStatement.executeQuery()).thenReturn(rs);
         when(rs.next()).thenReturn(false);
 
-        final AtomicBoolean streamClosed = new AtomicBoolean(false);
-        Function<Stream<Row>, Stream<Row>> setStreamOnCloseToVerifyResultSetNotClosedBeforeStreamAndMarkStreamClosed =
-                rowStream -> {
-                    rowStream.onClose(() -> {
-                        try {
-                            verify(rs, times(0)).close();
-                            streamClosed.set(true);
-                        } catch (SQLException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-                    return rowStream;
-                };
+        wrappedJDBCConnection.select(row -> row.at(1), sql).close();
 
-        wrappedJDBCConnection.select(setStreamOnCloseToVerifyResultSetNotClosedBeforeStreamAndMarkStreamClosed, sql);
-
-        assertTrue(streamClosed.get());
         InOrder order = inOrder(preparedStatement, rs);
         order.verify(preparedStatement, times(1)).executeQuery();
         order.verify(rs, times(1)).close();
@@ -108,7 +88,7 @@ public class WrappedJDBCConnectionTest {
     }
 
     @Test
-    public void select_closes_blob_streams_before_closing_statement() throws Exception {
+    public void select_closes_blob_streams_after_executing_query() throws Exception {
         String sql = "SELECT * FROM foo where blob = ?";
         PreparedStatement preparedStatement = prepareStatement(sql);
 
@@ -118,13 +98,11 @@ public class WrappedJDBCConnectionTest {
         when(preparedStatement.executeQuery()).thenReturn(rs);
         when(rs.next()).thenReturn(false);
 
-        wrappedJDBCConnection.select(rowStream -> 1, sql, InputParameterBinders.bindBlob(() -> blobStream));
+        wrappedJDBCConnection.select(row -> row.at(1), sql, InputParameterBinders.bindBlob(() -> blobStream));
 
         InOrder order = inOrder(preparedStatement, rs, blobStream);
         order.verify(preparedStatement, times(1)).executeQuery();
-        order.verify(rs, times(1)).close();
         order.verify(blobStream, times(1)).close();
-        order.verify(preparedStatement, times(1)).close();
     }
 
     @Test
@@ -136,8 +114,9 @@ public class WrappedJDBCConnectionTest {
 
         wrappedJDBCConnection = new WrappedJDBCConnection(jdbcConnection, resultSetWrapperFactory);
 
-        wrappedJDBCConnection.select(rowStream -> rowStream.collect(Collectors.toList()), sql);
+        wrappedJDBCConnection.select(row -> row.at(1), sql).collect(toList());
         wrappedJDBCConnection.close();
+
         InOrder order = inOrder(blob, jdbcConnection);
         order.verify(blob, times(1)).free();
         order.verify(jdbcConnection, times(1)).close();
@@ -152,7 +131,7 @@ public class WrappedJDBCConnectionTest {
 
         wrappedJDBCConnection = new WrappedJDBCConnection(jdbcConnection, resultSetWrapperFactory);
 
-        wrappedJDBCConnection.select(rowStream -> rowStream.collect(Collectors.toList()), sql);
+        wrappedJDBCConnection.select(row -> row.at(1), sql).collect(toList());
         wrappedJDBCConnection.close();
         InOrder order = inOrder(nclob, jdbcConnection);
         order.verify(nclob, times(1)).free();
@@ -168,7 +147,7 @@ public class WrappedJDBCConnectionTest {
 
         wrappedJDBCConnection = new WrappedJDBCConnection(jdbcConnection, resultSetWrapperFactory);
 
-        wrappedJDBCConnection.select(rowStream -> rowStream.collect(Collectors.toList()), sql);
+        wrappedJDBCConnection.select(row -> row.at(1), sql).collect(toList());
         wrappedJDBCConnection.close();
         InOrder order = inOrder(clob, jdbcConnection);
         order.verify(clob, times(1)).free();

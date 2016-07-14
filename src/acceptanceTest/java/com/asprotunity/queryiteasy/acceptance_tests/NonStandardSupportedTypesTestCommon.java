@@ -1,7 +1,6 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
 
-import com.asprotunity.queryiteasy.connection.Row;
 import org.junit.Test;
 
 import java.sql.SQLException;
@@ -22,18 +21,18 @@ public abstract class NonStandardSupportedTypesTestCommon extends SupportedTypes
     @Test
     public void stores_and_reads_longs_as_bigints() throws SQLException {
         Long value = 10L;
-        List<Row> expectedValues = storeAndReadValuesBack("BIGINT", bind((Long) null), bind(value));
+        List<Tuple2> expectedValues = storeAndReadValuesBack("BIGINT", bind((Long) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asLong(expectedValues.get(0).at("first")), is(nullValue()));
-        assertThat(asLong(expectedValues.get(0).at("second")), is(value));
+        assertThat(asLong(expectedValues.get(0)._1), is(nullValue()));
+        assertThat(asLong(expectedValues.get(0)._2), is(value));
     }
 
     @Test
     public void stores_and_reads_booleans() throws SQLException {
-        List<Row> expectedValues = storeAndReadValuesBack("BOOLEAN", bind((Boolean) null), bind(true));
+        List<Tuple2> expectedValues = storeAndReadValuesBack("BOOLEAN", bind((Boolean) null), bind(true));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asBoolean(expectedValues.get(0).at("first")), is(nullValue()));
-        assertTrue(asBoolean(expectedValues.get(0).at("second")));
+        assertThat(asBoolean(expectedValues.get(0)._1), is(nullValue()));
+        assertTrue(asBoolean(expectedValues.get(0)._2));
     }
 
     @Test
@@ -42,20 +41,20 @@ public abstract class NonStandardSupportedTypesTestCommon extends SupportedTypes
         // or that will be lost when putting the value in the db
         // and the assert will fail.
         Time value = new Time(36672000L);
-        List<Row> expectedValues = storeAndReadValuesBack("TIME", bind((Time) null), bind(value));
+        List<Tuple2> expectedValues = storeAndReadValuesBack("TIME", bind((Time) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asTime(expectedValues.get(0).at("first")), is(nullValue()));
-        assertThat(asTime(expectedValues.get(0).at("second")), is(value));
+        assertThat(asTime(expectedValues.get(0)._1), is(nullValue()));
+        assertThat(asTime(expectedValues.get(0)._2), is(value));
     }
 
     @Test
     public void stores_and_reads_timestamps() throws SQLException {
         // Tue, 12 Jan 2016 10:11:12.000 GMT. Note that some DBs support the milliseconds.
         Timestamp value = new Timestamp(1452593472000L);
-        List<Row> expectedValues = storeAndReadValuesBack("TIMESTAMP", bind((Timestamp) null), bind(value));
+        List<Tuple2> expectedValues = storeAndReadValuesBack("TIMESTAMP", bind((Timestamp) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asTimestamp(expectedValues.get(0).at("first")), is(nullValue()));
-        assertThat(asTimestamp(expectedValues.get(0).at("second")), is(value));
+        assertThat(asTimestamp(expectedValues.get(0)._1), is(nullValue()));
+        assertThat(asTimestamp(expectedValues.get(0)._2), is(value));
     }
 
 

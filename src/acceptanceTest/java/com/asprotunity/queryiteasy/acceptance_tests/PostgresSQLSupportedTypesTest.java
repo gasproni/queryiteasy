@@ -2,7 +2,6 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 
 
 import com.asprotunity.queryiteasy.DataStore;
-import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.stringio.StringIO;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -20,7 +19,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.loadProperties;
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
@@ -73,25 +71,26 @@ public class PostgresSQLSupportedTypesTest extends NonStandardSupportedTypesTest
 
     @Test
     public void stores_and_reads_longvarbinaries() throws SQLException, UnsupportedEncodingException {
-        String byteaContent = "this is the content of the bytea";
+        String binaryContent = "this is the content of the binary";
         Charset charset = Charset.forName("UTF-8");
-        Supplier<InputStream> inputStreamSupplier = () -> new ByteArrayInputStream(byteaContent.getBytes(charset));
+        Supplier<InputStream> inputStreamSupplier = () -> new ByteArrayInputStream(binaryContent.getBytes(charset));
         getDataStore().execute(connection -> {
             connection.update("CREATE TABLE testtable (first BYTEA NULL, second BYTEA NULL)");
             connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
                     bindLongVarbinary(() -> null), bindLongVarbinary(inputStreamSupplier));
         });
 
-        getDataStore().execute(connection -> {
-            List<Row> expectedValues = connection.select(rowStream -> rowStream.collect(toList()), "SELECT * FROM testtable"
-            );
-            assertThat(expectedValues.size(), is(1));
-            Function<InputStream, String> blobReader = inputStream -> StringIO.readFrom(inputStream, charset);
-            assertThat(fromLongVarbinary(expectedValues.get(0).at("first"), blobReader), is(nullValue()));
-            assertThat(fromLongVarbinary(expectedValues.get(0).at("second"), blobReader), is(byteaContent));
+        Function<InputStream, String> binaryReader = inputStream -> StringIO.readFrom(inputStream, charset);
 
-        });
+        List<Tuple2> expectedValues = getDataStore().executeWithResult(connection ->
+                connection.select(row -> new Tuple2<>(fromLongVarbinary(row.at(1), binaryReader), fromLongVarbinary(row.at(2), binaryReader)),
+                        "SELECT * FROM testtable").collect(toList()));
+
+        assertThat(expectedValues.size(), is(1));
+        assertThat(expectedValues.get(0)._1, is(nullValue()));
+        assertThat(expectedValues.get(0)._2, is(binaryContent));
     }
+
 
     @Test
     public void stores_and_reads_text() throws SQLException, UnsupportedEncodingException {
@@ -102,24 +101,23 @@ public class PostgresSQLSupportedTypesTest extends NonStandardSupportedTypesTest
                     bind((String) null), bind(text));
         });
 
-        getDataStore().execute(connection -> {
-            List<Row> expectedValues = connection.select(rowStream -> rowStream.collect(toList()), "SELECT * FROM testtable"
-            );
-            assertThat(expectedValues.size(), is(1));
-            assertThat(asString(expectedValues.get(0).at("second")), is(text));
-            assertThat(asString(expectedValues.get(0).at("first")), is(nullValue()));
-        });
+        List<Tuple2> expectedValues = getDataStore().executeWithResult(connection ->
+                connection.select(row -> new Tuple2<>(row.at("first"), row.at("second")),
+                        "SELECT * FROM testtable").collect(toList()));
+
+        assertThat(expectedValues.size(), is(1));
+        assertThat(asString(expectedValues.get(0)._1), is(nullValue()));
+        assertThat(asString(expectedValues.get(0)._2), is(text));
     }
 
     @Override
     protected void cleanup() throws Exception {
         getDataStore().execute(connection -> {
-            List<String> dropTableStatements = connection.select(rowStream ->
-                            rowStream.map(row -> asString(row.at("dropTableStatement"))).collect(Collectors.toList()),
+            List<String> dropTableStatements = connection.select(row -> asString(row.at("dropTableStatement")),
                     "select 'drop table if exists \"' || tablename || '\" cascade;' as dropTableStatement" +
                             "  from pg_tables " +
                             " where tableowner = 'testuser'"
-            );
+            ).collect(toList());
             for (String statement : dropTableStatements) {
                 connection.update(statement);
             }

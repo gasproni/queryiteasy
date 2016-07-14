@@ -2,7 +2,6 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 
 
 import com.asprotunity.queryiteasy.DataStore;
-import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.stringio.StringIO;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -37,19 +36,19 @@ public class HSQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon 
     @Test
     public void stores_and_reads_doubles_mapped_to_double() throws SQLException {
         Double value = 10.0;
-        List<Row> expectedValues = storeAndReadValuesBack("DOUBLE", bind((Double) null), bind(value));
+        List<Tuple2> expectedValues = storeAndReadValuesBack("DOUBLE", bind((Double) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asDouble(expectedValues.get(0).at("first")), is(nullValue()));
-        assertThat(asDouble(expectedValues.get(0).at("second")), is(value));
+        assertThat(asDouble(expectedValues.get(0)._1), is(nullValue()));
+        assertThat(asDouble(expectedValues.get(0)._2), is(value));
     }
 
     @Test
     public void stores_and_reads_bytes_as_tinyints() throws SQLException {
         Byte value = 's';
-        List<Row> expectedValues = storeAndReadValuesBack("TINYINT", bind((Byte) null), bind(value));
+        List<Tuple2> expectedValues = storeAndReadValuesBack("TINYINT", bind((Byte) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asByte(expectedValues.get(0).at("first")), is(nullValue()));
-        assertThat(asByte(expectedValues.get(0).at("second")), is(value));
+        assertThat(asByte(expectedValues.get(0)._1), is(nullValue()));
+        assertThat(asByte(expectedValues.get(0)._2), is(value));
     }
 
     @Test
@@ -63,14 +62,15 @@ public class HSQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon 
                     bindBlob(() -> null), bindBlob(inputStreamSupplier));
         });
 
-        getDataStore().execute(connection -> {
-            List<Row> expectedValues = connection.select(rowStream -> rowStream.collect(toList()), "SELECT * FROM testtable"
-            );
-            assertThat(expectedValues.size(), is(1));
-            Function<InputStream, String> blobReader = inputStream -> StringIO.readFrom(inputStream, charset);
-            assertThat(fromBlob(expectedValues.get(0).at("first"), blobReader), is(nullValue()));
-            assertThat(fromBlob(expectedValues.get(0).at("second"), blobReader), is(blobContent));
-        });
+        Function<InputStream, String> blobReader = inputStream -> StringIO.readFrom(inputStream, charset);
+
+        List<Tuple2> expectedValues = getDataStore().executeWithResult(connection ->
+                connection.select(row -> new Tuple2<>(fromBlob(row.at(1), blobReader), fromBlob(row.at(2), blobReader)),
+                        "SELECT * FROM testtable").collect(toList()));
+
+        assertThat(expectedValues.size(), is(1));
+        assertThat(expectedValues.get(0)._1, is(nullValue()));
+        assertThat(expectedValues.get(0)._2, is(blobContent));
     }
 
 
@@ -86,14 +86,14 @@ public class HSQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon 
         });
 
 
-        getDataStore().execute(connection -> {
-            List<Row> expectedValues = connection.select(rowStream -> rowStream.collect(toList()),
-                    "SELECT * FROM testtable");
+        List<Tuple2> expectedValues = getDataStore().executeWithResult(connection ->
+                connection.select(row -> new Tuple2<>(fromClob(row.at(1), StringIO::readFrom),
+                                                          fromClob(row.at(2), StringIO::readFrom)),
+                                      "SELECT * FROM testtable").collect(toList()));
 
-            assertThat(expectedValues.size(), is(1));
-            assertThat(fromClob(expectedValues.get(0).at("first"), StringIO::readFrom), is(nullValue()));
-            assertThat(fromClob(expectedValues.get(0).at("second"), StringIO::readFrom), is(clobContent));
-        });
+        assertThat(expectedValues.size(), is(1));
+        assertThat(expectedValues.get(0)._1, is(nullValue()));
+        assertThat(expectedValues.get(0)._2, is(clobContent));
     }
 
     @Override

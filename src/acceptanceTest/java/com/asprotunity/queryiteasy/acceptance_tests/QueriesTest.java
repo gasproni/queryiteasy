@@ -275,8 +275,8 @@ public class QueriesTest {
                 "INSERT INTO testtable (first) VALUES (11)");
 
         List<Integer> result = dataStore.executeWithResult(connection ->
-                connection.select(rowStream -> rowStream.map(row -> asInteger(row.at("first"))).collect(toList()),
-                        "SELECT first FROM testtable ORDER BY first ASC")
+                connection.select(row -> asInteger(row.at("first")),
+                        "SELECT first FROM testtable ORDER BY first ASC").collect(toList())
         );
 
         assertThat(result.size(), is(2));
@@ -290,15 +290,32 @@ public class QueriesTest {
                 "INSERT INTO testtable (first, second) VALUES (10, 'asecond10')",
                 "INSERT INTO testtable (first, second) VALUES (11, 'asecond11')");
 
-        List<Row> result = dataStore.executeWithResult(connection ->
-                connection.select(rowStream -> rowStream.collect(toList()),
+        List<Tuple2> result = dataStore.executeWithResult(connection ->
+                connection.select(row -> new Tuple2<>(row.at("first"), row.at("second")),
                         "SELECT first, second FROM testtable WHERE first = ? AND second = ?",
-                        bind(10), bind("asecond10"))
+                        bind(10), bind("asecond10")).collect(toList())
         );
 
         assertThat(result.size(), is(1));
-        assertThat(asInteger(result.get(0).at("first")), is(10));
-        assertThat(asString(result.get(0).at("second")), is("asecond10"));
+        assertThat(asInteger(result.get(0)._1), is(10));
+        assertThat(asString(result.get(0)._2), is("asecond10"));
+    }
+
+    @Test
+    public void selects_with_bind_values_new() throws SQLException {
+        DataSourceInstantiationAndAccess.prepareData(dataSource,
+                "CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)",
+                "INSERT INTO testtable (first, second) VALUES (10, 'asecond10')",
+                "INSERT INTO testtable (first, second) VALUES (11, 'asecond11')");
+
+        List<Tuple2> result = dataStore.executeWithResult(connection ->
+                connection.select(row -> new Tuple2<>(asInteger(row.at(1)), asString(row.at(2))),
+                        "SELECT first, second FROM testtable WHERE first = ? AND second = ?",
+                        bind(10), bind("asecond10")).collect(toList()));
+
+        assertThat(result.size(), is(1));
+        assertThat(result.get(0)._1, is(10));
+        assertThat(result.get(0)._2, is("asecond10"));
     }
 
 

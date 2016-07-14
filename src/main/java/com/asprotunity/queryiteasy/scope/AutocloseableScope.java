@@ -14,7 +14,16 @@ public class AutoCloseableScope implements AutoCloseable, Scope {
     }
 
     @Override
+    public <RType> RType make(RType obj, ThrowingConsumer<RType> consumer) {
+        onLeave(() -> consumer.apply(obj));
+        return obj;
+    }
+
+    @Override
     public void close() {
+        if (isClosed) {
+            return;
+        }
         ScopeException toThrow = null;
         for (int position = leaveActions.size() - 1; position >= 0; --position) {
             try {
