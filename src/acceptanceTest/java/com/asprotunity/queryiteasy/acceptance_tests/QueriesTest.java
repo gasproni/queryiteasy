@@ -291,7 +291,7 @@ public class QueriesTest {
                 "INSERT INTO testtable (first, second) VALUES (11, 'asecond11')");
 
         List<Tuple2> result = dataStore.executeWithResult(connection ->
-                connection.select(row -> new Tuple2<>(row.at("first"), row.at("second")),
+                connection.select(row -> new Tuple2<>(asInteger(row.at("first")), asString(row.at("second"))),
                         "SELECT first, second FROM testtable WHERE first = ? AND second = ?",
                         bind(10), bind("asecond10")).collect(toList())
         );
