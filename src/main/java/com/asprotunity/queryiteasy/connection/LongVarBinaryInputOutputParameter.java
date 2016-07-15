@@ -6,31 +6,24 @@ import com.asprotunity.queryiteasy.scope.Scope;
 import java.io.InputStream;
 import java.sql.CallableStatement;
 import java.sql.Types;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.fromLongVarbinary;
+import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asByteArray;
 
-public class LongVarBinaryInputOutputParameter<ResultType> implements InputOutputParameter {
+public class LongVarBinaryInputOutputParameter implements InputOutputParameter {
 
-    private Function<InputStream, ResultType> outputLongVarBinaryReader;
-    private ResultType value = null;
+    private byte[] value = null;
     private Supplier<InputStream> inputLongVarBinarySupplier;
 
-    public LongVarBinaryInputOutputParameter(Supplier<InputStream> inputLongVarBinarySupplier,
-                                             Function<InputStream, ResultType> outputLongVarBinaryReader) {
+    public LongVarBinaryInputOutputParameter(Supplier<InputStream> inputLongVarBinarySupplier) {
         if (inputLongVarBinarySupplier == null) {
             throw new InvalidArgumentException("inputLongVarBinarySupplier cannot be null");
         }
-        if (outputLongVarBinaryReader == null) {
-            throw new InvalidArgumentException("outputLongVarBinaryReader cannot be null");
-        }
 
         this.inputLongVarBinarySupplier = inputLongVarBinarySupplier;
-        this.outputLongVarBinaryReader = outputLongVarBinaryReader;
     }
 
-    public ResultType value() {
+    public byte[] value() {
         return value;
     }
 
@@ -45,7 +38,7 @@ public class LongVarBinaryInputOutputParameter<ResultType> implements InputOutpu
                 statementScope.add(inputStream::close);
             }
             statement.registerOutParameter(position, Types.LONGVARBINARY);
-            statementScope.add(() -> value = fromLongVarbinary(statement.getObject(position), outputLongVarBinaryReader));
+            statementScope.add(() -> value = asByteArray(statement.getObject(position)));
         });
     }
 }

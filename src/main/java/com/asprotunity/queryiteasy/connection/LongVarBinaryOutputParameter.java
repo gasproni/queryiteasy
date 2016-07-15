@@ -1,28 +1,17 @@
 package com.asprotunity.queryiteasy.connection;
 
-import com.asprotunity.queryiteasy.exception.InvalidArgumentException;
 import com.asprotunity.queryiteasy.scope.Scope;
 
-import java.io.InputStream;
 import java.sql.CallableStatement;
 import java.sql.Types;
-import java.util.function.Function;
 
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.fromLongVarbinary;
+import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asByteArray;
 
-public class LongVarBinaryOutputParameter<ResultType> implements OutputParameter {
+public class LongVarBinaryOutputParameter implements OutputParameter {
 
-    private Function<InputStream, ResultType> longVarBinaryReader;
-    private ResultType value = null;
+    private byte[] value = null;
 
-    public LongVarBinaryOutputParameter(Function<InputStream, ResultType> longVarBinaryReader) {
-        if (longVarBinaryReader == null) {
-            throw new InvalidArgumentException("longVarBinaryReader cannot be null");
-        }
-        this.longVarBinaryReader = longVarBinaryReader;
-    }
-
-    public ResultType value() {
+    public byte[] value() {
         return value;
     }
 
@@ -30,7 +19,7 @@ public class LongVarBinaryOutputParameter<ResultType> implements OutputParameter
     public void bind(CallableStatement statement, int position, Scope statementScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.LONGVARBINARY);
-            statementScope.add(() -> value = fromLongVarbinary(statement.getObject(position), longVarBinaryReader));
+            statementScope.add(() -> value = asByteArray(statement.getObject(position)));
         });
     }
 }

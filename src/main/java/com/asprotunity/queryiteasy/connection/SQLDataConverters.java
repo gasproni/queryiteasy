@@ -63,11 +63,6 @@ public final class SQLDataConverters {
         }
     }
 
-    public static <ResultType> ResultType fromLongVarbinary(Object object,
-                                                            Function<InputStream, ResultType> longvarbinaryReader) {
-        return fromBlob(object, longvarbinaryReader);
-    }
-
     public static <ResultType> ResultType fromInputStream(InputStream inputStream,
                                                           Function<InputStream, ResultType> binaryReader) {
         if (inputStream == null) {
@@ -76,6 +71,17 @@ public final class SQLDataConverters {
         try (AutoCloseableScope scope = new AutoCloseableScope()) {
             scope.add(inputStream::close);
             return binaryReader.apply(inputStream);
+        }
+    }
+
+    public static byte[] asByteArray(Object object) {
+        if (object == null) {
+            return null;
+        }
+        if (object instanceof byte[]) {
+            return (byte[])object;
+        } else {
+            throw new ClassCastException(classCastExceptionMessage(object, byte[].class));
         }
     }
 

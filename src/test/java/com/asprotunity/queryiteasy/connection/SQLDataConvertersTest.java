@@ -22,8 +22,20 @@ import static org.mockito.Mockito.*;
 public class SQLDataConvertersTest {
 
     @Test
-    public void converts_to_boolean_from_nullL_correctly() {
-        assertThat(asBoolean(null), is(nullValue()));
+    public void converts_null_byte_arrays_correctly() {
+        assertThat(asByteArray(null), is(nullValue()));
+    }
+
+    @Test
+    public void converts_byte_arrays_correctly() {
+        byte[] value = new byte[] {12, 13, 14};
+        assertThat(asByteArray(value), is(value));
+    }
+
+    @Test
+    public void throws_class_cast_exception_when_conversion_to_byte_array_not_possible() {
+        Integer value = 1;
+        assert_throws_class_cast_exception(value, SQLDataConverters::asByteArray, byte[].class);
     }
 
     @Test
@@ -34,6 +46,11 @@ public class SQLDataConvertersTest {
     @Test
     public void converts_strings_correctly() {
         assertThat(asString("text"), is("text"));
+    }
+
+    @Test
+    public void converts_to_boolean_from_nullL_correctly() {
+        assertThat(asBoolean(null), is(nullValue()));
     }
 
     @Test

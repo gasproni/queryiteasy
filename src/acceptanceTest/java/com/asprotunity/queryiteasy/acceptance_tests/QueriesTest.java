@@ -152,20 +152,18 @@ public class QueriesTest {
         });
 
         String ioParamOriginalBinaryContent = "this is the content of the blob";
-        LongVarBinaryInputOutputParameter<String> inputOutputParameter =
-                new LongVarBinaryInputOutputParameter<>(
-                        () -> new ByteArrayInputStream(ioParamOriginalBinaryContent.getBytes(charset)),
-                        inputStream -> StringIO.readFrom(inputStream, charset));
+        LongVarBinaryInputOutputParameter inputOutputParameter =
+                new LongVarBinaryInputOutputParameter(
+                        () -> new ByteArrayInputStream(ioParamOriginalBinaryContent.getBytes(charset)));
 
-        LongVarBinaryOutputParameter<String> outputParameter =
-                new LongVarBinaryOutputParameter<>(inputStream -> StringIO.readFrom(inputStream, charset));
+        LongVarBinaryOutputParameter outputParameter = new LongVarBinaryOutputParameter();
 
         dataStore.execute(connection ->
                 connection.call("{call test_binary_out_param(?, ?)}", inputOutputParameter, outputParameter)
         );
 
-        assertThat(outputParameter.value(), is(ioParamOriginalBinaryContent));
-        assertThat(inputOutputParameter.value(), is(binaryStoredInDb));
+        assertThat(outputParameter.value(), is(ioParamOriginalBinaryContent.getBytes(charset)));
+        assertThat(inputOutputParameter.value(), is(binaryStoredInDb.getBytes(charset)));
     }
 
 
