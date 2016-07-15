@@ -83,8 +83,8 @@ public class PostgresSQLSupportedTypesTest extends NonStandardSupportedTypesTest
         Function<InputStream, String> binaryReader = inputStream -> StringIO.readFrom(inputStream, charset);
 
         List<Tuple2> expectedValues = getDataStore().executeWithResult(connection ->
-                connection.select(row -> new Tuple2<>(SQLDataConverters.fromBinaryStream(row.binaryStreamAt(1), binaryReader),
-                                SQLDataConverters.fromBinaryStream(row.binaryStreamAt(2), binaryReader)),
+                connection.select(row -> new Tuple2<>(SQLDataConverters.fromInputStream(row.binaryStreamAt(1), binaryReader),
+                                SQLDataConverters.fromInputStream(row.binaryStreamAt(2), binaryReader)),
                         "SELECT * FROM testtable").collect(toList()));
 
         assertThat(expectedValues.size(), is(1));

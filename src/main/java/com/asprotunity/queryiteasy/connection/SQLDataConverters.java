@@ -68,8 +68,8 @@ public final class SQLDataConverters {
         return fromBlob(object, longvarbinaryReader);
     }
 
-    public static <ResultType> ResultType fromBinaryStream(InputStream inputStream,
-                                                           Function<InputStream, ResultType> binaryReader) {
+    public static <ResultType> ResultType fromInputStream(InputStream inputStream,
+                                                          Function<InputStream, ResultType> binaryReader) {
         if (inputStream == null) {
             return null;
         }

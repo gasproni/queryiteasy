@@ -311,7 +311,8 @@ public class QueriesTest {
         List<Tuple2> result = dataStore.executeWithResult(connection ->
                 connection.select(row -> new Tuple2<>(asInteger(row.at(1)), asString(row.at(2))),
                         "SELECT first, second FROM testtable WHERE first = ? AND second = ?",
-                        bind(10), bind("asecond10")).collect(toList()));
+                        bind(10), bind("asecond10")).collect(toList())
+        );
 
         assertThat(result.size(), is(1));
         assertThat(result.get(0)._1, is(10));
