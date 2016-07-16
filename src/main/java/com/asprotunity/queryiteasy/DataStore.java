@@ -22,8 +22,7 @@ public class DataStore {
 
     public void execute(Consumer<Connection> transaction) {
         RuntimeSQLException.execute(() -> {
-                    try (WrappedJDBCConnection connection = new WrappedJDBCConnection(dataSource.getConnection()
-                    )) {
+                    try (WrappedJDBCConnection connection = new WrappedJDBCConnection(dataSource.getConnection())) {
                         transaction.accept(connection);
                         connection.commit();
                     }
@@ -33,8 +32,7 @@ public class DataStore {
 
     public <ResultType> ResultType executeWithResult(Function<Connection, ResultType> transaction) {
         return RuntimeSQLException.executeAndReturnResult(() -> {
-                    try (WrappedJDBCConnection connection = new WrappedJDBCConnection(dataSource.getConnection()
-                    )) {
+                    try (WrappedJDBCConnection connection = new WrappedJDBCConnection(dataSource.getConnection())) {
                         ResultType result = transaction.apply(connection);
                         connection.commit();
                         return result;

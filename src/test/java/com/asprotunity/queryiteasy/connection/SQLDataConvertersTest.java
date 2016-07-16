@@ -22,12 +22,12 @@ import static org.mockito.Mockito.*;
 public class SQLDataConvertersTest {
 
     @Test
-    public void converts_null_byte_arrays_correctly() {
+    public void converts_null_byte_arrays() {
         assertThat(asByteArray(null), is(nullValue()));
     }
 
     @Test
-    public void converts_byte_arrays_correctly() {
+    public void converts_byte_arrays() {
         byte[] value = new byte[] {12, 13, 14};
         assertThat(asByteArray(value), is(value));
     }
@@ -39,28 +39,28 @@ public class SQLDataConvertersTest {
     }
 
     @Test
-    public void converts_null_strings_correctly() {
+    public void converts_null_strings() {
         assertThat(asString(null), is(nullValue()));
     }
 
     @Test
-    public void converts_strings_correctly() {
+    public void converts_strings() {
         assertThat(asString("text"), is("text"));
     }
 
     @Test
-    public void converts_to_boolean_from_nullL_correctly() {
+    public void converts_to_boolean_from_nullL() {
         assertThat(asBoolean(null), is(nullValue()));
     }
 
     @Test
-    public void converts_to_boolean_correctly() {
+    public void converts_to_boolean() {
         assertThat(asBoolean(Boolean.TRUE), is(Boolean.TRUE));
         assertThat(asBoolean(Boolean.FALSE), is(Boolean.FALSE));
     }
 
     @Test
-    public void converts_string_to_boolean_correctly() {
+    public void converts_string_to_boolean() {
         assertThat(asBoolean("true"), is(Boolean.TRUE));
         assertThat(asBoolean("True"), is(Boolean.TRUE));
         assertThat(asBoolean("TRUE"), is(Boolean.TRUE));
@@ -76,17 +76,17 @@ public class SQLDataConvertersTest {
     }
 
     @Test
-    public void converts_to_big_decimal_from_nullL_correctly() {
+    public void converts_to_big_decimal_from_nullL() {
         assertThat(asBigDecimal(null), is(nullValue()));
     }
 
     @Test
-    public void converts_to_big_decimal_correctly() {
+    public void converts_to_big_decimal() {
         assertThat(asBigDecimal(BigDecimal.TEN), is(BigDecimal.TEN));
     }
 
     @Test
-    public void converts_big_decimal_from_string_correctly() {
+    public void converts_big_decimal_from_string() {
         assertThat(asBigDecimal(new BigDecimal("10")), is(BigDecimal.TEN));
         assertThat(asBigDecimal(new BigDecimal("10.0")), is(BigDecimal.valueOf(10.0d)));
     }
@@ -104,24 +104,24 @@ public class SQLDataConvertersTest {
     }
 
     @Test
-    public void converts_to_sql_date_from_nullL_correctly() {
+    public void converts_to_sql_date_from_nullL() {
         assertThat(asDate(null), is(nullValue()));
     }
 
     @Test
-    public void converts_sql_date_correctly() {
+    public void converts_sql_date() {
         Date date = new Date(123456);
         assertThat(asDate(date), is(date));
     }
 
     @Test
-    public void converts_sql_date_from_string_correctly() {
+    public void converts_sql_date_from_string() {
         String value = "2016-05-31";
         assertThat(asDate(value), is(Date.valueOf(value)));
     }
 
     @Test
-    public void converts_sql_date_from_sql_timestamp_correctly() {
+    public void converts_sql_date_from_sql_timestamp() {
         Timestamp timestamp = Timestamp.valueOf("2016-02-27 21:12:30.333");
         Date expectedDate = Date.valueOf("2016-02-27");
         assertThat(asDate(timestamp).toLocalDate(), is(expectedDate.toLocalDate()));
@@ -134,24 +134,24 @@ public class SQLDataConvertersTest {
     }
 
     @Test
-    public void converts_to_sql_time_from_nullL_correctly() {
+    public void converts_to_sql_time_from_nullL() {
         assertThat(asTime(null), is(nullValue()));
     }
 
     @Test
-    public void converts_sql_time_correctly() {
+    public void converts_sql_time() {
         Time time = new Time(123456);
         assertThat(asTime(time), is(time));
     }
 
     @Test
-    public void converts_sql_time_from_string_correctly() {
+    public void converts_sql_time_from_string() {
         String value = "23:12:33";
         assertThat(asTime(value), is(Time.valueOf(value)));
     }
 
     @Test
-    public void converts_sql_time_from_sql_timestamp_correctly() {
+    public void converts_sql_time_from_sql_timestamp() {
         Timestamp timestamp = Timestamp.valueOf("2016-02-27 21:12:30.333");
         Time expectedTime = Time.valueOf("21:12:30");
         assertThat(asTime(timestamp).toLocalTime(), is(expectedTime.toLocalTime()));
@@ -164,18 +164,18 @@ public class SQLDataConvertersTest {
     }
 
     @Test
-    public void converts_to_sql_timestamp_from_nullL_correctly() {
+    public void converts_to_sql_timestamp_from_nullL() {
         assertThat(asTimestamp(null), is(nullValue()));
     }
 
     @Test
-    public void converts_sql_timestamp_correctly() {
+    public void converts_sql_timestamp() {
         Timestamp timestamp = new Timestamp(123456);
         assertThat(asTimestamp(timestamp), is(timestamp));
     }
 
     @Test
-    public void converts_sql_timestamp_from_string_correctly() {
+    public void converts_sql_timestamp_from_string() {
         String value = "2016-02-27 21:12:30.333";
         assertThat(asTimestamp(value), is(Timestamp.valueOf(value)));
     }
@@ -187,25 +187,25 @@ public class SQLDataConvertersTest {
     }
 
     @Test
-    public void converts_to_number_from_nullL_correctly() {
+    public void converts_to_number_from_nullL() {
         assertThat(convertNumber(null, Integer.class, Integer::valueOf, Number::intValue), is(nullValue()));
     }
 
     @Test
-    public void converts_to_number_correctly() {
+    public void converts_to_number() {
         Integer value = 10;
         assertThat(convertNumber(value, Integer.class, Integer::valueOf, Number::intValue), is(value));
     }
 
     @Test
-    public void converts_to_number_from_different_numeric_type_correctly() {
+    public void converts_to_number_from_different_numeric_type() {
         Double toConvert = 10.0;
         Integer expected = toConvert.intValue();
         assertThat(convertNumber(toConvert, Integer.class, Integer::valueOf, Number::intValue), is(expected));
     }
 
     @Test
-    public void converts_to_number_from_string_correctly() {
+    public void converts_to_number_from_string() {
         String toConvert = "10";
         Integer expected = Integer.parseInt(toConvert);
         assertThat(convertNumber(toConvert, Integer.class, Integer::valueOf, Number::intValue), is(expected));
@@ -236,7 +236,7 @@ public class SQLDataConvertersTest {
     }
 
     @Test
-    public void from_blob_frees_resources_correctly() throws IOException, SQLException {
+    public void from_blob_frees_resources() throws IOException, SQLException {
         Blob blob = mock(Blob.class);
         ByteArrayInputStream blobInputStream = mock(ByteArrayInputStream.class);
         when(blob.getBinaryStream()).thenReturn(blobInputStream);
@@ -283,7 +283,7 @@ public class SQLDataConvertersTest {
     }
 
     @Test
-    public void from_clob_frees_resources_correctly() throws IOException, SQLException {
+    public void from_clob_frees_resources() throws IOException, SQLException {
         Clob clob = mock(Clob.class);
         Reader reader = mock(Reader.class);
         when(clob.getCharacterStream()).thenReturn(reader);
