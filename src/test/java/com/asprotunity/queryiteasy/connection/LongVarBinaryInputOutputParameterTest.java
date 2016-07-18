@@ -6,7 +6,6 @@ import org.mockito.InOrder;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.function.Supplier;
@@ -45,15 +44,14 @@ public class LongVarBinaryInputOutputParameterTest extends OutputParameterTestBa
 
         InputStream inputLongVarBinaryStream = mock(InputStream.class);
         Supplier<InputStream> inputLongVarBinarySupplier = () -> inputLongVarBinaryStream;
-        String outputLongVarBinaryContent = "this is the content of the out longVarBinary";
-        Charset charset = Charset.forName("UTF-8");
+        byte[] outputLongVarBinaryContent = new byte[]{1, 2, 3, 4, 5, 6, 7};
         LongVarBinaryInputOutputParameter parameter = new LongVarBinaryInputOutputParameter(inputLongVarBinarySupplier);
 
-        when(statement.getObject(position)).thenReturn(outputLongVarBinaryContent.getBytes(charset));
+        when(statement.getObject(position)).thenReturn(outputLongVarBinaryContent);
 
         bindParameterAndEmulateCall(parameter);
 
-        assertThat(parameter.value(), is(outputLongVarBinaryContent.getBytes(charset)));
+        assertThat(parameter.value(), is(outputLongVarBinaryContent));
         InOrder order = inOrder(statement, inputLongVarBinaryStream);
         order.verify(statement).setBinaryStream(position, inputLongVarBinaryStream);
         order.verify(statement).registerOutParameter(position, Types.LONGVARBINARY);
@@ -63,16 +61,15 @@ public class LongVarBinaryInputOutputParameterTest extends OutputParameterTestBa
 
     @Test
     public void binds_results_correctly_when_input_longVarBinary_is_null_and_statement_leaves_scope() throws SQLException, IOException {
-        String outputLongVarBinaryContent = "this is the content of the out longVarBinary";
+        byte[] outputLongVarBinaryContent = new byte[]{1, 2, 3, 4, 5, 6, 7};
         Supplier<InputStream> inputLongVarBinarySupplier = () -> null;
-        Charset charset = Charset.forName("UTF-8");
         LongVarBinaryInputOutputParameter parameter = new LongVarBinaryInputOutputParameter(inputLongVarBinarySupplier);
 
-        when(statement.getObject(position)).thenReturn(outputLongVarBinaryContent.getBytes(charset));
+        when(statement.getObject(position)).thenReturn(outputLongVarBinaryContent);
 
         bindParameterAndEmulateCall(parameter);
 
-        assertThat(parameter.value(), is(outputLongVarBinaryContent.getBytes(charset)));
+        assertThat(parameter.value(), is(outputLongVarBinaryContent));
         InOrder order = inOrder(statement);
         order.verify(statement).setNull(position, Types.LONGVARBINARY);
         order.verify(statement).registerOutParameter(position, Types.LONGVARBINARY);
