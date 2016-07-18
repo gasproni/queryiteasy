@@ -37,13 +37,13 @@ With Queryiteasy:
 DataSource dataSource = ...;
 // The dataStore is created once and passed around in your code.
 Datastore dataStore = new DataStore(dataSource);
-dataStore.execute(connection -> connection.select(rowProcessor,
+dataStore.execute(connection -> connection.select(rowMapper,
                                                   "SELECT title FROM song WHERE band = ? and year = ?", 
                                                   bind("Rolling Stones"), bind(1975)));
 
 ```
 
-`rowProcessor` in the code above is a function that will process the results of the select—basically doing what the while loop does in the JDBC example.
+`rowMapper` in the code above is a function that will map each row to a user defined class. The select then returns a stream for further processing—basically doing what the while loop does in the JDBC example.
 The method `Datastore.execute` defines also the transaction boundary—if any call inside the function passed as parameter throws an exception the transaction will be rolled back, otherwise, if everything goes well, it will be committed, eliminating the need for explicit calls to commit and rollback. The connection is always closed at the end of `execute`, eliminating the need for an explicit call to `Connection.close`.
 The SQLException checked exception has been wrapped in a runtime exception, RuntimeSQLException, so it won't interfere with the use of lambdas.
 
