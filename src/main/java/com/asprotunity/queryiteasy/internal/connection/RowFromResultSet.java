@@ -1,8 +1,8 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
+import com.asprotunity.queryiteasy.connection.BlobReaders;
 import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
-import com.asprotunity.queryiteasy.connection.SQLDataConverters;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -10,8 +10,8 @@ import java.math.BigDecimal;
 import java.sql.*;
 import java.util.function.Function;
 
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.fromInputStream;
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.fromReader;
+import static com.asprotunity.queryiteasy.io.StreamIO.fromInputStream;
+import static com.asprotunity.queryiteasy.io.StreamIO.fromReader;
 
 public class RowFromResultSet implements Row {
 
@@ -72,22 +72,22 @@ public class RowFromResultSet implements Row {
 
     @Override
     public <ResultType> ResultType fromBlob(int columnIndex, Function<InputStream, ResultType> blobReader) {
-        return RuntimeSQLException.executeAndReturnResult(() -> SQLDataConverters.fromBlob(resultSet.getBlob(columnIndex), blobReader));
+        return RuntimeSQLException.executeAndReturnResult(() -> BlobReaders.fromBlob(resultSet.getBlob(columnIndex), blobReader));
     }
 
     @Override
     public <ResultType> ResultType fromBlob(String columnLabel, Function<InputStream, ResultType> blobReader) {
-        return RuntimeSQLException.executeAndReturnResult(() -> SQLDataConverters.fromBlob(resultSet.getBlob(columnLabel), blobReader));
+        return RuntimeSQLException.executeAndReturnResult(() -> BlobReaders.fromBlob(resultSet.getBlob(columnLabel), blobReader));
     }
 
     @Override
     public <ResultType> ResultType fromClob(int columnIndex, Function<Reader, ResultType> clobReader) {
-        return RuntimeSQLException.executeAndReturnResult(() -> SQLDataConverters.fromClob(resultSet.getClob(columnIndex), clobReader));
+        return RuntimeSQLException.executeAndReturnResult(() -> BlobReaders.fromClob(resultSet.getClob(columnIndex), clobReader));
     }
 
     @Override
     public <ResultType> ResultType fromClob(String columnLabel, Function<Reader, ResultType> clobReader) {
-        return RuntimeSQLException.executeAndReturnResult(() -> SQLDataConverters.fromClob(resultSet.getClob(columnLabel), clobReader));
+        return RuntimeSQLException.executeAndReturnResult(() -> BlobReaders.fromClob(resultSet.getClob(columnLabel), clobReader));
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.asprotunity.queryiteasy.stringio;
+package com.asprotunity.queryiteasy.io;
 
 import java.io.InputStream;
 import java.io.Reader;

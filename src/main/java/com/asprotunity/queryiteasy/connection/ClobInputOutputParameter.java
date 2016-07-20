@@ -9,7 +9,7 @@ import java.sql.Types;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.fromClob;
+import static com.asprotunity.queryiteasy.connection.BlobReaders.fromClob;
 
 public class ClobInputOutputParameter<ResultType> implements InputOutputParameter {
 

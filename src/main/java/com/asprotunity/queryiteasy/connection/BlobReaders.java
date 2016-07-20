@@ -10,7 +10,7 @@ import java.sql.Clob;
 import java.sql.SQLException;
 import java.util.function.Function;
 
-public final class SQLDataConverters {
+public final class BlobReaders {
 
     public static <ResultType> ResultType fromBlob(Blob blob,
                                                    Function<InputStream, ResultType> blobReader) {
@@ -43,28 +43,6 @@ public final class SQLDataConverters {
             } catch (IOException e) {
                 throw new RuntimeIOException(e);
             }
-        }
-    }
-
-    public static <ResultType> ResultType fromInputStream(InputStream inputStream,
-                                                          Function<InputStream, ResultType> inputStreamReader) {
-        if (inputStream == null) {
-            return inputStreamReader.apply(null);
-        }
-        try (AutoCloseableScope scope = new AutoCloseableScope()) {
-            scope.add(inputStream::close);
-            return inputStreamReader.apply(inputStream);
-        }
-    }
-
-    public static <ResultType> ResultType fromReader(Reader reader,
-                                                     Function<Reader, ResultType> inputStreamReader) {
-        if (reader == null) {
-            return inputStreamReader.apply(null);
-        }
-        try (AutoCloseableScope scope = new AutoCloseableScope()) {
-            scope.add(reader::close);
-            return inputStreamReader.apply(reader);
         }
     }
 

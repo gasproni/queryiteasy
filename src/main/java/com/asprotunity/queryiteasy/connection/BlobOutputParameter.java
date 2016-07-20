@@ -8,7 +8,7 @@ import java.sql.CallableStatement;
 import java.sql.Types;
 import java.util.function.Function;
 
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.fromBlob;
+import static com.asprotunity.queryiteasy.connection.BlobReaders.fromBlob;
 
 public class BlobOutputParameter<ResultType> implements OutputParameter {
 
