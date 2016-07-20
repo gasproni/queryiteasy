@@ -6,8 +6,6 @@ import java.sql.CallableStatement;
 import java.sql.Timestamp;
 import java.sql.Types;
 
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asTimestamp;
-
 public class TimestampInputOutputParameter implements InputOutputParameter {
     private Timestamp value = null;
 
@@ -24,7 +22,7 @@ public class TimestampInputOutputParameter implements InputOutputParameter {
         RuntimeSQLException.execute(() -> {
             statement.setTimestamp(position, this.value);
             statement.registerOutParameter(position, Types.TIMESTAMP);
-            statementScope.add(() -> this.value = asTimestamp(statement.getObject(position)));
+            statementScope.add(() -> this.value = statement.getTimestamp(position));
         });
     }
 

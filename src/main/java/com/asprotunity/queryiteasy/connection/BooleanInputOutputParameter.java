@@ -5,6 +5,8 @@ import com.asprotunity.queryiteasy.scope.Scope;
 import java.sql.CallableStatement;
 import java.sql.Types;
 
+import static com.asprotunity.queryiteasy.connection.OutputParameter.returnValueOrNull;
+
 public class BooleanInputOutputParameter implements InputOutputParameter {
     private Boolean value = null;
 
@@ -21,7 +23,9 @@ public class BooleanInputOutputParameter implements InputOutputParameter {
         RuntimeSQLException.execute(() -> {
             statement.setObject(position, this.value, Types.BOOLEAN);
             statement.registerOutParameter(position, Types.BOOLEAN);
-            statementScope.add(() -> this.value = statement.getBoolean(position));
+            statementScope.add(() ->
+                    this.value = returnValueOrNull(statement, position, CallableStatement::getBoolean)
+            );
         });
     }
 

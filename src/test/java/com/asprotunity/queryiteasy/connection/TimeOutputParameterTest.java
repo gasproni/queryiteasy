@@ -19,14 +19,14 @@ public class TimeOutputParameterTest extends OutputParameterTestBase {
         TimeOutputParameter parameter = new TimeOutputParameter();
         long doesntMatter = 123456789L;
         Time value = new Time(doesntMatter);
-        when(statement.getObject(position)).thenReturn(value);
+        when(statement.getTime(position)).thenReturn(value);
 
         bindParameterAndEmulateCall(parameter);
 
         assertThat(parameter.value(), is(value));
         InOrder order = inOrder(statement);
         order.verify(statement).registerOutParameter(position, Types.TIME);
-        order.verify(statement).getObject(position);
+        order.verify(statement).getTime(position);
     }
 
 }

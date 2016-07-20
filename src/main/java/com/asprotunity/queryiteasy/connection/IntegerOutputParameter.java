@@ -5,7 +5,7 @@ import com.asprotunity.queryiteasy.scope.Scope;
 import java.sql.CallableStatement;
 import java.sql.Types;
 
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asInteger;
+import static com.asprotunity.queryiteasy.connection.OutputParameter.returnValueOrNull;
 
 public class IntegerOutputParameter implements OutputParameter {
 
@@ -19,7 +19,7 @@ public class IntegerOutputParameter implements OutputParameter {
     public void bind(CallableStatement statement, int position, Scope statementScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.INTEGER);
-            statementScope.add(() -> this.value = asInteger(statement.getObject(position)));
+            statementScope.add(() -> this.value = returnValueOrNull(statement, position, CallableStatement::getInt));
         });
     }
 

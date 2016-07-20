@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.when;
@@ -15,9 +16,8 @@ public class BooleanInputOutputParameterTest extends OutputParameterTestBase {
 
     @Test
     public void value_is_initialized_with_constructor_parameter() {
-        boolean inputValue = true;
-        BooleanInputOutputParameter parameter = new BooleanInputOutputParameter(inputValue);
-        assertThat(parameter.value(), is(inputValue));
+        BooleanInputOutputParameter parameter = new BooleanInputOutputParameter(true);
+        assertThat(parameter.value(), is(true));
     }
 
 
@@ -35,6 +35,17 @@ public class BooleanInputOutputParameterTest extends OutputParameterTestBase {
         order.verify(statement).setObject(position, inputValue, Types.BOOLEAN);
         order.verify(statement).registerOutParameter(position, Types.BOOLEAN);
         order.verify(statement).getBoolean(position);
+    }
+
+    @Test
+    public void binds_result_correctly_when_result_null() throws SQLException {
+        BooleanInputOutputParameter parameter = new BooleanInputOutputParameter(null);
+        when(statement.getBoolean(position)).thenReturn(false);
+        when(statement.wasNull()).thenReturn(true);
+
+        bindParameterAndEmulateCall(parameter);
+
+        assertThat(parameter.value(), is(nullValue()));
     }
 
 }

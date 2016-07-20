@@ -26,7 +26,7 @@ public class TimestampInputOutputParameterTest extends OutputParameterTestBase {
         Timestamp inputValue = new Timestamp(123456789L);
         Timestamp outputValue = new Timestamp(99999999L);
         TimestampInputOutputParameter parameter = new TimestampInputOutputParameter(inputValue);
-        when(statement.getObject(position)).thenReturn(outputValue);
+        when(statement.getTimestamp(position)).thenReturn(outputValue);
 
         bindParameterAndEmulateCall(parameter);
 
@@ -34,7 +34,7 @@ public class TimestampInputOutputParameterTest extends OutputParameterTestBase {
         InOrder order = inOrder(statement);
         order.verify(statement).setTimestamp(position, inputValue);
         order.verify(statement).registerOutParameter(position, Types.TIMESTAMP);
-        order.verify(statement).getObject(position);
+        order.verify(statement).getTimestamp(position);
     }
 
 }

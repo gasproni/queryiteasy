@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.*;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -31,8 +30,8 @@ public abstract class SupportedTypesTestCommon {
         Integer value = 10;
         List<Tuple2<Integer, Integer>> expectedValues = storeAndReadValuesBack("INTEGER", Row::asInteger, bind((Integer) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asInteger(expectedValues.get(0)._1), is(nullValue()));
-        assertThat(asInteger(expectedValues.get(0)._2), is(value));
+        assertThat(expectedValues.get(0)._1, is(nullValue()));
+        assertThat(expectedValues.get(0)._2, is(value));
     }
 
     @Test
@@ -49,8 +48,8 @@ public abstract class SupportedTypesTestCommon {
         Short value = 10;
         List<Tuple2<Short, Short>> expectedValues = storeAndReadValuesBack("SMALLINT", Row::asShort, bind((Short) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asShort(expectedValues.get(0)._1), is(nullValue()));
-        assertThat(asShort(expectedValues.get(0)._2), is(value));
+        assertThat(expectedValues.get(0)._1, is(nullValue()));
+        assertThat(expectedValues.get(0)._2, is(value));
     }
 
     @Test
@@ -58,8 +57,8 @@ public abstract class SupportedTypesTestCommon {
         Double value = 10.0;
         List<Tuple2<Double, Double>> expectedValues = storeAndReadValuesBack("FLOAT", Row::asDouble, bind((Double) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asDouble(expectedValues.get(0)._1), is(nullValue()));
-        assertThat(asDouble(expectedValues.get(0)._2), is(value));
+        assertThat(expectedValues.get(0)._1, is(nullValue()));
+        assertThat(expectedValues.get(0)._2, is(value));
     }
 
     @Test
@@ -67,8 +66,8 @@ public abstract class SupportedTypesTestCommon {
         Float value = 10.0F;
         List<Tuple2<Float, Float>> expectedValues = storeAndReadValuesBack("REAL", Row::asFloat, bind((Float) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asFloat(expectedValues.get(0)._1), is(nullValue()));
-        assertThat(asFloat(expectedValues.get(0)._2), is(value));
+        assertThat(expectedValues.get(0)._1, is(nullValue()));
+        assertThat(expectedValues.get(0)._2, is(value));
     }
 
     @Test
@@ -106,8 +105,8 @@ public abstract class SupportedTypesTestCommon {
         Double value = 10.0;
         List<Tuple2<Double, Double>> expectedValues = storeAndReadValuesBack("DOUBLE PRECISION", Row::asDouble, bind((Double) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asDouble(expectedValues.get(0)._1), is(nullValue()));
-        assertThat(asDouble(expectedValues.get(0)._2), is(value));
+        assertThat(expectedValues.get(0)._1, is(nullValue()));
+        assertThat(expectedValues.get(0)._2, is(value));
     }
 
     @Test
@@ -115,8 +114,8 @@ public abstract class SupportedTypesTestCommon {
         Byte value = 's';
         List<Tuple2<Byte, Byte>> expectedValues = storeAndReadValuesBack("SMALLINT", Row::asByte, bind((Byte) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asByte(expectedValues.get(0)._1), is(nullValue()));
-        assertThat(asByte(expectedValues.get(0)._2), is(value));
+        assertThat(expectedValues.get(0)._1, is(nullValue()));
+        assertThat(expectedValues.get(0)._2, is(value));
     }
 
 

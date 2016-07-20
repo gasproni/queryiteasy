@@ -24,7 +24,6 @@ import java.util.function.Supplier;
 import static com.asprotunity.queryiteasy.acceptance_tests.HSQLInMemoryConfigurationAndSchemaDrop.dropHSQLPublicSchema;
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.*;
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asInteger;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -70,7 +69,7 @@ public class QueriesTest {
         List<FlexibleTuple> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT * FROM testtable");
 
         assertThat(expectedValues.size(), is(1));
-        assertThat(asInteger(expectedValues.get(0).at("first")), is(10));
+        assertThat(expectedValues.get(0).at("first"), is(10));
         assertThat(expectedValues.get(0).at("second"), is("asecond10"));
         assertThat(inputOutputParameter.value(), is("NewString"));
         assertThat(outputParameter.value(), is("OldString"));
@@ -195,7 +194,7 @@ public class QueriesTest {
 
         List<FlexibleTuple> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT first FROM testtable");
         assertThat(expectedValues.size(), is(1));
-        assertThat(asInteger(expectedValues.get(0).at("first")), is(10));
+        assertThat(expectedValues.get(0).at("first"), is(10));
     }
 
     @Test
@@ -225,7 +224,7 @@ public class QueriesTest {
 
         List<FlexibleTuple> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT * FROM testtable");
         assertThat(expectedValues.size(), is(1));
-        assertThat(asInteger(expectedValues.get(0).at("first")), is(10));
+        assertThat(expectedValues.get(0).at("first"), is(10));
         assertThat(expectedValues.get(0).at("second"), is("asecond"));
     }
 
@@ -243,7 +242,7 @@ public class QueriesTest {
         List<FlexibleTuple> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT * FROM testtable ORDER BY first ASC");
         assertThat(expectedValues.size(), is(3));
         for (int index = 0; index < expectedValues.size(); ++index) {
-            assertThat(asInteger(expectedValues.get(index).at("first")), is(index + 10));
+            assertThat(expectedValues.get(index).at("first"), is(index + 10));
             assertThat(expectedValues.get(index).at("second"), is("asecond" + (index + 10)));
         }
     }

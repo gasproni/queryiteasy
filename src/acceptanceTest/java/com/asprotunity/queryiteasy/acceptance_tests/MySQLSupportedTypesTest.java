@@ -22,8 +22,6 @@ import java.util.function.Supplier;
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.loadProperties;
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.*;
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asByte;
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asDouble;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -72,8 +70,8 @@ public class MySQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon
         Double value = 10.0;
         List<Tuple2<Double, Double>> expectedValues = storeAndReadValuesBack("DOUBLE", Row::asDouble, bind((Double) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asDouble(expectedValues.get(0)._1), is(nullValue()));
-        assertThat(asDouble(expectedValues.get(0)._2), is(value));
+        assertThat(expectedValues.get(0)._1, is(nullValue()));
+        assertThat(expectedValues.get(0)._2, is(value));
     }
 
     @Test
@@ -81,8 +79,8 @@ public class MySQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon
         Byte value = 's';
         List<Tuple2<Byte, Byte>> expectedValues = storeAndReadValuesBack("TINYINT", Row::asByte, bind((Byte) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asByte(expectedValues.get(0)._1), is(nullValue()));
-        assertThat(asByte(expectedValues.get(0)._2), is(value));
+        assertThat(expectedValues.get(0)._1, is(nullValue()));
+        assertThat(expectedValues.get(0)._2, is(value));
     }
 
     @Test

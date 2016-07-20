@@ -26,7 +26,7 @@ public class TimeInputOutputParameterTest extends OutputParameterTestBase {
         Time inputValue = new Time(123456789L);
         Time outputValue = new Time(99999999L);
         TimeInputOutputParameter parameter = new TimeInputOutputParameter(inputValue);
-        when(statement.getObject(position)).thenReturn(outputValue);
+        when(statement.getTime(position)).thenReturn(outputValue);
 
         bindParameterAndEmulateCall(parameter);
 
@@ -34,7 +34,7 @@ public class TimeInputOutputParameterTest extends OutputParameterTestBase {
         InOrder order = inOrder(statement);
         order.verify(statement).setTime(position, inputValue);
         order.verify(statement).registerOutParameter(position, Types.TIME);
-        order.verify(statement).getObject(position);
+        order.verify(statement).getTime(position);
     }
 
 }

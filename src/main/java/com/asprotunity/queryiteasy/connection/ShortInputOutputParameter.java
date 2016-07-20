@@ -5,7 +5,7 @@ import com.asprotunity.queryiteasy.scope.Scope;
 import java.sql.CallableStatement;
 import java.sql.Types;
 
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asShort;
+import static com.asprotunity.queryiteasy.connection.OutputParameter.returnValueOrNull;
 
 public class ShortInputOutputParameter implements InputOutputParameter {
     private Short value = null;
@@ -23,7 +23,7 @@ public class ShortInputOutputParameter implements InputOutputParameter {
         RuntimeSQLException.execute(() -> {
             statement.setObject(position, this.value, Types.SMALLINT);
             statement.registerOutParameter(position, Types.SMALLINT);
-            statementScope.add(() -> this.value = asShort(statement.getObject(position)));
+            statementScope.add(() -> this.value = returnValueOrNull(statement, position, CallableStatement::getShort));
         });
     }
 

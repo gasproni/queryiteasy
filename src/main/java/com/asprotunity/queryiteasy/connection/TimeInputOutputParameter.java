@@ -6,8 +6,6 @@ import java.sql.CallableStatement;
 import java.sql.Time;
 import java.sql.Types;
 
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asTime;
-
 public class TimeInputOutputParameter implements InputOutputParameter {
     private Time value = null;
 
@@ -24,7 +22,7 @@ public class TimeInputOutputParameter implements InputOutputParameter {
         RuntimeSQLException.execute(() -> {
             statement.setTime(position, this.value);
             statement.registerOutParameter(position, Types.TIME);
-            statementScope.add(() -> this.value = asTime(statement.getObject(position)));
+            statementScope.add(() -> this.value = statement.getTime(position));
         });
     }
 

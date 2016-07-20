@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.when;
@@ -25,7 +26,8 @@ public class LongInputOutputParameterTest extends OutputParameterTestBase {
         Long inputValue = 10L;
         Long outputValue = 10L;
         LongInputOutputParameter parameter = new LongInputOutputParameter(inputValue);
-        when(statement.getObject(position)).thenReturn(outputValue);
+        when(statement.getLong(position)).thenReturn(outputValue);
+        when(statement.wasNull()).thenReturn(false);
 
         bindParameterAndEmulateCall(parameter);
 
@@ -33,7 +35,18 @@ public class LongInputOutputParameterTest extends OutputParameterTestBase {
         InOrder order = inOrder(statement);
         order.verify(statement).setObject(position, inputValue, Types.BIGINT);
         order.verify(statement).registerOutParameter(position, Types.BIGINT);
-        order.verify(statement).getObject(position);
+        order.verify(statement).getLong(position);
+    }
+
+    @Test
+    public void binds_result_correctly_when_result_null() throws SQLException {
+        LongInputOutputParameter parameter = new LongInputOutputParameter(0L);
+        when(statement.getLong(position)).thenReturn(0L);
+        when(statement.wasNull()).thenReturn(true);
+
+        bindParameterAndEmulateCall(parameter);
+
+        assertThat(parameter.value(), is(nullValue()));
     }
 
 }

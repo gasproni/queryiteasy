@@ -5,7 +5,7 @@ import com.asprotunity.queryiteasy.scope.Scope;
 import java.sql.CallableStatement;
 import java.sql.Types;
 
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asByte;
+import static com.asprotunity.queryiteasy.connection.OutputParameter.returnValueOrNull;
 
 public class ByteInputOutputParameter implements InputOutputParameter {
     private Byte value = null;
@@ -23,7 +23,7 @@ public class ByteInputOutputParameter implements InputOutputParameter {
         RuntimeSQLException.execute(() -> {
             statement.setObject(position, this.value, Types.TINYINT);
             statement.registerOutParameter(position, Types.TINYINT);
-            statementScope.add(() -> this.value = asByte(statement.getObject(position)));
+            statementScope.add(() -> this.value = returnValueOrNull(statement, position, CallableStatement::getByte));
         });
     }
 

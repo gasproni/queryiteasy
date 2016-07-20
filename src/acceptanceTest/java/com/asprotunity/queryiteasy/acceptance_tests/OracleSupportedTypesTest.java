@@ -24,7 +24,6 @@ import java.util.function.Supplier;
 
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.*;
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asLong;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -78,8 +77,8 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
         Long value = 10L;
         List<Tuple2<Long, Long>> expectedValues = storeAndReadValuesBack("NUMBER", Row::asLong, bind((Long) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asLong(expectedValues.get(0)._1), is(nullValue()));
-        assertThat(asLong(expectedValues.get(0)._2), is(value));
+        assertThat(expectedValues.get(0)._1, is(nullValue()));
+        assertThat(expectedValues.get(0)._2, is(value));
     }
 
     @Test

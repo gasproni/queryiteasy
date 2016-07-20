@@ -5,7 +5,7 @@ import com.asprotunity.queryiteasy.scope.Scope;
 import java.sql.CallableStatement;
 import java.sql.Types;
 
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asDouble;
+import static com.asprotunity.queryiteasy.connection.OutputParameter.returnValueOrNull;
 
 public class DoubleInputOutputParameter implements InputOutputParameter {
     private Double value = null;
@@ -23,7 +23,7 @@ public class DoubleInputOutputParameter implements InputOutputParameter {
         RuntimeSQLException.execute(() -> {
             statement.setObject(position, this.value, Types.DOUBLE);
             statement.registerOutParameter(position, Types.DOUBLE);
-            statementScope.add(() -> this.value = asDouble(statement.getObject(position)));
+            statementScope.add(() -> this.value = returnValueOrNull(statement, position, CallableStatement::getDouble));
         });
     }
 
