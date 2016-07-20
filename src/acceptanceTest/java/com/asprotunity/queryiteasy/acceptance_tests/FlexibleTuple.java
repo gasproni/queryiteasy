@@ -7,6 +7,4 @@ public interface FlexibleTuple {
 
     Object at(int columnPosition);
 
-    int columnCount();
-
 }

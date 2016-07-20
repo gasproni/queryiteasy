@@ -49,7 +49,7 @@ public final class SQLDataConverters {
     public static <ResultType> ResultType fromInputStream(InputStream inputStream,
                                                           Function<InputStream, ResultType> inputStreamReader) {
         if (inputStream == null) {
-            return null;
+            return inputStreamReader.apply(null);
         }
         try (AutoCloseableScope scope = new AutoCloseableScope()) {
             scope.add(inputStream::close);
@@ -60,7 +60,7 @@ public final class SQLDataConverters {
     public static <ResultType> ResultType fromReader(Reader reader,
                                                      Function<Reader, ResultType> inputStreamReader) {
         if (reader == null) {
-            return null;
+            return inputStreamReader.apply(null);
         }
         try (AutoCloseableScope scope = new AutoCloseableScope()) {
             scope.add(reader::close);

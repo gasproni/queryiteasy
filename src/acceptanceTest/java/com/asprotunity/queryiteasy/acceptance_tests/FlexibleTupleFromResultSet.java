@@ -30,11 +30,6 @@ public class FlexibleTupleFromResultSet implements FlexibleTuple {
         return columns[columnIndex(columnPosition)];
     }
 
-    @Override
-    public int columnCount() {
-        return columns.length;
-    }
-
     private static String normaliseColumnLabel(String name) {
         return name.toUpperCase();
     }
