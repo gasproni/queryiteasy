@@ -29,14 +29,14 @@ public class ClobOutputParameterTest extends OutputParameterTestBase {
         ClobOutputParameter<String> parameter = new ClobOutputParameter<>(clobReader);
 
         Clob value = mock(Clob.class);
-        when(statement.getObject(position)).thenReturn(value);
+        when(statement.getClob(position)).thenReturn(value);
 
         bindParameterAndEmulateCall(parameter);
 
         assertThat(parameter.value(), is(blobContent));
         InOrder order = inOrder(statement);
         order.verify(statement).registerOutParameter(position, Types.CLOB);
-        order.verify(statement).getObject(position);
+        order.verify(statement).getClob(position);
     }
 
 }

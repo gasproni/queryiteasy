@@ -1,6 +1,7 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
 
+import com.asprotunity.queryiteasy.connection.Row;
 import org.junit.Test;
 
 import java.sql.SQLException;
@@ -9,7 +10,6 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.*;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -21,18 +21,18 @@ public abstract class NonStandardSupportedTypesTestCommon extends SupportedTypes
     @Test
     public void stores_and_reads_longs_as_bigints() throws SQLException {
         Long value = 10L;
-        List<Tuple2> expectedValues = storeAndReadValuesBack("BIGINT", bind((Long) null), bind(value));
+        List<Tuple2<Long, Long>> expectedValues = storeAndReadValuesBack("BIGINT", Row::asLong, bind((Long) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asLong(expectedValues.get(0)._1), is(nullValue()));
-        assertThat(asLong(expectedValues.get(0)._2), is(value));
+        assertThat(expectedValues.get(0)._1, is(nullValue()));
+        assertThat(expectedValues.get(0)._2, is(value));
     }
 
     @Test
     public void stores_and_reads_booleans() throws SQLException {
-        List<Tuple2> expectedValues = storeAndReadValuesBack("BOOLEAN", bind((Boolean) null), bind(true));
+        List<Tuple2<Boolean, Boolean>> expectedValues = storeAndReadValuesBack("BOOLEAN", Row::asBoolean, bind((Boolean) null), bind(true));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asBoolean(expectedValues.get(0)._1), is(nullValue()));
-        assertTrue(asBoolean(expectedValues.get(0)._2));
+        assertThat(expectedValues.get(0)._1, is(nullValue()));
+        assertTrue(expectedValues.get(0)._2);
     }
 
     @Test
@@ -41,20 +41,20 @@ public abstract class NonStandardSupportedTypesTestCommon extends SupportedTypes
         // or that will be lost when putting the value in the db
         // and the assert will fail.
         Time value = new Time(36672000L);
-        List<Tuple2> expectedValues = storeAndReadValuesBack("TIME", bind((Time) null), bind(value));
+        List<Tuple2<Time, Time>> expectedValues = storeAndReadValuesBack("TIME", Row::asTime, bind((Time) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asTime(expectedValues.get(0)._1), is(nullValue()));
-        assertThat(asTime(expectedValues.get(0)._2), is(value));
+        assertThat(expectedValues.get(0)._1, is(nullValue()));
+        assertThat(expectedValues.get(0)._2, is(value));
     }
 
     @Test
     public void stores_and_reads_timestamps() throws SQLException {
         // Tue, 12 Jan 2016 10:11:12.000 GMT. Note that some DBs support the milliseconds.
         Timestamp value = new Timestamp(1452593472000L);
-        List<Tuple2> expectedValues = storeAndReadValuesBack("TIMESTAMP", bind((Timestamp) null), bind(value));
+        List<Tuple2<Timestamp, Timestamp>> expectedValues = storeAndReadValuesBack("TIMESTAMP", Row::asTimestamp, bind((Timestamp) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asTimestamp(expectedValues.get(0)._1), is(nullValue()));
-        assertThat(asTimestamp(expectedValues.get(0)._2), is(value));
+        assertThat(expectedValues.get(0)._1, is(nullValue()));
+        assertThat(expectedValues.get(0)._2, is(value));
     }
 
 

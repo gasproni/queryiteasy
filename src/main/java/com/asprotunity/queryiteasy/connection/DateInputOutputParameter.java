@@ -6,8 +6,6 @@ import java.sql.CallableStatement;
 import java.sql.Date;
 import java.sql.Types;
 
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asDate;
-
 public class DateInputOutputParameter implements InputOutputParameter {
     private Date value = null;
 
@@ -24,7 +22,7 @@ public class DateInputOutputParameter implements InputOutputParameter {
         RuntimeSQLException.execute(() -> {
             statement.setDate(position, value);
             statement.registerOutParameter(position, Types.DATE);
-            statementScope.add(() -> this.value = asDate(statement.getObject(position)));
+            statementScope.add(() -> this.value = statement.getDate(position));
         });
     }
 

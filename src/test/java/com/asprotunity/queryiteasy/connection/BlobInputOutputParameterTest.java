@@ -61,7 +61,7 @@ public class BlobInputOutputParameterTest extends OutputParameterTestBase {
         BlobInputOutputParameter<String> parameter = new BlobInputOutputParameter<>(inputBlobSupplier, outputBlobReader);
 
         Blob value = mock(Blob.class);
-        when(statement.getObject(position)).thenReturn(value);
+        when(statement.getBlob(position)).thenReturn(value);
 
         bindParameterAndEmulateCall(parameter);
 
@@ -69,7 +69,7 @@ public class BlobInputOutputParameterTest extends OutputParameterTestBase {
         InOrder order = inOrder(statement, inputBlobStream);
         order.verify(statement).setBlob(position, inputBlobStream);
         order.verify(statement).registerOutParameter(position, Types.BLOB);
-        order.verify(statement).getObject(position);
+        order.verify(statement).getBlob(position);
         order.verify(inputBlobStream).close();
     }
 
@@ -82,7 +82,7 @@ public class BlobInputOutputParameterTest extends OutputParameterTestBase {
         BlobInputOutputParameter<String> parameter = new BlobInputOutputParameter<>(inputBlobSupplier, outputBlobReader);
 
         Blob value = mock(Blob.class);
-        when(statement.getObject(position)).thenReturn(value);
+        when(statement.getBlob(position)).thenReturn(value);
 
         bindParameterAndEmulateCall(parameter);
 
@@ -90,7 +90,7 @@ public class BlobInputOutputParameterTest extends OutputParameterTestBase {
         InOrder order = inOrder(statement);
         order.verify(statement).setNull(position, Types.BLOB);
         order.verify(statement).registerOutParameter(position, Types.BLOB);
-        order.verify(statement).getObject(position);
+        order.verify(statement).getBlob(position);
     }
 
 }

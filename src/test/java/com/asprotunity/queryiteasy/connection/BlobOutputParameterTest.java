@@ -36,7 +36,7 @@ public class BlobOutputParameterTest extends OutputParameterTestBase {
         assertThat(parameter.value(), is(blobContent));
         InOrder order = inOrder(statement);
         order.verify(statement).registerOutParameter(position, Types.BLOB);
-        order.verify(statement).getObject(position);
+        order.verify(statement).getBlob(position);
     }
 
 }

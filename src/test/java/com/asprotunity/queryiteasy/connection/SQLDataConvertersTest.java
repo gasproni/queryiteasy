@@ -5,10 +5,8 @@ import org.junit.Test;
 import org.mockito.InOrder;
 
 import java.io.*;
-import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.sql.*;
-import java.util.Scanner;
 import java.util.function.Function;
 
 import static com.asprotunity.queryiteasy.connection.SQLDataConverters.*;
@@ -20,118 +18,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 public class SQLDataConvertersTest {
-
-    @Test
-    public void converts_null_byte_arrays() {
-        assertThat(asByteArray(null), is(nullValue()));
-    }
-
-    @Test
-    public void converts_byte_arrays() {
-        byte[] value = new byte[] {12, 13, 14};
-        assertThat(asByteArray(value), is(value));
-    }
-
-    @Test
-    public void throws_class_cast_exception_when_conversion_to_byte_array_not_possible() {
-        Integer value = 1;
-        assert_throws_class_cast_exception(value, SQLDataConverters::asByteArray, byte[].class);
-    }
-
-    @Test
-    public void converts_null_strings() {
-        assertThat(asString(null), is(nullValue()));
-    }
-
-    @Test
-    public void converts_strings() {
-        assertThat(asString("text"), is("text"));
-    }
-
-    @Test
-    public void converts_to_boolean_from_nullL() {
-        assertThat(asBoolean(null), is(nullValue()));
-    }
-
-    @Test
-    public void converts_to_boolean() {
-        assertThat(asBoolean(Boolean.TRUE), is(Boolean.TRUE));
-        assertThat(asBoolean(Boolean.FALSE), is(Boolean.FALSE));
-    }
-
-    @Test
-    public void converts_string_to_boolean() {
-        assertThat(asBoolean("true"), is(Boolean.TRUE));
-        assertThat(asBoolean("True"), is(Boolean.TRUE));
-        assertThat(asBoolean("TRUE"), is(Boolean.TRUE));
-        assertThat(asBoolean("false"), is(Boolean.FALSE));
-        assertThat(asBoolean("False"), is(Boolean.FALSE));
-        assertThat(asBoolean("FALSE"), is(Boolean.FALSE));
-    }
-
-    @Test
-    public void throws_class_cast_exception_when_conversion_to_boolean_not_possible() {
-        Integer value = 1;
-        assert_throws_class_cast_exception(value, SQLDataConverters::asBoolean, Boolean.class);
-    }
-
-    @Test
-    public void converts_to_big_decimal_from_nullL() {
-        assertThat(asBigDecimal(null), is(nullValue()));
-    }
-
-    @Test
-    public void converts_to_big_decimal() {
-        assertThat(asBigDecimal(BigDecimal.TEN), is(BigDecimal.TEN));
-    }
-
-    @Test
-    public void converts_big_decimal_from_string() {
-        assertThat(asBigDecimal(new BigDecimal("10")), is(BigDecimal.TEN));
-        assertThat(asBigDecimal(new BigDecimal("10.0")), is(BigDecimal.valueOf(10.0d)));
-    }
-
-    @Test
-    public void converts_big_decimal_from_number_to_its_double_equivalent() {
-        Integer value = 10;
-        assertThat(asBigDecimal(value), is(new BigDecimal("10.0")));
-    }
-
-    @Test
-    public void throws_class_cast_exception_when_conversion_to_big_decimal_not_possible() {
-        Character value = 20;
-        assert_throws_class_cast_exception(value, SQLDataConverters::asBigDecimal, BigDecimal.class);
-    }
-
-    @Test
-    public void converts_to_sql_date_from_nullL() {
-        assertThat(asDate(null), is(nullValue()));
-    }
-
-    @Test
-    public void converts_sql_date() {
-        Date date = new Date(123456);
-        assertThat(asDate(date), is(date));
-    }
-
-    @Test
-    public void converts_sql_date_from_string() {
-        String value = "2016-05-31";
-        assertThat(asDate(value), is(Date.valueOf(value)));
-    }
-
-    @Test
-    public void converts_sql_date_from_sql_timestamp() {
-        Timestamp timestamp = Timestamp.valueOf("2016-02-27 21:12:30.333");
-        Date expectedDate = Date.valueOf("2016-02-27");
-        assertThat(asDate(timestamp).toLocalDate(), is(expectedDate.toLocalDate()));
-    }
-
-    @Test
-    public void throws_class_cast_exception_when_conversion_to_sql_date_not_possible() {
-        Character value = 20;
-        assert_throws_class_cast_exception(value, SQLDataConverters::asDate, Date.class);
-    }
 
     @Test
     public void converts_to_sql_time_from_nullL() {
@@ -261,17 +147,6 @@ public class SQLDataConvertersTest {
     }
 
     @Test
-    public void from_blob_converts_from_byte_array() throws UnsupportedEncodingException {
-        String expected = "this is a string to be converted;";
-        Charset charset = Charset.forName("UTF-8");
-        byte[] bytes = expected.getBytes("UTF-8");
-
-        String converted = fromBlob(bytes, inputStream -> readFrom(inputStream, charset));
-
-        assertThat(converted, is(expected));
-    }
-
-    @Test
     public void from_clob_converts_from_sql_clob() throws UnsupportedEncodingException, SQLException {
         Clob clob = mock(Clob.class);
         String expected = "this is a string to be converted;";
@@ -305,15 +180,6 @@ public class SQLDataConvertersTest {
         });
 
         assertThat(converted, is(nullValue()));
-    }
-
-    @Test
-    public void from_clob_converts_from_string() throws UnsupportedEncodingException {
-        String expected = "this is a string to be converted;";
-
-        String converted = fromClob(expected, reader -> new Scanner(reader).useDelimiter("\\A").next());
-
-        assertThat(converted, is(expected));
     }
 
     private <T> void assert_throws_class_cast_exception(Object toConvert, Function<Object, T> convertType, Class<T> targetType) {

@@ -44,7 +44,7 @@ public class BlobInputOutputParameter<ResultType> implements InputOutputParamete
                 statementScope.add(inputStream::close);
             }
             statement.registerOutParameter(position, Types.BLOB);
-            statementScope.add(() -> value = fromBlob(statement.getObject(position), outputBlobReader));
+            statementScope.add(() -> value = fromBlob(statement.getBlob(position), outputBlobReader));
         });
     }
 }

@@ -19,14 +19,14 @@ public class LongVarBinaryOutputParameterTest extends OutputParameterTestBase {
         byte[] value = new byte[]{1, 2, 3, 4};
         LongVarBinaryOutputParameter parameter = new LongVarBinaryOutputParameter();
 
-        when(statement.getObject(position)).thenReturn(value);
+        when(statement.getBytes(position)).thenReturn(value);
 
         bindParameterAndEmulateCall(parameter);
 
         assertThat(parameter.value(), is(value));
         InOrder order = inOrder(statement);
         order.verify(statement).registerOutParameter(position, Types.LONGVARBINARY);
-        order.verify(statement).getObject(position);
+        order.verify(statement).getBytes(position);
     }
 
 }

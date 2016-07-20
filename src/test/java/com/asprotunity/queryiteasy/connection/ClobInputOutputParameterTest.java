@@ -61,7 +61,7 @@ public class ClobInputOutputParameterTest extends OutputParameterTestBase {
         ClobInputOutputParameter<String> parameter = new ClobInputOutputParameter<>(inputClobSupplier, outputClobReader);
 
         Clob value = mock(Clob.class);
-        when(statement.getObject(position)).thenReturn(value);
+        when(statement.getClob(position)).thenReturn(value);
 
         bindParameterAndEmulateCall(parameter);
 
@@ -69,7 +69,7 @@ public class ClobInputOutputParameterTest extends OutputParameterTestBase {
         InOrder order = inOrder(statement, inputClobReader);
         order.verify(statement).setClob(position, inputClobReader);
         order.verify(statement).registerOutParameter(position, Types.CLOB);
-        order.verify(statement).getObject(position);
+        order.verify(statement).getClob(position);
         order.verify(inputClobReader).close();
     }
 
@@ -82,7 +82,7 @@ public class ClobInputOutputParameterTest extends OutputParameterTestBase {
         ClobInputOutputParameter<String> parameter = new ClobInputOutputParameter<>(inputClobSupplier, outputClobReader);
 
         Clob value = mock(Clob.class);
-        when(statement.getObject(position)).thenReturn(value);
+        when(statement.getClob(position)).thenReturn(value);
 
         bindParameterAndEmulateCall(parameter);
 
@@ -90,7 +90,7 @@ public class ClobInputOutputParameterTest extends OutputParameterTestBase {
         InOrder order = inOrder(statement);
         order.verify(statement).setNull(position, Types.CLOB);
         order.verify(statement).registerOutParameter(position, Types.CLOB);
-        order.verify(statement).getObject(position);
+        order.verify(statement).getClob(position);
     }
 
 }

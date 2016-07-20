@@ -4,15 +4,16 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public interface Connection {
+public interface Connection<RowType> {
     void update(String sql, InputParameter... parameters);
 
     void update(String sql, List<Batch> batches);
 
-    <MappedRow> Stream<MappedRow> select(Function<Row, MappedRow> rowMapper, String sql,
-                                         InputParameter... parameters);
+    <MappedRowType> Stream<MappedRowType> select(Function<RowType, MappedRowType> rowMapper, String sql,
+                                                 InputParameter... parameters);
 
     void call(String sql, Parameter... parameters);
 
-    <MappedRow> Stream<MappedRow> call(Function<Row, MappedRow> rowMapper, String sql, Parameter... parameters);
+    <MappedRowType> Stream<MappedRowType> call(Function<RowType, MappedRowType> rowMapper, String sql,
+                                               Parameter... parameters);
 }

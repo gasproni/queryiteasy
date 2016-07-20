@@ -1,8 +1,7 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
 
-import com.asprotunity.queryiteasy.DataStore;
-import com.asprotunity.queryiteasy.connection.SQLDataConverters;
+import com.asprotunity.queryiteasy.DefaultDataStore;
 import com.asprotunity.queryiteasy.stringio.StringIO;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -25,7 +24,6 @@ import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bindLongVarbinary;
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asString;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -34,13 +32,13 @@ import static org.junit.Assume.assumeTrue;
 
 public class PostgresSQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon {
 
-    private static DataStore dataStore;
+    private static DefaultDataStore dataStore;
 
     @BeforeClass
     public static void setUp() throws Exception {
         DataSource dataSource = configureDataSource();
         assumeTrue("No Postgresql JDBC driver found, skipping tests", dataSource != null);
-        dataStore = new DataStore(dataSource);
+        dataStore = new DefaultDataStore(dataSource);
     }
 
     private static DataSource configureDataSource() throws Exception {
@@ -80,11 +78,11 @@ public class PostgresSQLSupportedTypesTest extends NonStandardSupportedTypesTest
                     bindLongVarbinary(() -> null), bindLongVarbinary(inputStreamSupplier));
         });
 
-        Function<InputStream, String> binaryReader = inputStream -> StringIO.readFrom(inputStream, charset);
+        Function<InputStream, String> streamReader = inputStream -> StringIO.readFrom(inputStream, charset);
 
         List<Tuple2> expectedValues = getDataStore().executeWithResult(connection ->
-                connection.select(row -> new Tuple2<>(SQLDataConverters.fromInputStream(row.binaryStreamAt(1), binaryReader),
-                                SQLDataConverters.fromInputStream(row.binaryStreamAt(2), binaryReader)),
+                connection.select(row -> new Tuple2<>(row.fromBinaryStream(1, streamReader),
+                                row.fromBinaryStream(2, streamReader)),
                         "SELECT * FROM testtable").collect(toList()));
 
         assertThat(expectedValues.size(), is(1));
@@ -103,18 +101,18 @@ public class PostgresSQLSupportedTypesTest extends NonStandardSupportedTypesTest
         });
 
         List<Tuple2> expectedValues = getDataStore().executeWithResult(connection ->
-                connection.select(row -> new Tuple2<>(row.at("first"), row.at("second")),
+                connection.select(row -> new Tuple2<>(row.asString("first"), row.asString("second")),
                         "SELECT * FROM testtable").collect(toList()));
 
         assertThat(expectedValues.size(), is(1));
-        assertThat(asString(expectedValues.get(0)._1), is(nullValue()));
-        assertThat(asString(expectedValues.get(0)._2), is(text));
+        assertThat(expectedValues.get(0)._1, is(nullValue()));
+        assertThat(expectedValues.get(0)._2, is(text));
     }
 
     @Override
     protected void cleanup() throws Exception {
         getDataStore().execute(connection -> {
-            List<String> dropTableStatements = connection.select(row -> asString(row.at("dropTableStatement")),
+            List<String> dropTableStatements = connection.select(row -> row.asString("dropTableStatement"),
                     "select 'drop table if exists \"' || tablename || '\" cascade;' as dropTableStatement" +
                             "  from pg_tables " +
                             " where tableowner = 'testuser'"
@@ -126,7 +124,7 @@ public class PostgresSQLSupportedTypesTest extends NonStandardSupportedTypesTest
     }
 
     @Override
-    protected DataStore getDataStore() {
+    protected DefaultDataStore getDataStore() {
         return dataStore;
     }
 

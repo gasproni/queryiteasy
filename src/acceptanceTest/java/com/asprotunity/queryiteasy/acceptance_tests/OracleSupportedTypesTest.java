@@ -1,7 +1,8 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
 
-import com.asprotunity.queryiteasy.DataStore;
+import com.asprotunity.queryiteasy.DefaultDataStore;
+import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
 import com.asprotunity.queryiteasy.stringio.StringIO;
 import org.junit.BeforeClass;
@@ -23,7 +24,7 @@ import java.util.function.Supplier;
 
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.*;
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.*;
+import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asLong;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -32,13 +33,13 @@ import static org.junit.Assume.assumeTrue;
 
 public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
 
-    private static DataStore dataStore;
+    private static DefaultDataStore dataStore;
 
     @BeforeClass
     public static void setUp() throws Exception {
         DataSource dataSource = configureDataSource();
         assumeTrue("No Oracle JDBC driver found, skipping tests", dataSource != null);
-        dataStore = new DataStore(dataSource);
+        dataStore = new DefaultDataStore(dataSource);
     }
 
     private static boolean isNotDropOfSystemOrLobIndex(String statement) {
@@ -68,14 +69,14 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
 
     }
 
-    protected DataStore getDataStore() {
+    protected DefaultDataStore getDataStore() {
         return dataStore;
     }
 
     @Test
     public void stores_and_reads_longs_as_numbers() throws SQLException {
         Long value = 10L;
-        List<Tuple2> expectedValues = storeAndReadValuesBack("NUMBER", bind((Long) null), bind(value));
+        List<Tuple2<Long, Long>> expectedValues = storeAndReadValuesBack("NUMBER", Row::asLong, bind((Long) null), bind(value));
         assertThat(expectedValues.size(), is(1));
         assertThat(asLong(expectedValues.get(0)._1), is(nullValue()));
         assertThat(asLong(expectedValues.get(0)._2), is(value));
@@ -87,26 +88,26 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
         // or that will be lost when putting the value in the db
         // and the assert will fail.
         Time value = new Time(36672000L);
-        List<Tuple2> expectedValues = storeAndReadValuesBack("DATE", bind((Time) null), bind(value));
+        List<Tuple2<Time, Time>> expectedValues = storeAndReadValuesBack("DATE", Row::asTime, bind((Time) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asTime(expectedValues.get(0)._1), is(nullValue()));
-        assertThat(asTime(expectedValues.get(0)._2), is(value));
+        assertThat(expectedValues.get(0)._1, is(nullValue()));
+        assertThat(expectedValues.get(0)._2, is(value));
     }
 
     @Test
     public void stores_and_reads_sql_timestamps_as_dates() throws SQLException {
         // Tue, 12 Jan 2016 10:11:12.000 GMT. Note that some DBs support the milliseconds.
         Timestamp value = new Timestamp(1452593472000L);
-        List<Tuple2> expectedValues = storeAndReadValuesBack("DATE", bind((Timestamp) null), bind(value));
+        List<Tuple2<Timestamp, Timestamp>> expectedValues = storeAndReadValuesBack("DATE", Row::asTimestamp, bind((Timestamp) null), bind(value));
         assertThat(expectedValues.size(), is(1));
-        assertThat(asDate(expectedValues.get(0)._1), is(nullValue()));
-        assertThat(asDate(expectedValues.get(0)._2), is(value));
+        assertThat(expectedValues.get(0)._1, is(nullValue()));
+        assertThat(expectedValues.get(0)._2, is(value));
     }
 
     @Test
     public void doesnt_support_booleans() throws SQLException {
         try {
-            storeAndReadValuesBack("BOOLEAN", bind((Boolean) null), bind(true));
+            storeAndReadValuesBack("BOOLEAN", Row::asBoolean, bind((Boolean) null), bind(true));
         } catch (RuntimeSQLException exc) {
             assertThat(exc.getCause().getMessage(), is("ORA-00902: invalid datatype\n"));
         }
@@ -126,7 +127,7 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
         Function<InputStream, String> blobReader = inputStream -> StringIO.readFrom(inputStream, charset);
 
         List<Tuple2> expectedValues = getDataStore().executeWithResult(connection ->
-                connection.select(row -> new Tuple2<>(fromBlob(row.at(1), blobReader), fromBlob(row.at(2), blobReader)),
+                connection.select(row -> new Tuple2<>(row.fromBlob(1, blobReader), row.fromBlob(2, blobReader)),
                         "SELECT * FROM testtable").collect(toList()));
 
         assertThat(expectedValues.size(), is(1));
@@ -148,8 +149,8 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
 
 
         List<Tuple2> expectedValues = getDataStore().executeWithResult(connection ->
-                connection.select(row -> new Tuple2<>(fromClob(row.at(1), StringIO::readFrom),
-                                fromClob(row.at(2), StringIO::readFrom)),
+                connection.select(row -> new Tuple2<>(row.fromClob(1, StringIO::readFrom),
+                                row.fromClob(2, StringIO::readFrom)),
                         "SELECT * FROM testtable").collect(toList()));
 
         assertThat(expectedValues.size(), is(1));
@@ -160,9 +161,9 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
     @Override
     protected void cleanup() throws Exception {
         getDataStore().execute(connection -> {
-            List<String> dropStatements = connection.select(row -> asString(row.at("dropStatements")),
+            List<String> dropStatements = connection.select(row -> row.asString("dropStatements"),
                     "select 'drop '||object_type||' '|| object_name|| " +
-                    "DECODE(OBJECT_TYPE,'TABLE',' CASCADE CONSTRAINTS','') as dropStatements from user_objects"
+                            "DECODE(OBJECT_TYPE,'TABLE',' CASCADE CONSTRAINTS','') as dropStatements from user_objects"
             ).collect(toList());
             for (String statement : dropStatements) {
                 if (isNotDropOfSystemOrLobIndex(statement)) {

@@ -26,7 +26,7 @@ public class BigDecimalInputOutputParameterTest extends OutputParameterTestBase 
         BigDecimal inputValue = new BigDecimal(10.3);
         BigDecimal outputValue = new BigDecimal(12.5);
         BigDecimalInputOutputParameter parameter = new BigDecimalInputOutputParameter(inputValue);
-        when(statement.getObject(position)).thenReturn(outputValue);
+        when(statement.getBigDecimal(position)).thenReturn(outputValue);
 
         bindParameterAndEmulateCall(parameter);
 
@@ -34,7 +34,7 @@ public class BigDecimalInputOutputParameterTest extends OutputParameterTestBase 
         InOrder order = inOrder(statement);
         order.verify(statement).setBigDecimal(position, inputValue);
         order.verify(statement).registerOutParameter(position, Types.DECIMAL);
-        order.verify(statement).getObject(position);
+        order.verify(statement).getBigDecimal(position);
     }
 
 }

@@ -6,8 +6,6 @@ import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Types;
 
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asBigDecimal;
-
 public class BigDecimalOutputParameter implements OutputParameter {
     private BigDecimal value = null;
 
@@ -19,7 +17,7 @@ public class BigDecimalOutputParameter implements OutputParameter {
     public void bind(CallableStatement statement, int position, Scope statementScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.DECIMAL);
-            statementScope.add(() -> this.value = asBigDecimal(statement.getObject(position)));
+            statementScope.add(() -> this.value = statement.getBigDecimal(position));
         });
     }
 

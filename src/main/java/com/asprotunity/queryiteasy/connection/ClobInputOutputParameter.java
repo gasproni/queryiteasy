@@ -44,7 +44,7 @@ public class ClobInputOutputParameter<ResultType> implements InputOutputParamete
                 statementScope.add(reader::close);
             }
             statement.registerOutParameter(position, Types.CLOB);
-            statementScope.add(() -> value = fromClob(statement.getObject(position), outputClobReader));
+            statementScope.add(() -> value = fromClob(statement.getClob(position), outputClobReader));
         });
     }
 }

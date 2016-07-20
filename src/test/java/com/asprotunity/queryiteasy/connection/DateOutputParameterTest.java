@@ -19,14 +19,14 @@ public class DateOutputParameterTest extends OutputParameterTestBase {
         DateOutputParameter parameter = new DateOutputParameter();
         long doesntMatter = 123456789L;
         Date value = new Date(doesntMatter);
-        when(statement.getObject(position)).thenReturn(value);
+        when(statement.getDate(position)).thenReturn(value);
 
         bindParameterAndEmulateCall(parameter);
 
         assertThat(parameter.value(), is(value));
         InOrder order = inOrder(statement);
         order.verify(statement).registerOutParameter(position, Types.DATE);
-        order.verify(statement).getObject(position);
+        order.verify(statement).getDate(position);
     }
 
 }

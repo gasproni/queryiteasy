@@ -8,8 +8,6 @@ import java.sql.CallableStatement;
 import java.sql.Types;
 import java.util.function.Supplier;
 
-import static com.asprotunity.queryiteasy.connection.SQLDataConverters.asByteArray;
-
 public class LongVarBinaryInputOutputParameter implements InputOutputParameter {
 
     private byte[] value = null;
@@ -38,7 +36,7 @@ public class LongVarBinaryInputOutputParameter implements InputOutputParameter {
                 statementScope.add(inputStream::close);
             }
             statement.registerOutParameter(position, Types.LONGVARBINARY);
-            statementScope.add(() -> value = asByteArray(statement.getObject(position)));
+            statementScope.add(() -> value = statement.getBytes(position));
         });
     }
 }

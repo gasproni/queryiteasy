@@ -16,24 +16,24 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
-public class DataStoreTest {
+public class DefaultDataStoreTest {
 
 
     private java.sql.Connection jdbcConnection;
-    private DataStore dataStore;
+    private DefaultDataStore dataStore;
 
     @Before
     public void setUp() throws SQLException {
         DataSource dataSource = Mockito.mock(DataSource.class);
         jdbcConnection = Mockito.mock(java.sql.Connection.class);
         when(dataSource.getConnection()).thenReturn(jdbcConnection);
-        dataStore = new DataStore(dataSource);
+        dataStore = new DefaultDataStore(dataSource);
     }
 
 
     @Test(expected = InvalidArgumentException.class)
     public void throws_exception_when_datasource_is_null() {
-        new DataStore(null);
+        new DefaultDataStore(null);
     }
 
     @Test
@@ -94,11 +94,6 @@ public class DataStoreTest {
         order.verify(jdbcConnection, times(1)).close();
     }
 
-    @FunctionalInterface
-    public interface VoidCodeBlock {
-        void execute();
-    }
-
     private void assertRollbackAndCloseCalledInThisOrderAndCommitNeverCalled(VoidCodeBlock codeBlock) throws SQLException {
         try {
             codeBlock.execute();
@@ -109,5 +104,10 @@ public class DataStoreTest {
         InOrder order = inOrder(jdbcConnection);
         order.verify(jdbcConnection, times(1)).rollback();
         order.verify(jdbcConnection, times(1)).close();
+    }
+
+    @FunctionalInterface
+    public interface VoidCodeBlock {
+        void execute();
     }
 }

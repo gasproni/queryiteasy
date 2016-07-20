@@ -26,7 +26,7 @@ public class BooleanInputOutputParameterTest extends OutputParameterTestBase {
         Boolean inputValue = true;
         Boolean outputValue = false;
         BooleanInputOutputParameter parameter = new BooleanInputOutputParameter(inputValue);
-        when(statement.getObject(position)).thenReturn(outputValue);
+        when(statement.getBoolean(position)).thenReturn(outputValue);
 
         bindParameterAndEmulateCall(parameter);
 
@@ -34,7 +34,7 @@ public class BooleanInputOutputParameterTest extends OutputParameterTestBase {
         InOrder order = inOrder(statement);
         order.verify(statement).setObject(position, inputValue, Types.BOOLEAN);
         order.verify(statement).registerOutParameter(position, Types.BOOLEAN);
-        order.verify(statement).getObject(position);
+        order.verify(statement).getBoolean(position);
     }
 
 }

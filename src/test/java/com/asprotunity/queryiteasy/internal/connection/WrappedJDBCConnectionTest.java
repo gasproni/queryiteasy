@@ -1,6 +1,7 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
 import com.asprotunity.queryiteasy.connection.InputParameterBinders;
+import com.asprotunity.queryiteasy.connection.Row;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -17,13 +18,13 @@ import static org.mockito.Mockito.*;
 public class WrappedJDBCConnectionTest {
 
     private Connection jdbcConnection;
-    private WrappedJDBCConnection wrappedJDBCConnection;
+    private WrappedJDBCConnection<Row> wrappedJDBCConnection;
 
     @Before
     public void setUp() {
         jdbcConnection = mock(Connection.class);
-        wrappedJDBCConnection = new WrappedJDBCConnection(jdbcConnection
-        );
+        wrappedJDBCConnection = new WrappedJDBCConnection<>(jdbcConnection,
+                RowFromResultSet::new);
     }
 
     @Test
@@ -78,7 +79,7 @@ public class WrappedJDBCConnectionTest {
         when(preparedStatement.executeQuery()).thenReturn(rs);
         when(rs.next()).thenReturn(false);
 
-        wrappedJDBCConnection.select(row -> row.at(1), sql).close();
+        wrappedJDBCConnection.select(row -> row.asInteger(1), sql).close();
 
         InOrder order = inOrder(preparedStatement, rs);
         order.verify(preparedStatement, times(1)).executeQuery();
@@ -97,7 +98,7 @@ public class WrappedJDBCConnectionTest {
         when(preparedStatement.executeQuery()).thenReturn(rs);
         when(rs.next()).thenReturn(false);
 
-        wrappedJDBCConnection.select(row -> row.at(1), sql, InputParameterBinders.bindBlob(() -> blobStream));
+        wrappedJDBCConnection.select(row -> row.asInteger(1), sql, InputParameterBinders.bindBlob(() -> blobStream));
 
         InOrder order = inOrder(preparedStatement, rs, blobStream);
         order.verify(preparedStatement, times(1)).executeQuery();

@@ -2,19 +2,19 @@ package com.asprotunity.queryiteasy.connection;
 
 import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
 
-import java.io.*;
-import java.math.BigDecimal;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.sql.*;
 import java.util.function.Function;
 
 public final class SQLDataConverters {
 
-    public static <ResultType> ResultType fromBlob(Object object,
+    public static <ResultType> ResultType fromBlob(Blob blob,
                                                    Function<InputStream, ResultType> blobReader) {
-        if (object == null) {
+        if (blob == null) {
             return blobReader.apply(null);
-        } else if (object instanceof Blob) {
-            Blob blob = (Blob) object;
+        } else {
             try (AutoCloseableScope scope = new AutoCloseableScope();
                  InputStream inputStream = blob.getBinaryStream()) {
                 scope.add(blob::free);
@@ -24,24 +24,14 @@ public final class SQLDataConverters {
             } catch (IOException e) {
                 throw new RuntimeIOException(e);
             }
-        } else if (object instanceof byte[]) {
-            // This is for MySQL. Sometimes it returns blobs as byte[].
-            try (InputStream inputStream = new ByteArrayInputStream((byte[]) object)) {
-                return blobReader.apply(inputStream);
-            } catch (IOException e) {
-                throw new RuntimeIOException(e);
-            }
-        } else {
-            throw new ClassCastException("Cannot extract blob data from " + object.getClass());
         }
     }
 
-    public static <ResultType> ResultType fromClob(Object object,
+    public static <ResultType> ResultType fromClob(Clob clob,
                                                    Function<Reader, ResultType> clobReader) {
-        if (object == null) {
+        if (clob == null) {
             return clobReader.apply(null);
-        } else if (object instanceof Clob) {
-            Clob clob = (Clob) object;
+        } else {
             try (AutoCloseableScope scope = new AutoCloseableScope();
                  Reader reader = clob.getCharacterStream()) {
                 scope.add(clob::free);
@@ -51,45 +41,29 @@ public final class SQLDataConverters {
             } catch (IOException e) {
                 throw new RuntimeIOException(e);
             }
-        } else if (object instanceof String) {
-            // This is for MySQL 'TEXT' SQL type.
-            try (Reader reader = new StringReader((String) object)) {
-                return clobReader.apply(reader);
-            } catch (IOException e) {
-                throw new RuntimeIOException(e);
-            }
-        } else {
-            throw new ClassCastException("Cannot extract clob data from " + object.getClass());
         }
     }
 
     public static <ResultType> ResultType fromInputStream(InputStream inputStream,
-                                                          Function<InputStream, ResultType> binaryReader) {
+                                                          Function<InputStream, ResultType> inputStreamReader) {
         if (inputStream == null) {
             return null;
         }
         try (AutoCloseableScope scope = new AutoCloseableScope()) {
             scope.add(inputStream::close);
-            return binaryReader.apply(inputStream);
+            return inputStreamReader.apply(inputStream);
         }
     }
 
-    public static byte[] asByteArray(Object object) {
-        if (object == null) {
+    public static <ResultType> ResultType fromReader(Reader reader,
+                                                     Function<Reader, ResultType> inputStreamReader) {
+        if (reader == null) {
             return null;
         }
-        if (object instanceof byte[]) {
-            return (byte[])object;
-        } else {
-            throw new ClassCastException(classCastExceptionMessage(object, byte[].class));
+        try (AutoCloseableScope scope = new AutoCloseableScope()) {
+            scope.add(reader::close);
+            return inputStreamReader.apply(reader);
         }
-    }
-
-    public static String asString(Object value) {
-        if (value == null) {
-            return null;
-        }
-        return String.valueOf(value);
     }
 
     public static Short asShort(Object value) {
@@ -120,44 +94,6 @@ public final class SQLDataConverters {
     public static Byte asByte(Object value) {
         return convertNumber(value,
                 Byte.class, Byte::valueOf, Number::byteValue);
-    }
-
-    public static BigDecimal asBigDecimal(Object value) {
-        if (value == null) {
-            return null;
-        } else if (value instanceof BigDecimal) {
-            return (BigDecimal) value;
-        } else if (value instanceof String) {
-            return new BigDecimal((String) value);
-        } else if (value instanceof Number) {
-            return BigDecimal.valueOf(((Number) value).doubleValue());
-        }
-        throw new ClassCastException(classCastExceptionMessage(value, BigDecimal.class));
-    }
-
-    public static Boolean asBoolean(Object value) {
-        if (value == null) {
-            return null;
-        } else if (value instanceof Boolean) {
-            return (Boolean) value;
-        } else if (value instanceof String) {
-            return Boolean.valueOf((String) value);
-        }
-        throw new ClassCastException(classCastExceptionMessage(value, Boolean.class));
-    }
-
-    public static Date asDate(Object value) {
-        if (value == null) {
-            return null;
-        } else if (value instanceof Date) {
-            return (Date) value;
-        } else if (value instanceof String) {
-            return Date.valueOf((String) value);
-        } else if (value instanceof Timestamp) {
-            Timestamp timestamp = (Timestamp) value;
-            return new Date(timestamp.getTime());
-        }
-        throw new ClassCastException(classCastExceptionMessage(value, Date.class));
     }
 
     public static Time asTime(Object value) {

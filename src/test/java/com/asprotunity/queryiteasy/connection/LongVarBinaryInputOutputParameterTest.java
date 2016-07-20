@@ -47,7 +47,7 @@ public class LongVarBinaryInputOutputParameterTest extends OutputParameterTestBa
         byte[] outputLongVarBinaryContent = new byte[]{1, 2, 3, 4, 5, 6, 7};
         LongVarBinaryInputOutputParameter parameter = new LongVarBinaryInputOutputParameter(inputLongVarBinarySupplier);
 
-        when(statement.getObject(position)).thenReturn(outputLongVarBinaryContent);
+        when(statement.getBytes(position)).thenReturn(outputLongVarBinaryContent);
 
         bindParameterAndEmulateCall(parameter);
 
@@ -55,7 +55,7 @@ public class LongVarBinaryInputOutputParameterTest extends OutputParameterTestBa
         InOrder order = inOrder(statement, inputLongVarBinaryStream);
         order.verify(statement).setBinaryStream(position, inputLongVarBinaryStream);
         order.verify(statement).registerOutParameter(position, Types.LONGVARBINARY);
-        order.verify(statement).getObject(position);
+        order.verify(statement).getBytes(position);
         order.verify(inputLongVarBinaryStream).close();
     }
 
@@ -65,7 +65,7 @@ public class LongVarBinaryInputOutputParameterTest extends OutputParameterTestBa
         Supplier<InputStream> inputLongVarBinarySupplier = () -> null;
         LongVarBinaryInputOutputParameter parameter = new LongVarBinaryInputOutputParameter(inputLongVarBinarySupplier);
 
-        when(statement.getObject(position)).thenReturn(outputLongVarBinaryContent);
+        when(statement.getBytes(position)).thenReturn(outputLongVarBinaryContent);
 
         bindParameterAndEmulateCall(parameter);
 
@@ -73,7 +73,7 @@ public class LongVarBinaryInputOutputParameterTest extends OutputParameterTestBa
         InOrder order = inOrder(statement);
         order.verify(statement).setNull(position, Types.LONGVARBINARY);
         order.verify(statement).registerOutParameter(position, Types.LONGVARBINARY);
-        order.verify(statement).getObject(position);
+        order.verify(statement).getBytes(position);
     }
 
 }
