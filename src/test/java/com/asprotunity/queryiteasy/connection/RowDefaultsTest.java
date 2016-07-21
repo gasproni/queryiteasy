@@ -6,10 +6,7 @@ import org.mockito.InOrder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.function.Function;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -26,6 +23,21 @@ public class RowDefaultsTest {
     private final RowDefaults row = new RowDefaults(resultSet) {};
     private InputStream inputStream = mock(InputStream.class);
     private Reader reader = mock(Reader.class);
+
+    @Test
+    public void reads_columncount_from_resultset_metadata() throws SQLException, IOException {
+        ResultSetMetaData metadata = mock(ResultSetMetaData.class);
+        int columnCount = 13;
+        when(metadata.getColumnCount()).thenReturn(columnCount);
+
+        ResultSet resultSet = mock(ResultSet.class);
+        when(resultSet.getMetaData()).thenReturn(metadata);
+
+        Row row = new RowDefaults(resultSet) {};
+        assertThat(row.columnCount(), is(columnCount));
+        verify(resultSet, times(1)).getMetaData();
+        verify(metadata, times(1)).getColumnCount();
+    }
 
     @Test
     public void reads_from_binary_stream_using_column_index() throws SQLException, IOException {

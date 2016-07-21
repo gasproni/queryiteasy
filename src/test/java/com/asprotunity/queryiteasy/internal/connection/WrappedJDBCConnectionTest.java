@@ -1,8 +1,8 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
 import com.asprotunity.queryiteasy.connection.GenericRow;
-import com.asprotunity.queryiteasy.connection.InputParameterBinders;
 import com.asprotunity.queryiteasy.connection.Row;
+import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
 import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +15,8 @@ import java.util.Collections;
 
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
+import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bindBlob;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 public class WrappedJDBCConnectionTest {
@@ -62,12 +64,12 @@ public class WrappedJDBCConnectionTest {
     }
 
     @Test
-    public void update_closes_blob_stream_before_closing_statement() throws Exception {
+    public void update_closes_query_scope_before_closing_statement() throws Exception {
         String sql = "INSERT INTO foo VALUES(?)";
         PreparedStatement preparedStatement = prepareStatement(sql);
         InputStream blobStream = mock(InputStream.class);
 
-        wrappedJDBCConnection.update(sql, InputParameterBinders.bindBlob(() -> blobStream));
+        wrappedJDBCConnection.update(sql, bindBlob(() -> blobStream));
 
         InOrder order = inOrder(preparedStatement, blobStream);
         order.verify(preparedStatement, times(1)).execute();
@@ -80,34 +82,116 @@ public class WrappedJDBCConnectionTest {
         String sql = "SELECT * FROM foo";
         PreparedStatement preparedStatement = prepareStatement(sql);
 
-        ResultSet rs = mock(ResultSet.class);
-        when(preparedStatement.executeQuery()).thenReturn(rs);
-        when(rs.next()).thenReturn(false);
+        ResultSet resultSet = mock(ResultSet.class);
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
+        when(resultSet.next()).thenReturn(false);
 
         wrappedJDBCConnection.select(row -> row.asInteger(1), sql).close();
 
-        InOrder order = inOrder(preparedStatement, rs);
+        InOrder order = inOrder(preparedStatement, resultSet);
         order.verify(preparedStatement, times(1)).executeQuery();
-        order.verify(rs, times(1)).close();
+        order.verify(resultSet, times(1)).close();
         order.verify(preparedStatement, times(1)).close();
     }
 
     @Test
-    public void select_closes_blob_streams_after_executing_query() throws Exception {
+    public void select_closes_query_scope_but_leaves_resultset_and_statement_scope_open_after_executing_query() throws Exception {
         String sql = "SELECT * FROM foo where blob = ?";
         PreparedStatement preparedStatement = prepareStatement(sql);
 
         InputStream blobStream = mock(InputStream.class);
 
-        ResultSet rs = mock(ResultSet.class);
-        when(preparedStatement.executeQuery()).thenReturn(rs);
-        when(rs.next()).thenReturn(false);
+        ResultSet resultSet = mock(ResultSet.class);
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
+        when(resultSet.next()).thenReturn(false);
 
-        wrappedJDBCConnection.select(row -> row.asInteger(1), sql, InputParameterBinders.bindBlob(() -> blobStream));
+        wrappedJDBCConnection.select(row -> row.asInteger(1), sql, bindBlob(() -> blobStream));
 
-        InOrder order = inOrder(preparedStatement, rs, blobStream);
+        InOrder order = inOrder(preparedStatement, resultSet, blobStream);
         order.verify(preparedStatement, times(1)).executeQuery();
         order.verify(blobStream, times(1)).close();
+
+        verify(resultSet, times(0)).close();
+        verify(preparedStatement, times(0)).close();
+    }
+
+    @Test
+    public void select_closes_query_scope_if_query_throws_exception() throws Exception {
+        String sql = "SELECT * FROM foo where blob = ?";
+        PreparedStatement preparedStatement = prepareStatement(sql);
+
+        InputStream blobStream = mock(InputStream.class);
+
+        when(preparedStatement.executeQuery()).thenThrow(new SQLException());
+
+        try {
+            wrappedJDBCConnection.select(row -> row.asInteger(1), sql, bindBlob(() -> blobStream));
+            fail("RuntimeSQLException expected");
+        }
+        catch (RuntimeSQLException exception) {
+            InOrder order = inOrder(preparedStatement, blobStream);
+            order.verify(preparedStatement, times(1)).executeQuery();
+            order.verify(blobStream, times(1)).close();
+            verify(preparedStatement, times(1)).close();
+        }
+    }
+
+    @Test
+    public void call_with_results_closes_query_scope_but_leaves_resultset_and_statement_scope_open_after_executing_query() throws Exception {
+        String sql = "{call foo_func(?)}";
+        CallableStatement callableStatement = prepareCall(sql);
+
+        InputStream blobStream = mock(InputStream.class);
+
+        ResultSet resultSet = mock(ResultSet.class);
+        when(callableStatement.executeQuery()).thenReturn(resultSet);
+        when(resultSet.next()).thenReturn(false);
+
+        wrappedJDBCConnection.call(row -> row.asInteger(1), sql, bindBlob(() -> blobStream));
+
+        InOrder order = inOrder(callableStatement, resultSet, blobStream);
+        order.verify(callableStatement, times(1)).executeQuery();
+        order.verify(blobStream, times(1)).close();
+
+        verify(resultSet, times(0)).close();
+        verify(callableStatement, times(0)).close();
+    }
+
+    @Test
+    public void call_with_result_closes_query_scope_and_resultset_and_statement_scope_if_query_throws_exception() throws Exception {
+        String sql = "{call foo_func(?)}";
+        CallableStatement callableStatement = prepareCall(sql);
+
+        InputStream blobStream = mock(InputStream.class);
+
+        when(callableStatement.executeQuery()).thenThrow(new SQLException());
+
+        try {
+            wrappedJDBCConnection.call(row -> row.asInteger(1), sql, bindBlob(() -> blobStream));
+            fail("RuntimeSQLException expected");
+        }
+        catch (RuntimeSQLException exception) {
+            InOrder order = inOrder(callableStatement, blobStream);
+            order.verify(callableStatement, times(1)).executeQuery();
+            order.verify(blobStream, times(1)).close();
+            verify(callableStatement, times(1)).close();
+        }
+    }
+
+    @Test
+    public void call_with_no_results_closes_query_scope_and_statement() throws Exception {
+        String sql = "{call foo_func(?)}";
+
+        CallableStatement callableStatement = prepareCall(sql);
+
+        InputStream blobStream = mock(InputStream.class);
+
+        wrappedJDBCConnection.call(sql, bindBlob(() -> blobStream));
+
+        InOrder order = inOrder(callableStatement, blobStream);
+        order.verify(callableStatement, times(1)).execute();
+        order.verify(blobStream, times(1)).close();
+        verify(callableStatement, times(1)).close();
     }
 
     @Test
@@ -133,7 +217,7 @@ public class WrappedJDBCConnectionTest {
 
         InputStream blobStream = mock(InputStream.class);
 
-        wrappedJDBCConnection.update(sql, Collections.singletonList(batch(InputParameterBinders.bindBlob(() -> blobStream))));
+        wrappedJDBCConnection.update(sql, Collections.singletonList(batch(bindBlob(() -> blobStream))));
 
         InOrder order = inOrder(preparedStatement, blobStream);
         order.verify(preparedStatement, times(1)).executeBatch();
@@ -142,9 +226,15 @@ public class WrappedJDBCConnectionTest {
     }
 
     private PreparedStatement prepareStatement(String sql) throws SQLException {
-        PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        when(jdbcConnection.prepareStatement(sql)).thenReturn(preparedStatement);
-        return preparedStatement;
+        PreparedStatement result = mock(PreparedStatement.class);
+        when(jdbcConnection.prepareStatement(sql)).thenReturn(result);
+        return result;
+    }
+
+    private CallableStatement prepareCall(String sql) throws SQLException {
+        CallableStatement result = mock(CallableStatement.class);
+        when(jdbcConnection.prepareCall(sql)).thenReturn(result);
+        return result;
     }
 
 }

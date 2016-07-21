@@ -125,7 +125,7 @@ public class InputParameterBindersTest {
         InputParameterBinders.bindBlob(() -> blobStream).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setBlob(position, blobStream);
         assertThat(this.scope.handlersCount(), is(1));
-        assertThatStreamOnLeaveRegisteredCorrectly(scope, blobStream);
+        assertThatStreamIsClosedWhenScopeClosed(scope, blobStream);
 
     }
 
@@ -142,7 +142,7 @@ public class InputParameterBindersTest {
         InputParameterBinders.bindClob(() -> clobReader).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setClob(position, clobReader);
         assertThat(this.scope.handlersCount(), is(1));
-        assertThatReaderOnLeaveRegisteredCorrectly(scope, clobReader);
+        assertThatReaderIsClosedWhenScopeClosed(scope, clobReader);
 
     }
 
@@ -159,7 +159,7 @@ public class InputParameterBindersTest {
         InputParameterBinders.bindLongVarbinary(() -> binaryStream).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setBinaryStream(position, binaryStream);
         assertThat(this.scope.handlersCount(), is(1));
-        assertThatStreamOnLeaveRegisteredCorrectly(scope, binaryStream);
+        assertThatStreamIsClosedWhenScopeClosed(scope, binaryStream);
 
     }
 
@@ -170,13 +170,13 @@ public class InputParameterBindersTest {
         assertThat(scope.handlersCount(), is(0));
     }
 
-    private void assertThatStreamOnLeaveRegisteredCorrectly(DefaultAutoCloseableScope scope, InputStream blobStream) throws IOException {
+    private void assertThatStreamIsClosedWhenScopeClosed(DefaultAutoCloseableScope scope, InputStream blobStream) throws IOException {
         verify(blobStream, times(0)).close();
         scope.close();
         verify(blobStream, times(1)).close();
     }
 
-    private void assertThatReaderOnLeaveRegisteredCorrectly(DefaultAutoCloseableScope scope, Reader blobReader) throws IOException {
+    private void assertThatReaderIsClosedWhenScopeClosed(DefaultAutoCloseableScope scope, Reader blobReader) throws IOException {
         verify(blobReader, times(0)).close();
         scope.close();
         verify(blobReader, times(1)).close();
