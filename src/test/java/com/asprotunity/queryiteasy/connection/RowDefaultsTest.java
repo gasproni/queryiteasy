@@ -1,6 +1,5 @@
-package com.asprotunity.queryiteasy.internal.connection;
+package com.asprotunity.queryiteasy.connection;
 
-import com.asprotunity.queryiteasy.connection.Row;
 import org.junit.Test;
 import org.mockito.InOrder;
 
@@ -19,12 +18,12 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.IsNot.not;
 import static org.mockito.Mockito.*;
 
-public class GenericRowTest {
+public class RowDefaultsTest {
 
     private final int columnIndex = 5;
     private final String columnLabel = "columnLabel";
     private final ResultSet resultSet = mock(ResultSet.class);
-    private final Row row = new GenericRow(resultSet);
+    private final RowDefaults row = new RowDefaults(resultSet) {};
     private InputStream inputStream = mock(InputStream.class);
     private Reader reader = mock(Reader.class);
 

@@ -1,5 +1,6 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
+import com.asprotunity.queryiteasy.connection.GenericRow;
 import com.asprotunity.queryiteasy.connection.InputParameterBinders;
 import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.scope.AutoCloseableScope;

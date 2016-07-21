@@ -1,6 +1,4 @@
-package com.asprotunity.queryiteasy.internal.connection;
-
-import com.asprotunity.queryiteasy.connection.RowDefaults;
+package com.asprotunity.queryiteasy.connection;
 
 import java.sql.ResultSet;
 
