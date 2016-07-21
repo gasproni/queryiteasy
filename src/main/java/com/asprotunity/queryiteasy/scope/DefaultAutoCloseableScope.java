@@ -3,7 +3,7 @@ package com.asprotunity.queryiteasy.scope;
 import java.util.ArrayList;
 
 
-public class AutoCloseableScope implements AutoCloseable, Scope {
+public class DefaultAutoCloseableScope implements AutoCloseableScope {
 
     private boolean isClosed = false;
     private ArrayList<OnCloseAction> onCloseActions = new ArrayList<>();

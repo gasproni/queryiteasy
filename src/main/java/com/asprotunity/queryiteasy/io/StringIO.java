@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
 
-public class StringIO {
+public abstract class StringIO {
 
     public static String readFrom(InputStream inputStream, Charset charset) {
         if (inputStream == null) {

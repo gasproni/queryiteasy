@@ -1,7 +1,5 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
-import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
-
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -19,7 +17,6 @@ public interface DataSourceInstantiationAndAccess {
 
     static List<FlexibleTuple> query(DataSource dataSource, String sql) throws SQLException {
         try (Connection connection = dataSource.getConnection();
-             AutoCloseableScope connectionScope = new AutoCloseableScope();
              Statement statement = connection.createStatement();
              ResultSet rs = statement.executeQuery(sql)) {
             ArrayList<FlexibleTuple> result = new ArrayList<>();

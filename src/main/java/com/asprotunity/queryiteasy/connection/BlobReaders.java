@@ -1,6 +1,6 @@
 package com.asprotunity.queryiteasy.connection;
 
-import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
+import com.asprotunity.queryiteasy.scope.DefaultAutoCloseableScope;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +17,7 @@ public final class BlobReaders {
         if (blob == null) {
             return blobReader.apply(null);
         } else {
-            try (AutoCloseableScope scope = new AutoCloseableScope();
+            try (DefaultAutoCloseableScope scope = new DefaultAutoCloseableScope();
                  InputStream inputStream = blob.getBinaryStream()) {
                 scope.add(blob::free);
                 return blobReader.apply(inputStream);
@@ -34,7 +34,7 @@ public final class BlobReaders {
         if (clob == null) {
             return clobReader.apply(null);
         } else {
-            try (AutoCloseableScope scope = new AutoCloseableScope();
+            try (DefaultAutoCloseableScope scope = new DefaultAutoCloseableScope();
                  Reader reader = clob.getCharacterStream()) {
                 scope.add(clob::free);
                 return clobReader.apply(reader);

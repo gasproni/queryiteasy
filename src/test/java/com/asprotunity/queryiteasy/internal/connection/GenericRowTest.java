@@ -19,12 +19,12 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.IsNot.not;
 import static org.mockito.Mockito.*;
 
-public class RowFromResultSetTest {
+public class GenericRowTest {
 
     private final int columnIndex = 5;
     private final String columnLabel = "columnLabel";
     private final ResultSet resultSet = mock(ResultSet.class);
-    private final Row row = new RowFromResultSet(resultSet);
+    private final Row row = new GenericRow(resultSet);
     private InputStream inputStream = mock(InputStream.class);
     private Reader reader = mock(Reader.class);
 

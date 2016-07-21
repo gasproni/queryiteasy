@@ -7,18 +7,18 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-public class AutoCloseableScopeTest {
+public class DefaultAutoCloseableScopeTest {
 
 
     @Test
     public void scope_is_not_closed_after_instatiation() {
-        AutoCloseableScope scope = new AutoCloseableScope();
+        DefaultAutoCloseableScope scope = new DefaultAutoCloseableScope();
         assertFalse(scope.isClosed());
     }
 
     @Test
     public void closes_scope_correctly_when_no_handlers_registered() {
-        AutoCloseableScope scope = new AutoCloseableScope();
+        DefaultAutoCloseableScope scope = new DefaultAutoCloseableScope();
         scope.close();
         assertTrue(scope.isClosed());
     }
@@ -27,7 +27,7 @@ public class AutoCloseableScopeTest {
     public void calls_single_registered_close_handler() throws Exception {
         Closeable closeable = mock(Closeable.class);
 
-        AutoCloseableScope scope = new AutoCloseableScope();
+        DefaultAutoCloseableScope scope = new DefaultAutoCloseableScope();
         scope.add(closeable::close);
         scope.close();
 
@@ -40,7 +40,7 @@ public class AutoCloseableScopeTest {
     public void close_calls_close_on_close_handlers_only_once() throws Exception {
         Closeable closeable = mock(Closeable.class);
 
-        AutoCloseableScope scope = new AutoCloseableScope();
+        DefaultAutoCloseableScope scope = new DefaultAutoCloseableScope();
         scope.add(closeable::close);
         scope.close();
         scope.close();
@@ -55,7 +55,7 @@ public class AutoCloseableScopeTest {
         Closeable closeable1 = mock(Closeable.class);
         Closeable closeable2 = mock(Closeable.class);
 
-        AutoCloseableScope scope = new AutoCloseableScope();
+        DefaultAutoCloseableScope scope = new DefaultAutoCloseableScope();
         scope.add(closeable1::close);
         scope.add(closeable2::close);
         scope.close();
@@ -72,7 +72,7 @@ public class AutoCloseableScopeTest {
         Closeable closeable = mock(Closeable.class);
         doThrow(exceptionFromCloseable).when(closeable).close();
 
-        AutoCloseableScope scope = new AutoCloseableScope();
+        DefaultAutoCloseableScope scope = new DefaultAutoCloseableScope();
         scope.add(closeable::close);
 
         try {
@@ -96,7 +96,7 @@ public class AutoCloseableScopeTest {
         Exception closeable3Exception = new Exception();
         doThrow(closeable3Exception).when(closeable3).close();
 
-        AutoCloseableScope scope = new AutoCloseableScope();
+        DefaultAutoCloseableScope scope = new DefaultAutoCloseableScope();
         scope.add(closeable1::close);
         scope.add(closeable2::close);
         scope.add(closeable3::close);

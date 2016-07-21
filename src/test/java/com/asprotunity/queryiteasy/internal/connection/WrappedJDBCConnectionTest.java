@@ -2,6 +2,7 @@ package com.asprotunity.queryiteasy.internal.connection;
 
 import com.asprotunity.queryiteasy.connection.InputParameterBinders;
 import com.asprotunity.queryiteasy.connection.Row;
+import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -17,14 +18,14 @@ import static org.mockito.Mockito.*;
 
 public class WrappedJDBCConnectionTest {
 
-    private Connection jdbcConnection;
-    private WrappedJDBCConnection<Row> wrappedJDBCConnection;
+    private Connection jdbcConnection = mock(Connection.class);
+    private AutoCloseableScope connectionScope = mock(AutoCloseableScope.class);
+    private WrappedJDBCConnection<Row> wrappedJDBCConnection =
+            new WrappedJDBCConnection<>(jdbcConnection, connectionScope, GenericRow::new);
 
     @Before
     public void setUp() {
-        jdbcConnection = mock(Connection.class);
-        wrappedJDBCConnection = new WrappedJDBCConnection<>(jdbcConnection,
-                RowFromResultSet::new);
+        when(connectionScope.add(any(Object.class), any())).thenAnswer(invocation -> invocation.getArguments()[0]);
     }
 
     @Test
@@ -41,7 +42,10 @@ public class WrappedJDBCConnectionTest {
     @Test
     public void closes_jdbc_connection_correctly() throws Exception {
         wrappedJDBCConnection.close();
-        verify(jdbcConnection, times(1)).close();
+        InOrder order = inOrder(jdbcConnection, connectionScope);
+        order.verify(jdbcConnection, times(1)).rollback();
+        order.verify(connectionScope, times(1)).close();
+        order.verify(jdbcConnection, times(1)).close();
     }
 
     @Test

@@ -1,18 +1,18 @@
 package com.asprotunity.queryiteasy.io;
 
-import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
+import com.asprotunity.queryiteasy.scope.DefaultAutoCloseableScope;
 
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.function.Function;
 
-public class StreamIO {
+public abstract class StreamIO {
     public static <ResultType> ResultType fromInputStream(InputStream inputStream,
                                                           Function<InputStream, ResultType> inputStreamReader) {
         if (inputStream == null) {
             return inputStreamReader.apply(null);
         }
-        try (AutoCloseableScope scope = new AutoCloseableScope()) {
+        try (DefaultAutoCloseableScope scope = new DefaultAutoCloseableScope()) {
             scope.add(inputStream::close);
             return inputStreamReader.apply(inputStream);
         }
@@ -23,7 +23,7 @@ public class StreamIO {
         if (reader == null) {
             return inputStreamReader.apply(null);
         }
-        try (AutoCloseableScope scope = new AutoCloseableScope()) {
+        try (DefaultAutoCloseableScope scope = new DefaultAutoCloseableScope()) {
             scope.add(reader::close);
             return inputStreamReader.apply(reader);
         }

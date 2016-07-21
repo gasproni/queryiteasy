@@ -1,8 +1,4 @@
-package com.asprotunity.queryiteasy.internal.connection;
-
-import com.asprotunity.queryiteasy.connection.BlobReaders;
-import com.asprotunity.queryiteasy.connection.Row;
-import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
+package com.asprotunity.queryiteasy.connection;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -13,21 +9,22 @@ import java.util.function.Function;
 import static com.asprotunity.queryiteasy.io.StreamIO.fromInputStream;
 import static com.asprotunity.queryiteasy.io.StreamIO.fromReader;
 
-public class RowFromResultSet implements Row {
+public abstract class RowDefaults implements Row {
+    private final ResultSet resultSet;
+    private final ResultSetMetaData metaData;
 
-    private ResultSet resultSet;
-    private ResultSetMetaData metaData;
-
-    public RowFromResultSet(ResultSet resultSet) {
-        RuntimeSQLException.execute(() -> {
+    public RowDefaults(ResultSet resultSet) {
+        try {
             this.resultSet = resultSet;
-            metaData = resultSet.getMetaData();
-        });
+            this.metaData = resultSet.getMetaData();
+        } catch (SQLException exception) {
+            throw new RuntimeSQLException(exception);
+        }
     }
 
     @Override
     public int columnCount() {
-        return RuntimeSQLException.executeAndReturnResult(() -> metaData.getColumnCount());
+        return RuntimeSQLException.executeAndReturnResult(metaData::getColumnCount);
     }
 
     @Override
