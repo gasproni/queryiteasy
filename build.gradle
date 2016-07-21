@@ -1,3 +1,14 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        //Needed only for SNAPSHOT versions
+        //maven { url "http://oss.sonatype.org/content/repositories/snapshots/" }
+    }
+    dependencies {
+        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.1.9'
+    }
+}
+
 plugins {
     id 'net.researchgate.release' version '2.4.0'
 }
@@ -6,6 +17,7 @@ repositories {
     mavenCentral()
 }
 
+apply plugin: "info.solidsoft.pitest"
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'findbugs'
@@ -83,6 +95,13 @@ findbugs {
     reportsDir = file("$project.buildDir/findbugsReports")
     effort = "max"
     reportLevel = "high"
+}
+
+pitest {
+    targetClasses = ['com.asprotunity.queryiteasy.*']  //by default "${project.group}.*"
+    mainSourceSets = [sourceSets.main]
+    threads = 4
+    outputFormats = ['XML', 'HTML']
 }
 
 dependencies {
