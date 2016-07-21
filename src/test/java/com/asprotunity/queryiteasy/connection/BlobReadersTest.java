@@ -31,6 +31,25 @@ public class BlobReadersTest {
         assertThat(converted, is(expected));
     }
 
+    @Test(expected = RuntimeSQLException.class)
+    public void from_blob_throws_RuntimeSQLException_when_SQLException_thrown() throws IOException, SQLException {
+        Blob blob = mock(Blob.class);
+        when(blob.getBinaryStream()).thenThrow(new SQLException());
+
+       fromBlob(blob, inputStream -> "doesn't matter");
+    }
+
+    @Test(expected = RuntimeIOException.class)
+    public void from_blob_throws_RuntimeIOException_when_IOException_thrown() throws IOException, SQLException {
+        InputStream inputStream = mock(InputStream.class);
+        doThrow(new IOException()).when(inputStream).close();
+
+        Blob blob = mock(Blob.class);
+        when(blob.getBinaryStream()).thenReturn(inputStream);
+
+        fromBlob(blob, is -> "doesn't matter");
+    }
+
     @Test
     public void from_blob_frees_resources() throws IOException, SQLException {
         Blob blob = mock(Blob.class);
@@ -80,6 +99,25 @@ public class BlobReadersTest {
         order.verify(clob, times(1)).getCharacterStream();
         order.verify(reader, times(1)).close();
         order.verify(clob, times(1)).free();
+    }
+
+    @Test(expected = RuntimeSQLException.class)
+    public void from_clob_throws_RuntimeSQLException_when_SQLException_thrown() throws IOException, SQLException {
+        Clob clob = mock(Clob.class);
+        when(clob.getCharacterStream()).thenThrow(new SQLException());
+
+        fromClob(clob, reader -> "doesn't matter");
+    }
+
+    @Test(expected = RuntimeIOException.class)
+    public void from_clob_throws_RuntimeIOException_when_IOException_thrown() throws IOException, SQLException {
+        Reader reader = mock(Reader.class);
+        doThrow(new IOException()).when(reader).close();
+
+        Clob clob = mock(Clob.class);
+        when(clob.getCharacterStream()).thenReturn(reader);
+
+        fromClob(clob, rd -> "doesn't matter");
     }
 
     @Test
