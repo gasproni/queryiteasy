@@ -220,16 +220,6 @@ public class RowFromResultSet implements Row {
         return RuntimeSQLException.executeAndReturnResult(() -> resultSet.getTimestamp(columnIndex));
     }
 
-    @Override
-    public Object asObject(int columnIndex) {
-        return RuntimeSQLException.executeAndReturnResult(() -> resultSet.getObject(columnIndex));
-    }
-
-    @Override
-    public Object asObject(String columnLabel) {
-        return RuntimeSQLException.executeAndReturnResult(() -> resultSet.getObject(columnLabel));
-    }
-
     private <ResultType> ResultType returnValueOrNull(ResultType value) throws SQLException {
         if (resultSet.wasNull()) {
             return null;

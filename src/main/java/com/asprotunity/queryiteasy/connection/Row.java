@@ -89,7 +89,4 @@ public interface Row {
 
     Timestamp asTimestamp(int columnIndex);
 
-    Object asObject(int columnIndex);
-
-    Object asObject(String columnLabel);
 }
