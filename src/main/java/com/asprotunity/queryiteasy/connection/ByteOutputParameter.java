@@ -13,10 +13,10 @@ public class ByteOutputParameter implements OutputParameter {
     }
 
     @Override
-    public void bind(CallableStatement statement, int position, Scope statementScope) {
+    public void bind(CallableStatement statement, int position, Scope queryScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.TINYINT);
-            statementScope.add(() -> this.value = Parameter.returnValueOrNull(statement, position, CallableStatement::getByte));
+            queryScope.add(() -> this.value = Parameter.returnValueOrNull(statement, position, CallableStatement::getByte));
         });
     }
 

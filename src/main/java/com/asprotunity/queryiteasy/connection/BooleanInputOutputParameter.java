@@ -17,11 +17,11 @@ public class BooleanInputOutputParameter implements InputOutputParameter {
     }
 
     @Override
-    public void bind(CallableStatement statement, int position, Scope statementScope) {
+    public void bind(CallableStatement statement, int position, Scope queryScope) {
         RuntimeSQLException.execute(() -> {
             statement.setObject(position, this.value, Types.BOOLEAN);
             statement.registerOutParameter(position, Types.BOOLEAN);
-            statementScope.add(() ->
+            queryScope.add(() ->
                     this.value = Parameter.returnValueOrNull(statement, position, CallableStatement::getBoolean)
             );
         });

@@ -34,17 +34,17 @@ public class ClobInputOutputParameter<ResultType> implements InputOutputParamete
     }
 
     @Override
-    public void bind(CallableStatement statement, int position, Scope statementScope) {
+    public void bind(CallableStatement statement, int position, Scope queryScope) {
         RuntimeSQLException.execute(() -> {
             Reader reader = inputClobSupplier.get();
             if (reader == null) {
                 statement.setNull(position, Types.CLOB);
             } else {
                 statement.setClob(position, reader);
-                statementScope.add(reader::close);
+                queryScope.add(reader::close);
             }
             statement.registerOutParameter(position, Types.CLOB);
-            statementScope.add(() -> value = fromClob(statement.getClob(position), outputClobReader));
+            queryScope.add(() -> value = fromClob(statement.getClob(position), outputClobReader));
         });
     }
 }

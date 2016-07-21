@@ -7,7 +7,7 @@ import java.sql.SQLException;
 
 public interface Parameter {
 
-    void bind(CallableStatement statement, int position, Scope statementScope);
+    void bind(CallableStatement statement, int position, Scope queryScope);
 
     static  <ResultType> ResultType returnValueOrNull(CallableStatement statement, int position,
                                                       ThrowingBiFunction<CallableStatement, Integer, ResultType, SQLException> readValue) {

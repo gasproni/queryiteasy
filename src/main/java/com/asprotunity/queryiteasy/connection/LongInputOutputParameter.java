@@ -18,11 +18,11 @@ public class LongInputOutputParameter implements InputOutputParameter {
     }
 
     @Override
-    public void bind(CallableStatement statement, int position, Scope statementScope) {
+    public void bind(CallableStatement statement, int position, Scope queryScope) {
         RuntimeSQLException.execute(() -> {
             statement.setObject(position, this.value, Types.BIGINT);
             statement.registerOutParameter(position, Types.BIGINT);
-            statementScope.add(() -> this.value = Parameter.returnValueOrNull(statement, position, CallableStatement::getLong));
+            queryScope.add(() -> this.value = Parameter.returnValueOrNull(statement, position, CallableStatement::getLong));
         });
     }
 

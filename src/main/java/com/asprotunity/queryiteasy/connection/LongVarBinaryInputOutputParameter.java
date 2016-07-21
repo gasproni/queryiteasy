@@ -26,17 +26,17 @@ public class LongVarBinaryInputOutputParameter implements InputOutputParameter {
     }
 
     @Override
-    public void bind(CallableStatement statement, int position, Scope statementScope) {
+    public void bind(CallableStatement statement, int position, Scope queryScope) {
         RuntimeSQLException.execute(() -> {
             InputStream inputStream = inputLongVarBinarySupplier.get();
             if (inputStream == null) {
                 statement.setNull(position, Types.LONGVARBINARY);
             } else {
                 statement.setBinaryStream(position, inputStream);
-                statementScope.add(inputStream::close);
+                queryScope.add(inputStream::close);
             }
             statement.registerOutParameter(position, Types.LONGVARBINARY);
-            statementScope.add(() -> value = statement.getBytes(position));
+            queryScope.add(() -> value = statement.getBytes(position));
         });
     }
 }

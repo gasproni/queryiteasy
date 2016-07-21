@@ -27,10 +27,10 @@ public class ClobOutputParameter<ResultType> implements OutputParameter {
     }
 
     @Override
-    public void bind(CallableStatement statement, int position, Scope statementScope) {
+    public void bind(CallableStatement statement, int position, Scope queryScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.CLOB);
-            statementScope.add(() -> value = fromClob(statement.getClob(position), clobReader));
+            queryScope.add(() -> value = fromClob(statement.getClob(position), clobReader));
         });
     }
 }

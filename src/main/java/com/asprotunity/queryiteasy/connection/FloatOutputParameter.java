@@ -13,10 +13,10 @@ public class FloatOutputParameter implements OutputParameter {
     }
 
     @Override
-    public void bind(CallableStatement statement, int position, Scope statementScope) {
+    public void bind(CallableStatement statement, int position, Scope queryScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.REAL);
-            statementScope.add(() -> this.value = Parameter.returnValueOrNull(statement, position, CallableStatement::getFloat));
+            queryScope.add(() -> this.value = Parameter.returnValueOrNull(statement, position, CallableStatement::getFloat));
         });
     }
 

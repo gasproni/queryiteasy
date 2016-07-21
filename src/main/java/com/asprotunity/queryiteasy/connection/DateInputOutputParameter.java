@@ -18,11 +18,11 @@ public class DateInputOutputParameter implements InputOutputParameter {
     }
 
     @Override
-    public void bind(CallableStatement statement, int position, Scope statementScope) {
+    public void bind(CallableStatement statement, int position, Scope queryScope) {
         RuntimeSQLException.execute(() -> {
             statement.setDate(position, value);
             statement.registerOutParameter(position, Types.DATE);
-            statementScope.add(() -> this.value = statement.getDate(position));
+            queryScope.add(() -> this.value = statement.getDate(position));
         });
     }
 

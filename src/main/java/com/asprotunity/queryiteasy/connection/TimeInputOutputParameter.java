@@ -18,11 +18,11 @@ public class TimeInputOutputParameter implements InputOutputParameter {
     }
 
     @Override
-    public void bind(CallableStatement statement, int position, Scope statementScope) {
+    public void bind(CallableStatement statement, int position, Scope queryScope) {
         RuntimeSQLException.execute(() -> {
             statement.setTime(position, this.value);
             statement.registerOutParameter(position, Types.TIME);
-            statementScope.add(() -> this.value = statement.getTime(position));
+            queryScope.add(() -> this.value = statement.getTime(position));
         });
     }
 

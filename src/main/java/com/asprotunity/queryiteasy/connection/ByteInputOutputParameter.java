@@ -17,11 +17,11 @@ public class ByteInputOutputParameter implements InputOutputParameter {
     }
 
     @Override
-    public void bind(CallableStatement statement, int position, Scope statementScope) {
+    public void bind(CallableStatement statement, int position, Scope queryScope) {
         RuntimeSQLException.execute(() -> {
             statement.setObject(position, this.value, Types.TINYINT);
             statement.registerOutParameter(position, Types.TINYINT);
-            statementScope.add(() -> this.value = Parameter.returnValueOrNull(statement, position, CallableStatement::getByte));
+            queryScope.add(() -> this.value = Parameter.returnValueOrNull(statement, position, CallableStatement::getByte));
         });
     }
 

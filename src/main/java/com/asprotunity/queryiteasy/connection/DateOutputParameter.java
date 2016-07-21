@@ -14,10 +14,10 @@ public class DateOutputParameter implements OutputParameter {
     }
 
     @Override
-    public void bind(CallableStatement statement, int position, Scope statementScope) {
+    public void bind(CallableStatement statement, int position, Scope queryScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.DATE);
-            statementScope.add(() -> this.value = statement.getDate(position));
+            queryScope.add(() -> this.value = statement.getDate(position));
         });
     }
 

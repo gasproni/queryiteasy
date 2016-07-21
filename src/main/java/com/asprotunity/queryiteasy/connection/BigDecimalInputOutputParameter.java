@@ -18,11 +18,11 @@ public class BigDecimalInputOutputParameter implements InputOutputParameter {
     }
 
     @Override
-    public void bind(CallableStatement statement, int position, Scope statementScope) {
+    public void bind(CallableStatement statement, int position, Scope queryScope) {
         RuntimeSQLException.execute(() -> {
             statement.setBigDecimal(position, this.value);
             statement.registerOutParameter(position, Types.DECIMAL);
-            statementScope.add(() -> this.value = statement.getBigDecimal(position));
+            queryScope.add(() -> this.value = statement.getBigDecimal(position));
         });
     }
 

@@ -18,11 +18,11 @@ public class IntegerInputOutputParameter implements InputOutputParameter {
     }
 
     @Override
-    public void bind(CallableStatement statement, int position, Scope statementScope) {
+    public void bind(CallableStatement statement, int position, Scope queryScope) {
         RuntimeSQLException.execute(() -> {
             statement.setObject(position, this.value, Types.INTEGER);
             statement.registerOutParameter(position, Types.INTEGER);
-            statementScope.add(() -> this.value = Parameter.returnValueOrNull(statement, position, CallableStatement::getInt));
+            queryScope.add(() -> this.value = Parameter.returnValueOrNull(statement, position, CallableStatement::getInt));
         });
     }
 

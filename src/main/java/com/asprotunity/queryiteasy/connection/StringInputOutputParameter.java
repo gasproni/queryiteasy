@@ -18,11 +18,11 @@ public class StringInputOutputParameter implements InputOutputParameter {
     }
 
     @Override
-    public void bind(CallableStatement statement, int position, Scope statementScope) {
+    public void bind(CallableStatement statement, int position, Scope queryScope) {
         RuntimeSQLException.execute(() -> {
             statement.setString(position, this.value);
             statement.registerOutParameter(position, Types.LONGVARCHAR);
-            statementScope.add(() -> this.value = statement.getString(position));
+            queryScope.add(() -> this.value = statement.getString(position));
         });
     }
 

@@ -14,10 +14,10 @@ public class TimestampOutputParameter implements OutputParameter {
     }
 
     @Override
-    public void bind(CallableStatement statement, int position, Scope statementScope) {
+    public void bind(CallableStatement statement, int position, Scope queryScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.TIMESTAMP);
-            statementScope.add(() -> this.value = statement.getTimestamp(position));
+            queryScope.add(() -> this.value = statement.getTimestamp(position));
         });
     }
 

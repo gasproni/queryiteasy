@@ -15,8 +15,8 @@ public interface InputParameter extends Parameter {
      * work correctly and keep the interface "functional".
      */
     @Override
-    default void bind(CallableStatement statement, int position, Scope statementScope) {
-        bind((PreparedStatement) statement, position, statementScope);
+    default void bind(CallableStatement statement, int position, Scope queryScope) {
+        bind((PreparedStatement) statement, position, queryScope);
     }
 
 }

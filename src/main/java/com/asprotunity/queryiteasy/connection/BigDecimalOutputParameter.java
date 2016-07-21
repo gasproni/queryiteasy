@@ -14,10 +14,10 @@ public class BigDecimalOutputParameter implements OutputParameter {
     }
 
     @Override
-    public void bind(CallableStatement statement, int position, Scope statementScope) {
+    public void bind(CallableStatement statement, int position, Scope queryScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.DECIMAL);
-            statementScope.add(() -> this.value = statement.getBigDecimal(position));
+            queryScope.add(() -> this.value = statement.getBigDecimal(position));
         });
     }
 

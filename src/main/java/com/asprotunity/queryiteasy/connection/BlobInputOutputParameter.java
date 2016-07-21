@@ -34,17 +34,17 @@ public class BlobInputOutputParameter<ResultType> implements InputOutputParamete
     }
 
     @Override
-    public void bind(CallableStatement statement, int position, Scope statementScope) {
+    public void bind(CallableStatement statement, int position, Scope queryScope) {
         RuntimeSQLException.execute(() -> {
             InputStream inputStream = inputBlobSupplier.get();
             if (inputStream == null) {
                 statement.setNull(position, Types.BLOB);
             } else {
                 statement.setBlob(position, inputStream);
-                statementScope.add(inputStream::close);
+                queryScope.add(inputStream::close);
             }
             statement.registerOutParameter(position, Types.BLOB);
-            statementScope.add(() -> value = fromBlob(statement.getBlob(position), outputBlobReader));
+            queryScope.add(() -> value = fromBlob(statement.getBlob(position), outputBlobReader));
         });
     }
 }
