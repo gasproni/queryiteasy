@@ -5,8 +5,6 @@ import com.asprotunity.queryiteasy.scope.Scope;
 import java.sql.CallableStatement;
 import java.sql.Types;
 
-import static com.asprotunity.queryiteasy.connection.OutputParameter.returnValueOrNull;
-
 public class FloatInputOutputParameter implements InputOutputParameter {
     private Float value = null;
 
@@ -23,7 +21,7 @@ public class FloatInputOutputParameter implements InputOutputParameter {
         RuntimeSQLException.execute(() -> {
             statement.setObject(position, this.value, Types.REAL);
             statement.registerOutParameter(position, Types.REAL);
-            statementScope.add(() -> this.value = returnValueOrNull(statement, position, CallableStatement::getFloat));
+            statementScope.add(() -> this.value = Parameter.returnValueOrNull(statement, position, CallableStatement::getFloat));
         });
     }
 
