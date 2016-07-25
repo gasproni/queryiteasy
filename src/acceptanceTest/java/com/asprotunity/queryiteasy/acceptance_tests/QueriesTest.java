@@ -2,6 +2,7 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 
 import com.asprotunity.queryiteasy.DefaultDataStore;
 import com.asprotunity.queryiteasy.connection.*;
+import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import com.asprotunity.queryiteasy.io.StringIO;
 import org.junit.After;
 import org.junit.BeforeClass;

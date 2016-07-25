@@ -2,7 +2,7 @@ package com.asprotunity.queryiteasy.internal.connection;
 
 import com.asprotunity.queryiteasy.connection.GenericRow;
 import com.asprotunity.queryiteasy.connection.Row;
-import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
+import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
 import org.junit.Before;
 import org.junit.Test;

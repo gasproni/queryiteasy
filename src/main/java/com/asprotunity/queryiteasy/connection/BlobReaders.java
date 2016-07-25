@@ -1,5 +1,7 @@
 package com.asprotunity.queryiteasy.connection;
 
+import com.asprotunity.queryiteasy.exception.RuntimeIOException;
+import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import com.asprotunity.queryiteasy.scope.DefaultAutoCloseableScope;
 
 import java.io.IOException;

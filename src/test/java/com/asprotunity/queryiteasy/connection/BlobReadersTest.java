@@ -1,5 +1,7 @@
 package com.asprotunity.queryiteasy.connection;
 
+import com.asprotunity.queryiteasy.exception.RuntimeIOException;
+import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import com.asprotunity.queryiteasy.io.StringIO;
 import org.junit.Test;
 import org.mockito.InOrder;

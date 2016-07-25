@@ -1,5 +1,6 @@
 package com.asprotunity.queryiteasy.connection;
 
+import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import com.asprotunity.queryiteasy.scope.Scope;
 
 import java.math.BigDecimal;

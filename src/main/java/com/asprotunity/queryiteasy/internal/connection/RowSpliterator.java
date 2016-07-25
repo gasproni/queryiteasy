@@ -1,7 +1,7 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
 import com.asprotunity.queryiteasy.connection.RowFactory;
-import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
+import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 
 import java.sql.ResultSet;
 import java.util.Spliterator;

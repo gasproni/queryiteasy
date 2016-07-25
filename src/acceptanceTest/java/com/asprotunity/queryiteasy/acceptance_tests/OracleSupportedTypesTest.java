@@ -3,7 +3,7 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 
 import com.asprotunity.queryiteasy.DefaultDataStore;
 import com.asprotunity.queryiteasy.connection.Row;
-import com.asprotunity.queryiteasy.connection.RuntimeSQLException;
+import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import com.asprotunity.queryiteasy.io.StringIO;
 import org.junit.BeforeClass;
 import org.junit.Test;

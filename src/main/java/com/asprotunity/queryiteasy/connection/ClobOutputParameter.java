@@ -1,6 +1,7 @@
 package com.asprotunity.queryiteasy.connection;
 
 import com.asprotunity.queryiteasy.exception.InvalidArgumentException;
+import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import com.asprotunity.queryiteasy.scope.Scope;
 
 import java.io.Reader;
