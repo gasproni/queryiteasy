@@ -18,9 +18,9 @@ public class RuntimeSQLException extends RuntimeException {
         }
     }
 
-    public static <ResultType> ResultType executeAndReturnResult(ThrowingSupplier<ResultType> throwingSupplier) {
+    public static <ResultType> ResultType executeWithResult(ThrowingSupplier<ResultType> throwingSupplier) {
         try {
-            return throwingSupplier.executeAndReturnResult();
+            return throwingSupplier.executeWithResult();
         } catch (java.sql.SQLException e) {
             throw new RuntimeSQLException(e);
         }
@@ -28,7 +28,7 @@ public class RuntimeSQLException extends RuntimeException {
 
     @FunctionalInterface
     public interface ThrowingSupplier<ResultType> {
-        ResultType executeAndReturnResult() throws java.sql.SQLException;
+        ResultType executeWithResult() throws java.sql.SQLException;
     }
 
     @FunctionalInterface

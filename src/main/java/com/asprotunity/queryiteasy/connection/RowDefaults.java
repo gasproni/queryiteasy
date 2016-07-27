@@ -27,209 +27,209 @@ public abstract class RowDefaults implements Row {
 
     @Override
     public int columnCount() {
-        return RuntimeSQLException.executeAndReturnResult(metaData::getColumnCount);
+        return RuntimeSQLException.executeWithResult(metaData::getColumnCount);
     }
 
     @Override
     public <ResultType> ResultType fromBinaryStream(String columnLabel, Function<InputStream, ResultType> streamReader) {
         InvalidArgumentException.throwIfNull(streamReader, "streamReader");
-        return RuntimeSQLException.executeAndReturnResult(() -> fromInputStream(resultSet.getBinaryStream(columnLabel), streamReader));
+        return RuntimeSQLException.executeWithResult(() -> fromInputStream(resultSet.getBinaryStream(columnLabel), streamReader));
     }
 
     @Override
     public <ResultType> ResultType fromBinaryStream(int columnIndex, Function<InputStream, ResultType> streamReader) {
         InvalidArgumentException.throwIfNull(streamReader, "streamReader");
-        return RuntimeSQLException.executeAndReturnResult(() -> fromInputStream(resultSet.getBinaryStream(columnIndex), streamReader));
+        return RuntimeSQLException.executeWithResult(() -> fromInputStream(resultSet.getBinaryStream(columnIndex), streamReader));
     }
 
     @Override
     public <ResultType> ResultType fromAsciiStream(String columnLabel, Function<InputStream, ResultType> streamReader) {
         InvalidArgumentException.throwIfNull(streamReader, "streamReader");
-        return RuntimeSQLException.executeAndReturnResult(() -> fromInputStream(resultSet.getAsciiStream(columnLabel), streamReader));
+        return RuntimeSQLException.executeWithResult(() -> fromInputStream(resultSet.getAsciiStream(columnLabel), streamReader));
     }
 
     @Override
     public <ResultType> ResultType fromAsciiStream(int columnIndex, Function<InputStream, ResultType> streamReader) {
         InvalidArgumentException.throwIfNull(streamReader, "streamReader");
-        return RuntimeSQLException.executeAndReturnResult(() -> fromInputStream(resultSet.getAsciiStream(columnIndex), streamReader));
+        return RuntimeSQLException.executeWithResult(() -> fromInputStream(resultSet.getAsciiStream(columnIndex), streamReader));
     }
 
     @Override
     public <ResultType> ResultType fromCharacterStream(String columnLabel, Function<Reader, ResultType> streamReader) {
         InvalidArgumentException.throwIfNull(streamReader, "streamReader");
-        return RuntimeSQLException.executeAndReturnResult(() -> fromReader(resultSet.getCharacterStream(columnLabel), streamReader));
+        return RuntimeSQLException.executeWithResult(() -> fromReader(resultSet.getCharacterStream(columnLabel), streamReader));
     }
 
     @Override
     public <ResultType> ResultType fromCharacterStream(int columnIndex, Function<Reader, ResultType> streamReader) {
         InvalidArgumentException.throwIfNull(streamReader, "streamReader");
-        return RuntimeSQLException.executeAndReturnResult(() -> fromReader(resultSet.getCharacterStream(columnIndex), streamReader));
+        return RuntimeSQLException.executeWithResult(() -> fromReader(resultSet.getCharacterStream(columnIndex), streamReader));
     }
 
     @Override
     public <ResultType> ResultType fromNCharacterStream(String columnLabel, Function<Reader, ResultType> streamReader) {
         InvalidArgumentException.throwIfNull(streamReader, "streamReader");
-        return RuntimeSQLException.executeAndReturnResult(() -> fromReader(resultSet.getNCharacterStream(columnLabel), streamReader));
+        return RuntimeSQLException.executeWithResult(() -> fromReader(resultSet.getNCharacterStream(columnLabel), streamReader));
     }
 
     @Override
     public <ResultType> ResultType fromNCharacterStream(int columnIndex, Function<Reader, ResultType> streamReader) {
         InvalidArgumentException.throwIfNull(streamReader, "streamReader");
-        return RuntimeSQLException.executeAndReturnResult(() -> fromReader(resultSet.getNCharacterStream(columnIndex), streamReader));
+        return RuntimeSQLException.executeWithResult(() -> fromReader(resultSet.getNCharacterStream(columnIndex), streamReader));
     }
 
     @Override
     public <ResultType> ResultType fromBlob(int columnIndex, Function<InputStream, ResultType> streamReader) {
         InvalidArgumentException.throwIfNull(streamReader, "streamReader");
-        return RuntimeSQLException.executeAndReturnResult(() -> BlobReaders.fromBlob(resultSet.getBlob(columnIndex), streamReader));
+        return RuntimeSQLException.executeWithResult(() -> BlobReaders.fromBlob(resultSet.getBlob(columnIndex), streamReader));
     }
 
     @Override
     public <ResultType> ResultType fromBlob(String columnLabel, Function<InputStream, ResultType> streamReader) {
         InvalidArgumentException.throwIfNull(streamReader, "streamReader");
-        return RuntimeSQLException.executeAndReturnResult(() -> BlobReaders.fromBlob(resultSet.getBlob(columnLabel), streamReader));
+        return RuntimeSQLException.executeWithResult(() -> BlobReaders.fromBlob(resultSet.getBlob(columnLabel), streamReader));
     }
 
     @Override
     public <ResultType> ResultType fromClob(int columnIndex, Function<Reader, ResultType> streamReader) {
         InvalidArgumentException.throwIfNull(streamReader, "streamReader");
-        return RuntimeSQLException.executeAndReturnResult(() -> BlobReaders.fromClob(resultSet.getClob(columnIndex), streamReader));
+        return RuntimeSQLException.executeWithResult(() -> BlobReaders.fromClob(resultSet.getClob(columnIndex), streamReader));
     }
 
     @Override
     public <ResultType> ResultType fromClob(String columnLabel, Function<Reader, ResultType> streamReader) {
         InvalidArgumentException.throwIfNull(streamReader, "streamReader");
-        return RuntimeSQLException.executeAndReturnResult(() -> BlobReaders.fromClob(resultSet.getClob(columnLabel), streamReader));
+        return RuntimeSQLException.executeWithResult(() -> BlobReaders.fromClob(resultSet.getClob(columnLabel), streamReader));
     }
 
     @Override
     public byte[] asByteArray(int columnIndex) {
-        return RuntimeSQLException.executeAndReturnResult(() -> resultSet.getBytes(columnIndex));
+        return RuntimeSQLException.executeWithResult(() -> resultSet.getBytes(columnIndex));
     }
 
     @Override
     public byte[] asByteArray(String columnLabel) {
-        return RuntimeSQLException.executeAndReturnResult(() -> resultSet.getBytes(columnLabel));
+        return RuntimeSQLException.executeWithResult(() -> resultSet.getBytes(columnLabel));
     }
 
     @Override
     public String asString(int columnIndex) {
-        return RuntimeSQLException.executeAndReturnResult(() -> resultSet.getString(columnIndex));
+        return RuntimeSQLException.executeWithResult(() -> resultSet.getString(columnIndex));
     }
 
     @Override
     public String asString(String columnLabel) {
-        return RuntimeSQLException.executeAndReturnResult(() -> resultSet.getString(columnLabel));
+        return RuntimeSQLException.executeWithResult(() -> resultSet.getString(columnLabel));
     }
 
     @Override
     public Short asShort(String columnLabel) {
-        return RuntimeSQLException.executeAndReturnResult(() -> returnValueOrNull(resultSet.getShort(columnLabel)));
+        return RuntimeSQLException.executeWithResult(() -> returnValueOrNull(resultSet.getShort(columnLabel)));
     }
 
     @Override
     public Short asShort(int column) {
-        return RuntimeSQLException.executeAndReturnResult(() -> returnValueOrNull(resultSet.getShort(column)));
+        return RuntimeSQLException.executeWithResult(() -> returnValueOrNull(resultSet.getShort(column)));
     }
 
     @Override
     public Integer asInteger(String columnLabel) {
-        return RuntimeSQLException.executeAndReturnResult(() -> returnValueOrNull(resultSet.getInt(columnLabel)));
+        return RuntimeSQLException.executeWithResult(() -> returnValueOrNull(resultSet.getInt(columnLabel)));
     }
 
     @Override
     public Integer asInteger(int column) {
-        return RuntimeSQLException.executeAndReturnResult(() -> returnValueOrNull(resultSet.getInt(column)));
+        return RuntimeSQLException.executeWithResult(() -> returnValueOrNull(resultSet.getInt(column)));
     }
 
     @Override
     public Long asLong(String columnLabel) {
-        return RuntimeSQLException.executeAndReturnResult(() -> returnValueOrNull(resultSet.getLong(columnLabel)));
+        return RuntimeSQLException.executeWithResult(() -> returnValueOrNull(resultSet.getLong(columnLabel)));
     }
 
     @Override
     public Long asLong(int column) {
-        return RuntimeSQLException.executeAndReturnResult(() -> returnValueOrNull(resultSet.getLong(column)));
+        return RuntimeSQLException.executeWithResult(() -> returnValueOrNull(resultSet.getLong(column)));
     }
 
     @Override
     public Double asDouble(int columnIndex) {
-        return RuntimeSQLException.executeAndReturnResult(() -> returnValueOrNull(resultSet.getDouble(columnIndex)));
+        return RuntimeSQLException.executeWithResult(() -> returnValueOrNull(resultSet.getDouble(columnIndex)));
     }
 
     @Override
     public Double asDouble(String columnLabel) {
-        return RuntimeSQLException.executeAndReturnResult(() -> returnValueOrNull(resultSet.getDouble(columnLabel)));
+        return RuntimeSQLException.executeWithResult(() -> returnValueOrNull(resultSet.getDouble(columnLabel)));
     }
 
     @Override
     public Float asFloat(String columnLabel) {
-        return RuntimeSQLException.executeAndReturnResult(() -> returnValueOrNull(resultSet.getFloat(columnLabel)));
+        return RuntimeSQLException.executeWithResult(() -> returnValueOrNull(resultSet.getFloat(columnLabel)));
     }
 
     @Override
     public Float asFloat(int columnIndex) {
-        return RuntimeSQLException.executeAndReturnResult(() -> returnValueOrNull(resultSet.getFloat(columnIndex)));
+        return RuntimeSQLException.executeWithResult(() -> returnValueOrNull(resultSet.getFloat(columnIndex)));
     }
 
     @Override
     public Byte asByte(String columnLabel) {
-        return RuntimeSQLException.executeAndReturnResult(() -> returnValueOrNull(resultSet.getByte(columnLabel)));
+        return RuntimeSQLException.executeWithResult(() -> returnValueOrNull(resultSet.getByte(columnLabel)));
     }
 
     @Override
     public Byte asByte(int columnIndex) {
-        return RuntimeSQLException.executeAndReturnResult(() -> returnValueOrNull(resultSet.getByte(columnIndex)));
+        return RuntimeSQLException.executeWithResult(() -> returnValueOrNull(resultSet.getByte(columnIndex)));
     }
 
     @Override
     public BigDecimal asBigDecimal(String columnLabel) {
-        return RuntimeSQLException.executeAndReturnResult(() -> resultSet.getBigDecimal(columnLabel));
+        return RuntimeSQLException.executeWithResult(() -> resultSet.getBigDecimal(columnLabel));
     }
 
     @Override
     public BigDecimal asBigDecimal(int columnIndex) {
-        return RuntimeSQLException.executeAndReturnResult(() -> resultSet.getBigDecimal(columnIndex));
+        return RuntimeSQLException.executeWithResult(() -> resultSet.getBigDecimal(columnIndex));
     }
 
     @Override
     public Boolean asBoolean(String columnLabel) {
-        return RuntimeSQLException.executeAndReturnResult(() -> returnValueOrNull(resultSet.getBoolean(columnLabel)));
+        return RuntimeSQLException.executeWithResult(() -> returnValueOrNull(resultSet.getBoolean(columnLabel)));
     }
 
     @Override
     public Boolean asBoolean(int columnIndex) {
-        return RuntimeSQLException.executeAndReturnResult(() -> returnValueOrNull(resultSet.getBoolean(columnIndex)));
+        return RuntimeSQLException.executeWithResult(() -> returnValueOrNull(resultSet.getBoolean(columnIndex)));
     }
 
     @Override
     public Date asDate(String columnLabel) {
-        return RuntimeSQLException.executeAndReturnResult(() -> resultSet.getDate(columnLabel));
+        return RuntimeSQLException.executeWithResult(() -> resultSet.getDate(columnLabel));
     }
 
     @Override
     public Date asDate(int columnIndex) {
-        return RuntimeSQLException.executeAndReturnResult(() -> resultSet.getDate(columnIndex));
+        return RuntimeSQLException.executeWithResult(() -> resultSet.getDate(columnIndex));
     }
 
     @Override
     public Time asTime(String columnLabel) {
-        return RuntimeSQLException.executeAndReturnResult(() -> resultSet.getTime(columnLabel));
+        return RuntimeSQLException.executeWithResult(() -> resultSet.getTime(columnLabel));
     }
 
     @Override
     public Time asTime(int columnIndex) {
-        return RuntimeSQLException.executeAndReturnResult(() -> resultSet.getTime(columnIndex));
+        return RuntimeSQLException.executeWithResult(() -> resultSet.getTime(columnIndex));
     }
 
     @Override
     public Timestamp asTimestamp(String columnLabel) {
-        return RuntimeSQLException.executeAndReturnResult(() -> resultSet.getTimestamp(columnLabel));
+        return RuntimeSQLException.executeWithResult(() -> resultSet.getTimestamp(columnLabel));
     }
 
     @Override
     public Timestamp asTimestamp(int columnIndex) {
-        return RuntimeSQLException.executeAndReturnResult(() -> resultSet.getTimestamp(columnIndex));
+        return RuntimeSQLException.executeWithResult(() -> resultSet.getTimestamp(columnIndex));
     }
 
     private <ResultType> ResultType returnValueOrNull(ResultType value) throws SQLException {

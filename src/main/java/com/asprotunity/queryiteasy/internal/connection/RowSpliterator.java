@@ -20,7 +20,7 @@ public class RowSpliterator<RowType extends Row> implements Spliterator<RowType>
 
     @Override
     public boolean tryAdvance(Consumer<? super RowType> action) {
-        return RuntimeSQLException.executeAndReturnResult(() -> {
+        return RuntimeSQLException.executeWithResult(() -> {
             if (resultSet.next()) {
                 action.accept(rowFactory.make(resultSet));
                 return true;

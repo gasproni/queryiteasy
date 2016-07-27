@@ -97,7 +97,7 @@ public class WrappedJDBCConnection<RowType extends Row> implements Connection<Ro
     @Override
     public <MappedRowType> Stream<MappedRowType> select(Function<RowType, MappedRowType> rowMapper, String sql,
                                                         InputParameter... parameters) {
-        return RuntimeSQLException.executeAndReturnResult(() -> {
+        return RuntimeSQLException.executeWithResult(() -> {
             DefaultAutoCloseableScope resultSetAndStatementScope = connectionScope.add(new DefaultAutoCloseableScope(), DefaultAutoCloseableScope::close);
             try (DefaultAutoCloseableScope executeQueryScope = new DefaultAutoCloseableScope()) {
                 PreparedStatement statement = resultSetAndStatementScope.add(connection.prepareStatement(sql), PreparedStatement::close);
@@ -124,7 +124,7 @@ public class WrappedJDBCConnection<RowType extends Row> implements Connection<Ro
     @Override
     public <MappedRowType> Stream<MappedRowType> call(Function<RowType, MappedRowType> rowMapper, String sql,
                                                       Parameter... parameters) {
-        return RuntimeSQLException.executeAndReturnResult(() -> {
+        return RuntimeSQLException.executeWithResult(() -> {
             DefaultAutoCloseableScope resultSetAndStatementScope =
                     connectionScope.add(new DefaultAutoCloseableScope(), DefaultAutoCloseableScope::close);
             try (DefaultAutoCloseableScope executeQueryScope = new DefaultAutoCloseableScope()) {

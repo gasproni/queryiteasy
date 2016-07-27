@@ -36,7 +36,7 @@ public class DataStore<RowType extends Row> {
     }
 
     public <ResultType> ResultType executeWithResult(Function<Connection<RowType>, ResultType> transaction) {
-        return RuntimeSQLException.executeAndReturnResult(() -> {
+        return RuntimeSQLException.executeWithResult(() -> {
                     try (WrappedJDBCConnection<RowType> connection =
                                  new WrappedJDBCConnection<>(dataSource.getConnection(), rowFactory)) {
                         ResultType result = transaction.apply(connection);

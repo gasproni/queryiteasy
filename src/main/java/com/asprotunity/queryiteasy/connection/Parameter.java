@@ -12,7 +12,7 @@ public interface Parameter {
 
     static  <ResultType> ResultType returnValueOrNull(CallableStatement statement, int position,
                                                       ThrowingBiFunction<CallableStatement, Integer, ResultType, SQLException> readValue) {
-        return RuntimeSQLException.executeAndReturnResult(() -> {
+        return RuntimeSQLException.executeWithResult(() -> {
             ResultType result = readValue.apply(statement, position);
             if (statement.wasNull()) {
                 return null;
