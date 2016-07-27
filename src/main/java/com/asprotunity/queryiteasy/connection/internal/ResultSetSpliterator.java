@@ -1,4 +1,4 @@
-package com.asprotunity.queryiteasy.internal.connection;
+package com.asprotunity.queryiteasy.connection.internal;
 
 import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 
@@ -6,11 +6,11 @@ import java.sql.ResultSet;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 
-public class RowSpliterator implements Spliterator<ResultSet> {
+public class ResultSetSpliterator implements Spliterator<ResultSet> {
 
     private ResultSet resultSet;
 
-    public RowSpliterator(ResultSet resultSet) {
+    public ResultSetSpliterator(ResultSet resultSet) {
         this.resultSet = resultSet;
     }
 

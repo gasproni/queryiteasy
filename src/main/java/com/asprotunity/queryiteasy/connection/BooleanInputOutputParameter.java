@@ -23,7 +23,7 @@ public class BooleanInputOutputParameter implements InputOutputParameter {
             statement.setObject(position, this.value, Types.BOOLEAN);
             statement.registerOutParameter(position, Types.BOOLEAN);
             queryScope.add(() ->
-                    this.value = SQLValueReaders.returnValueOrNull(statement, position, CallableStatement::getBoolean)
+                    this.value = SQLResultReaders.returnValueOrNull(statement, position, CallableStatement::getBoolean)
             );
         });
     }

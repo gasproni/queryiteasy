@@ -36,7 +36,6 @@ public abstract class ResultSetReaders {
         return RuntimeSQLException.executeWithResult(() -> fromInputStream(resultSet.getBinaryStream(columnLabel), streamReader));
     }
 
-
     public static <ResultType> ResultType fromAsciiStream(ResultSet resultSet,
                                                           int columnIndex,
                                                           Function<InputStream, ResultType> streamReader) {
@@ -124,51 +123,51 @@ public abstract class ResultSetReaders {
     }
 
     public static Short asShort(ResultSet resultSet, String columnLabel) {
-        return RuntimeSQLException.executeWithResult(() -> SQLValueReaders.returnValueOrNull(resultSet, columnLabel, ResultSet::getShort));
+        return RuntimeSQLException.executeWithResult(() -> SQLResultReaders.returnValueOrNull(resultSet, columnLabel, ResultSet::getShort));
     }
 
     public static Short asShort(ResultSet resultSet, int columnIndex) {
-        return RuntimeSQLException.executeWithResult(() -> SQLValueReaders.returnValueOrNull(resultSet, columnIndex, ResultSet::getShort));
+        return RuntimeSQLException.executeWithResult(() -> SQLResultReaders.returnValueOrNull(resultSet, columnIndex, ResultSet::getShort));
     }
 
     public static Integer asInteger(ResultSet resultSet, String columnLabel) {
-        return RuntimeSQLException.executeWithResult(() -> SQLValueReaders.returnValueOrNull(resultSet, columnLabel, ResultSet::getInt));
+        return RuntimeSQLException.executeWithResult(() -> SQLResultReaders.returnValueOrNull(resultSet, columnLabel, ResultSet::getInt));
     }
 
     public static Integer asInteger(ResultSet resultSet, int columnIndex) {
-        return RuntimeSQLException.executeWithResult(() -> SQLValueReaders.returnValueOrNull(resultSet, columnIndex, ResultSet::getInt));
+        return RuntimeSQLException.executeWithResult(() -> SQLResultReaders.returnValueOrNull(resultSet, columnIndex, ResultSet::getInt));
     }
 
     public static Long asLong(ResultSet resultSet, String columnLabel) {
-        return RuntimeSQLException.executeWithResult(() -> SQLValueReaders.returnValueOrNull(resultSet, columnLabel, ResultSet::getLong));
+        return RuntimeSQLException.executeWithResult(() -> SQLResultReaders.returnValueOrNull(resultSet, columnLabel, ResultSet::getLong));
     }
 
     public static Long asLong(ResultSet resultSet, int columnIndex) {
-        return RuntimeSQLException.executeWithResult(() -> SQLValueReaders.returnValueOrNull(resultSet, columnIndex, ResultSet::getLong));
+        return RuntimeSQLException.executeWithResult(() -> SQLResultReaders.returnValueOrNull(resultSet, columnIndex, ResultSet::getLong));
     }
 
     public static Double asDouble(ResultSet resultSet, int columnIndex) {
-        return RuntimeSQLException.executeWithResult(() -> SQLValueReaders.returnValueOrNull(resultSet, columnIndex, ResultSet::getDouble));
+        return RuntimeSQLException.executeWithResult(() -> SQLResultReaders.returnValueOrNull(resultSet, columnIndex, ResultSet::getDouble));
     }
 
     public static Double asDouble(ResultSet resultSet, String columnLabel) {
-        return RuntimeSQLException.executeWithResult(() -> SQLValueReaders.returnValueOrNull(resultSet, columnLabel, ResultSet::getDouble));
+        return RuntimeSQLException.executeWithResult(() -> SQLResultReaders.returnValueOrNull(resultSet, columnLabel, ResultSet::getDouble));
     }
 
     public static Float asFloat(ResultSet resultSet, String columnLabel) {
-        return RuntimeSQLException.executeWithResult(() -> SQLValueReaders.returnValueOrNull(resultSet, columnLabel, ResultSet::getFloat));
+        return RuntimeSQLException.executeWithResult(() -> SQLResultReaders.returnValueOrNull(resultSet, columnLabel, ResultSet::getFloat));
     }
 
     public static Float asFloat(ResultSet resultSet, int columnIndex) {
-        return RuntimeSQLException.executeWithResult(() -> SQLValueReaders.returnValueOrNull(resultSet, columnIndex, ResultSet::getFloat));
+        return RuntimeSQLException.executeWithResult(() -> SQLResultReaders.returnValueOrNull(resultSet, columnIndex, ResultSet::getFloat));
     }
 
     public static Byte asByte(ResultSet resultSet, String columnLabel) {
-        return RuntimeSQLException.executeWithResult(() -> SQLValueReaders.returnValueOrNull(resultSet, columnLabel, ResultSet::getByte));
+        return RuntimeSQLException.executeWithResult(() -> SQLResultReaders.returnValueOrNull(resultSet, columnLabel, ResultSet::getByte));
     }
 
     public static Byte asByte(ResultSet resultSet, int columnIndex) {
-        return RuntimeSQLException.executeWithResult(() -> SQLValueReaders.returnValueOrNull(resultSet, columnIndex, ResultSet::getByte));
+        return RuntimeSQLException.executeWithResult(() -> SQLResultReaders.returnValueOrNull(resultSet, columnIndex, ResultSet::getByte));
     }
 
     public static BigDecimal asBigDecimal(ResultSet resultSet, String columnLabel) {
@@ -180,11 +179,11 @@ public abstract class ResultSetReaders {
     }
 
     public static Boolean asBoolean(ResultSet resultSet, String columnLabel) {
-        return RuntimeSQLException.executeWithResult(() -> SQLValueReaders.returnValueOrNull(resultSet, columnLabel, ResultSet::getBoolean));
+        return RuntimeSQLException.executeWithResult(() -> SQLResultReaders.returnValueOrNull(resultSet, columnLabel, ResultSet::getBoolean));
     }
 
     public static Boolean asBoolean(ResultSet resultSet, int columnIndex) {
-        return RuntimeSQLException.executeWithResult(() -> SQLValueReaders.returnValueOrNull(resultSet, columnIndex, ResultSet::getBoolean));
+        return RuntimeSQLException.executeWithResult(() -> SQLResultReaders.returnValueOrNull(resultSet, columnIndex, ResultSet::getBoolean));
     }
 
     public static Date asDate(ResultSet resultSet, String columnLabel) {

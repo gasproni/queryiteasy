@@ -1,4 +1,4 @@
-package com.asprotunity.queryiteasy.internal.connection;
+package com.asprotunity.queryiteasy.connection.internal;
 
 import com.asprotunity.queryiteasy.connection.Batch;
 import com.asprotunity.queryiteasy.connection.Connection;
@@ -143,7 +143,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
                                                                DefaultAutoCloseableScope resultSetAndStatementScope,
                                                                PreparedStatement statement) throws SQLException {
         ResultSet resultSet = resultSetAndStatementScope.add(statement.executeQuery(), ResultSet::close);
-        return StreamSupport.stream(new RowSpliterator(resultSet),
+        return StreamSupport.stream(new ResultSetSpliterator(resultSet),
                 false)
                 .onClose(resultSetAndStatementScope::close)
                 .map(rowMapper);

@@ -4,7 +4,7 @@ import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class SQLValueReaders {
+public class SQLResultReaders {
 
     public static <ResultType> ResultType
     returnValueOrNull(CallableStatement statement, int position,

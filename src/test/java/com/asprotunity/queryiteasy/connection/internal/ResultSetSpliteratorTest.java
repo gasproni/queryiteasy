@@ -1,4 +1,4 @@
-package com.asprotunity.queryiteasy.internal.connection;
+package com.asprotunity.queryiteasy.connection.internal;
 
 import org.junit.Test;
 
@@ -12,10 +12,10 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-public class RowSpliteratorTest {
+public class ResultSetSpliteratorTest {
 
     private final ResultSet resultSet = mock(ResultSet.class);
-    private final RowSpliterator spliterator = new RowSpliterator(resultSet);
+    private final ResultSetSpliterator spliterator = new ResultSetSpliterator(resultSet);
 
     @Test
     @SuppressWarnings("unchecked")

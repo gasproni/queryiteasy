@@ -6,7 +6,7 @@ import com.asprotunity.queryiteasy.scope.Scope;
 import java.sql.CallableStatement;
 import java.sql.Types;
 
-import static com.asprotunity.queryiteasy.connection.SQLValueReaders.returnValueOrNull;
+import static com.asprotunity.queryiteasy.connection.SQLResultReaders.returnValueOrNull;
 
 public class IntegerInputOutputParameter implements InputOutputParameter {
 

@@ -1,4 +1,4 @@
-package com.asprotunity.queryiteasy.internal.connection;
+package com.asprotunity.queryiteasy.connection.internal;
 
 import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
