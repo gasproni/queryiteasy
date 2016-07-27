@@ -19,12 +19,8 @@ public class ClobInputOutputParameter<ResultType> implements InputOutputParamete
     private Supplier<Reader> inputClobSupplier;
 
     public ClobInputOutputParameter(Supplier<Reader> inputClobSupplier, Function<Reader, ResultType> outputClobReader) {
-        if (inputClobSupplier == null) {
-            throw new InvalidArgumentException("inputClobSupplier cannot be null");
-        }
-        if (outputClobReader == null) {
-            throw new InvalidArgumentException("outputClobReader cannot be null");
-        }
+        InvalidArgumentException.throwIfNull(inputClobSupplier, "inputClobSupplier");
+        InvalidArgumentException.throwIfNull(outputClobReader, "outputClobReader");
 
         this.inputClobSupplier = inputClobSupplier;
         this.outputClobReader = outputClobReader;

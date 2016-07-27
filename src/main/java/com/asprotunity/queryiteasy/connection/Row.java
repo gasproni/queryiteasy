@@ -29,13 +29,13 @@ public interface Row {
 
     <ResultType> ResultType fromNCharacterStream(String columnLabel, Function<Reader, ResultType> streamReader);
 
-    <ResultType> ResultType fromBlob(int columnIndex, Function<InputStream, ResultType> blobReader);
+    <ResultType> ResultType fromBlob(int columnIndex, Function<InputStream, ResultType> streamReader);
 
-    <ResultType> ResultType fromBlob(String columnLabel, Function<InputStream, ResultType> blobReader);
+    <ResultType> ResultType fromBlob(String columnLabel, Function<InputStream, ResultType> streamReader);
 
-    <ResultType> ResultType fromClob(int columnIndex, Function<Reader, ResultType> clobReader);
+    <ResultType> ResultType fromClob(int columnIndex, Function<Reader, ResultType> streamReader);
 
-    <ResultType> ResultType fromClob(String columnLabel, Function<Reader, ResultType> clobReader);
+    <ResultType> ResultType fromClob(String columnLabel, Function<Reader, ResultType> streamReader);
 
     byte[] asByteArray(int columnIndex);
 

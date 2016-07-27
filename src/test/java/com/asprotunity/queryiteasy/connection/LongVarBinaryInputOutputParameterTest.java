@@ -35,7 +35,7 @@ public class LongVarBinaryInputOutputParameterTest extends OutputParameterTestBa
             fail("InvalidArgumentException expected");
 
         } catch (InvalidArgumentException e) {
-            assertThat(e.getMessage(), is("inputLongVarBinarySupplier cannot be null"));
+            assertThat(e.getMessage(), is("inputLongVarBinarySupplier cannot be null."));
         }
     }
 

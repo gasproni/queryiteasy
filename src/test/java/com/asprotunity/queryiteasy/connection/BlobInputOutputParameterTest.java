@@ -36,7 +36,7 @@ public class BlobInputOutputParameterTest extends OutputParameterTestBase {
             new BlobInputOutputParameter<String>(() -> null, null);
             fail("InvalidArgumentException expected");
         } catch (InvalidArgumentException e) {
-            assertThat(e.getMessage(), is("outputBlobReader cannot be null"));
+            assertThat(e.getMessage(), is("outputBlobReader cannot be null."));
         }
     }
 
@@ -47,7 +47,7 @@ public class BlobInputOutputParameterTest extends OutputParameterTestBase {
             fail("InvalidArgumentException expected");
 
         } catch (InvalidArgumentException e) {
-            assertThat(e.getMessage(), is("inputBlobSupplier cannot be null"));
+            assertThat(e.getMessage(), is("inputBlobSupplier cannot be null."));
         }
     }
 

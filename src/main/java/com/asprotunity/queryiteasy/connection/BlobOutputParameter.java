@@ -17,9 +17,7 @@ public class BlobOutputParameter<ResultType> implements OutputParameter {
     private ResultType value = null;
 
     public BlobOutputParameter(Function<InputStream, ResultType> blobReader) {
-        if (blobReader == null) {
-            throw new InvalidArgumentException("blobReader cannot be null");
-        }
+        InvalidArgumentException.throwIfNull(blobReader, "blobReader");
         this.blobReader = blobReader;
     }
 

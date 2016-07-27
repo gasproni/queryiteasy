@@ -17,9 +17,7 @@ public class ClobOutputParameter<ResultType> implements OutputParameter {
     private ResultType value = null;
 
     public ClobOutputParameter(Function<Reader, ResultType> clobReader) {
-        if (clobReader == null) {
-            throw new InvalidArgumentException("clobReader cannot be null");
-        }
+        InvalidArgumentException.throwIfNull(clobReader, "clobReader");
         this.clobReader = clobReader;
     }
 

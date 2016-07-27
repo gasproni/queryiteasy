@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public interface Connection<RowType> {
+public interface Connection<RowType extends Row> {
     void update(String sql, InputParameter... parameters);
 
     void update(String sql, List<Batch> batches);

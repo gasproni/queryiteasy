@@ -15,10 +15,7 @@ public class LongVarBinaryInputOutputParameter implements InputOutputParameter {
     private Supplier<InputStream> inputLongVarBinarySupplier;
 
     public LongVarBinaryInputOutputParameter(Supplier<InputStream> inputLongVarBinarySupplier) {
-        if (inputLongVarBinarySupplier == null) {
-            throw new InvalidArgumentException("inputLongVarBinarySupplier cannot be null");
-        }
-
+        InvalidArgumentException.throwIfNull(inputLongVarBinarySupplier, "inputLongVarBinarySupplier");
         this.inputLongVarBinarySupplier = inputLongVarBinarySupplier;
     }
 

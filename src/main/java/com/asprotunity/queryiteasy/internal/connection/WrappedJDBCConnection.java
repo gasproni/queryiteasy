@@ -17,7 +17,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class WrappedJDBCConnection<RowType> implements Connection<RowType>, AutoCloseable {
+public class WrappedJDBCConnection<RowType extends Row> implements Connection<RowType>, AutoCloseable {
     private final java.sql.Connection connection;
     private final AutoCloseableScope connectionScope;
     private RowFactory<RowType> rowFactory;

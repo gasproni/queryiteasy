@@ -1,5 +1,6 @@
 package com.asprotunity.queryiteasy.connection;
 
+import com.asprotunity.queryiteasy.exception.InvalidArgumentException;
 import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 
 import java.io.InputStream;
@@ -72,6 +73,7 @@ public class InputParameterBinders {
     }
 
     public static InputParameter bindBlob(Supplier<InputStream> streamSupplier) {
+        InvalidArgumentException.throwIfNull(streamSupplier, "streamSupplier");
         return (statement, position, statementScope) -> {
             InputStream inputStream = streamSupplier.get();
             RuntimeSQLException.execute(() -> {
@@ -86,6 +88,7 @@ public class InputParameterBinders {
     }
 
     public static InputParameter bindClob(Supplier<Reader> readerSupplier) {
+        InvalidArgumentException.throwIfNull(readerSupplier, "readerSupplier");
         return (statement, position, statementScope) -> {
             Reader reader = readerSupplier.get();
             RuntimeSQLException.execute(() -> {
@@ -100,6 +103,7 @@ public class InputParameterBinders {
     }
 
     public static InputParameter bindLongVarbinary(Supplier<InputStream> streamSupplier) {
+        InvalidArgumentException.throwIfNull(streamSupplier, "streamSupplier");
         return (statement, position, statementScope) -> {
             InputStream inputStream = streamSupplier.get();
             RuntimeSQLException.execute(() -> {

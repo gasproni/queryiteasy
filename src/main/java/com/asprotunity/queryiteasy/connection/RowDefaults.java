@@ -1,5 +1,6 @@
 package com.asprotunity.queryiteasy.connection;
 
+import com.asprotunity.queryiteasy.exception.InvalidArgumentException;
 import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 
 import java.io.InputStream;
@@ -16,8 +17,8 @@ public abstract class RowDefaults implements Row {
     private final ResultSetMetaData metaData;
 
     public RowDefaults(ResultSet resultSet) {
+        this.resultSet = resultSet;
         try {
-            this.resultSet = resultSet;
             this.metaData = resultSet.getMetaData();
         } catch (SQLException exception) {
             throw new RuntimeSQLException(exception);
@@ -31,62 +32,74 @@ public abstract class RowDefaults implements Row {
 
     @Override
     public <ResultType> ResultType fromBinaryStream(String columnLabel, Function<InputStream, ResultType> streamReader) {
+        InvalidArgumentException.throwIfNull(streamReader, "streamReader");
         return RuntimeSQLException.executeAndReturnResult(() -> fromInputStream(resultSet.getBinaryStream(columnLabel), streamReader));
     }
 
     @Override
     public <ResultType> ResultType fromBinaryStream(int columnIndex, Function<InputStream, ResultType> streamReader) {
+        InvalidArgumentException.throwIfNull(streamReader, "streamReader");
         return RuntimeSQLException.executeAndReturnResult(() -> fromInputStream(resultSet.getBinaryStream(columnIndex), streamReader));
     }
 
     @Override
     public <ResultType> ResultType fromAsciiStream(String columnLabel, Function<InputStream, ResultType> streamReader) {
+        InvalidArgumentException.throwIfNull(streamReader, "streamReader");
         return RuntimeSQLException.executeAndReturnResult(() -> fromInputStream(resultSet.getAsciiStream(columnLabel), streamReader));
     }
 
     @Override
     public <ResultType> ResultType fromAsciiStream(int columnIndex, Function<InputStream, ResultType> streamReader) {
+        InvalidArgumentException.throwIfNull(streamReader, "streamReader");
         return RuntimeSQLException.executeAndReturnResult(() -> fromInputStream(resultSet.getAsciiStream(columnIndex), streamReader));
     }
 
     @Override
     public <ResultType> ResultType fromCharacterStream(String columnLabel, Function<Reader, ResultType> streamReader) {
+        InvalidArgumentException.throwIfNull(streamReader, "streamReader");
         return RuntimeSQLException.executeAndReturnResult(() -> fromReader(resultSet.getCharacterStream(columnLabel), streamReader));
     }
 
     @Override
     public <ResultType> ResultType fromCharacterStream(int columnIndex, Function<Reader, ResultType> streamReader) {
+        InvalidArgumentException.throwIfNull(streamReader, "streamReader");
         return RuntimeSQLException.executeAndReturnResult(() -> fromReader(resultSet.getCharacterStream(columnIndex), streamReader));
     }
 
     @Override
     public <ResultType> ResultType fromNCharacterStream(String columnLabel, Function<Reader, ResultType> streamReader) {
+        InvalidArgumentException.throwIfNull(streamReader, "streamReader");
         return RuntimeSQLException.executeAndReturnResult(() -> fromReader(resultSet.getNCharacterStream(columnLabel), streamReader));
     }
 
     @Override
     public <ResultType> ResultType fromNCharacterStream(int columnIndex, Function<Reader, ResultType> streamReader) {
+        InvalidArgumentException.throwIfNull(streamReader, "streamReader");
         return RuntimeSQLException.executeAndReturnResult(() -> fromReader(resultSet.getNCharacterStream(columnIndex), streamReader));
     }
 
     @Override
-    public <ResultType> ResultType fromBlob(int columnIndex, Function<InputStream, ResultType> blobReader) {
-        return RuntimeSQLException.executeAndReturnResult(() -> BlobReaders.fromBlob(resultSet.getBlob(columnIndex), blobReader));
+    public <ResultType> ResultType fromBlob(int columnIndex, Function<InputStream, ResultType> streamReader) {
+        InvalidArgumentException.throwIfNull(streamReader, "streamReader");
+        return RuntimeSQLException.executeAndReturnResult(() -> BlobReaders.fromBlob(resultSet.getBlob(columnIndex), streamReader));
     }
 
     @Override
-    public <ResultType> ResultType fromBlob(String columnLabel, Function<InputStream, ResultType> blobReader) {
-        return RuntimeSQLException.executeAndReturnResult(() -> BlobReaders.fromBlob(resultSet.getBlob(columnLabel), blobReader));
+    public <ResultType> ResultType fromBlob(String columnLabel, Function<InputStream, ResultType> streamReader) {
+        InvalidArgumentException.throwIfNull(streamReader, "streamReader");
+        return RuntimeSQLException.executeAndReturnResult(() -> BlobReaders.fromBlob(resultSet.getBlob(columnLabel), streamReader));
     }
 
     @Override
-    public <ResultType> ResultType fromClob(int columnIndex, Function<Reader, ResultType> clobReader) {
-        return RuntimeSQLException.executeAndReturnResult(() -> BlobReaders.fromClob(resultSet.getClob(columnIndex), clobReader));
+    public <ResultType> ResultType fromClob(int columnIndex, Function<Reader, ResultType> streamReader) {
+        InvalidArgumentException.throwIfNull(streamReader, "streamReader");
+        return RuntimeSQLException.executeAndReturnResult(() -> BlobReaders.fromClob(resultSet.getClob(columnIndex), streamReader));
     }
 
     @Override
-    public <ResultType> ResultType fromClob(String columnLabel, Function<Reader, ResultType> clobReader) {
-        return RuntimeSQLException.executeAndReturnResult(() -> BlobReaders.fromClob(resultSet.getClob(columnLabel), clobReader));
+    public <ResultType> ResultType fromClob(String columnLabel, Function<Reader, ResultType> streamReader) {
+        InvalidArgumentException.throwIfNull(streamReader, "streamReader");
+        return RuntimeSQLException.executeAndReturnResult(() -> BlobReaders.fromClob(resultSet.getClob(columnLabel), streamReader));
     }
 
     @Override

@@ -3,25 +3,20 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 
 import com.asprotunity.queryiteasy.DefaultDataStore;
 import com.asprotunity.queryiteasy.connection.Row;
-import com.asprotunity.queryiteasy.io.StringIO;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.sql.DataSource;
-import java.io.*;
 import java.lang.reflect.Method;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.loadProperties;
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
-import static com.asprotunity.queryiteasy.connection.InputParameterBinders.*;
+import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -81,50 +76,6 @@ public class MySQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0)._1, is(nullValue()));
         assertThat(expectedValues.get(0)._2, is(value));
-    }
-
-    @Test
-    public void stores_and_reads_blobs() throws SQLException, UnsupportedEncodingException {
-        String blobContent = "this is the content of the blob";
-        Charset charset = Charset.forName("UTF-8");
-        Supplier<InputStream> inputStreamSupplier = () -> new ByteArrayInputStream(blobContent.getBytes(charset));
-        getDataStore().execute(connection -> {
-            connection.update("CREATE TABLE testtable (first BLOB NULL, second BLOB NULL)");
-            connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
-                    bindBlob(() -> null), bindBlob(inputStreamSupplier));
-        });
-
-        Function<InputStream, String> blobReader = inputStream -> StringIO.readFrom(inputStream, charset);
-
-        List<Tuple2> expectedValues = getDataStore().executeWithResult(connection ->
-                connection.select(row -> new Tuple2<>(row.fromBlob(1, blobReader), row.fromBlob(2, blobReader)),
-                        "SELECT * FROM testtable").collect(toList()));
-
-        assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0)._1, is(nullValue()));
-        assertThat(expectedValues.get(0)._2, is(blobContent));
-    }
-
-    @Test
-    public void stores_and_reads_text_as_clobs() throws SQLException, UnsupportedEncodingException {
-        String clobContent = "this is the content of the blob";
-        Supplier<Reader> readerSupplier = () -> new StringReader(clobContent);
-
-        getDataStore().execute(connection -> {
-            connection.update("CREATE TABLE testtable (first TEXT NULL, second TEXT NULL)");
-            connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
-                    bindClob(() -> null), bindClob(readerSupplier));
-        });
-
-
-        List<Tuple2> expectedValues = getDataStore().executeWithResult(connection ->
-                connection.select(row -> new Tuple2<>(row.fromClob(1, StringIO::readFrom),
-                                row.fromClob(2, StringIO::readFrom)),
-                        "SELECT * FROM testtable").collect(toList()));
-
-        assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0)._1, is(nullValue()));
-        assertThat(expectedValues.get(0)._2, is(clobContent));
     }
 
     @Override

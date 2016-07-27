@@ -36,7 +36,7 @@ public class ClobInputOutputParameterTest extends OutputParameterTestBase {
             new ClobInputOutputParameter<String>(() -> null, null);
             fail("InvalidArgumentException expected");
         } catch (InvalidArgumentException e) {
-            assertThat(e.getMessage(), is("outputClobReader cannot be null"));
+            assertThat(e.getMessage(), is("outputClobReader cannot be null."));
         }
     }
 
@@ -47,7 +47,7 @@ public class ClobInputOutputParameterTest extends OutputParameterTestBase {
             fail("InvalidArgumentException expected");
 
         } catch (InvalidArgumentException e) {
-            assertThat(e.getMessage(), is("inputClobSupplier cannot be null"));
+            assertThat(e.getMessage(), is("inputClobSupplier cannot be null."));
         }
     }
 

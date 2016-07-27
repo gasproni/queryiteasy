@@ -1,5 +1,7 @@
 package com.asprotunity.queryiteasy.connection;
 
+import com.asprotunity.queryiteasy.exception.InvalidArgumentException;
+import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import org.junit.Test;
 import org.mockito.InOrder;
 
@@ -13,6 +15,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 public class RowDefaultsTest {
@@ -20,7 +24,8 @@ public class RowDefaultsTest {
     private final int columnIndex = 5;
     private final String columnLabel = "columnLabel";
     private final ResultSet resultSet = mock(ResultSet.class);
-    private final RowDefaults row = new RowDefaults(resultSet) {};
+    private final RowDefaults row = new RowDefaults(resultSet) {
+    };
     private InputStream inputStream = mock(InputStream.class);
     private Reader reader = mock(Reader.class);
 
@@ -33,10 +38,19 @@ public class RowDefaultsTest {
         ResultSet resultSet = mock(ResultSet.class);
         when(resultSet.getMetaData()).thenReturn(metadata);
 
-        Row row = new RowDefaults(resultSet) {};
+        Row row = new RowDefaults(resultSet) {
+        };
         assertThat(row.columnCount(), is(columnCount));
         verify(resultSet, times(1)).getMetaData();
         verify(metadata, times(1)).getColumnCount();
+    }
+
+    @Test(expected = RuntimeSQLException.class)
+    public void constructor_throws_if_SQLException_thrown_when_reading_metadata() throws SQLException, IOException {
+        ResultSet resultSet = mock(ResultSet.class);
+        when(resultSet.getMetaData()).thenThrow(new SQLException("a message"));
+        new RowDefaults(resultSet) {
+        };
     }
 
     @Test
@@ -86,6 +100,12 @@ public class RowDefaultsTest {
     }
 
     @Test
+    public void fromBinaryStream_throws_InvalidArgumentException_when_stream_reader_parameter_null() {
+        assertThrows(() -> row.fromBinaryStream(columnIndex, null), InvalidArgumentException.class);
+        assertThrows(() -> row.fromBinaryStream(columnLabel, null), InvalidArgumentException.class);
+    }
+
+    @Test
     public void reads_from_ascii_stream_using_column_index() throws SQLException, IOException {
         when(resultSet.getAsciiStream(columnIndex)).thenReturn(inputStream);
 
@@ -129,6 +149,12 @@ public class RowDefaultsTest {
 
         assertThat(result, is(nullValue()));
         verify(resultSet, times(1)).getAsciiStream(columnLabel);
+    }
+
+    @Test
+    public void fromAsciiStream_throws_InvalidArgumentException_when_stream_reader_parameter_null() {
+        assertThrows(() -> row.fromAsciiStream(columnIndex, null), InvalidArgumentException.class);
+        assertThrows(() -> row.fromAsciiStream(columnLabel, null), InvalidArgumentException.class);
     }
 
     @Test
@@ -178,6 +204,12 @@ public class RowDefaultsTest {
     }
 
     @Test
+    public void fromCharacterStream_throws_InvalidArgumentException_when_stream_reader_parameter_null() {
+        assertThrows(() -> row.fromCharacterStream(columnIndex, null), InvalidArgumentException.class);
+        assertThrows(() -> row.fromCharacterStream(columnLabel, null), InvalidArgumentException.class);
+    }
+
+    @Test
     public void reads_from_ncharacter_stream_using_column_index() throws SQLException, IOException {
         when(resultSet.getNCharacterStream(columnIndex)).thenReturn(reader);
 
@@ -221,6 +253,12 @@ public class RowDefaultsTest {
 
         assertThat(result, is(nullValue()));
         verify(resultSet, times(1)).getNCharacterStream(columnLabel);
+    }
+
+    @Test
+    public void fromNCharacterStream_throws_InvalidArgumentException_when_stream_reader_parameter_null() {
+        assertThrows(() -> row.fromNCharacterStream(columnIndex, null), InvalidArgumentException.class);
+        assertThrows(() -> row.fromNCharacterStream(columnLabel, null), InvalidArgumentException.class);
     }
 
     @Test
@@ -280,6 +318,12 @@ public class RowDefaultsTest {
     }
 
     @Test
+    public void fromBlob_throws_InvalidArgumentException_when_stream_reader_parameter_null() {
+        assertThrows(() -> row.fromBlob(columnIndex, null), InvalidArgumentException.class);
+        assertThrows(() -> row.fromBlob(columnLabel, null), InvalidArgumentException.class);
+    }
+
+    @Test
     public void reads_from_clob_using_column_label() throws SQLException, IOException {
         Clob clob = mock(Clob.class);
         when(clob.getCharacterStream()).thenReturn(reader);
@@ -333,6 +377,12 @@ public class RowDefaultsTest {
         assertThat(result, is(nullValue()));
         InOrder order = inOrder(resultSet);
         order.verify(resultSet, times(1)).getClob(columnIndex);
+    }
+
+    @Test
+    public void fromClob_throws_InvalidArgumentException_when_stream_reader_parameter_null() {
+        assertThrows(() -> row.fromClob(columnIndex, null), InvalidArgumentException.class);
+        assertThrows(() -> row.fromClob(columnLabel, null), InvalidArgumentException.class);
     }
 
     @Test
@@ -572,4 +622,20 @@ public class RowDefaultsTest {
             throw new RuntimeException("Shouldn't be here");
         };
     }
+
+    @FunctionalInterface
+    private interface CodeBlock {
+        void execute();
+    }
+
+    private <T extends RuntimeException> void assertThrows(CodeBlock codeBlock, Class<T> exceptionClass) {
+        try {
+            codeBlock.execute();
+            fail("Exception expected");
+        }
+        catch (RuntimeException exception) {
+            assertTrue(exception.getClass().equals(exceptionClass));
+        }
+    }
+
 }

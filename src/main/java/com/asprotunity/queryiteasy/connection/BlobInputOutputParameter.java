@@ -19,12 +19,8 @@ public class BlobInputOutputParameter<ResultType> implements InputOutputParamete
     private Supplier<InputStream> inputBlobSupplier;
 
     public BlobInputOutputParameter(Supplier<InputStream> inputBlobSupplier, Function<InputStream, ResultType> outputBlobReader) {
-        if (inputBlobSupplier == null) {
-            throw new InvalidArgumentException("inputBlobSupplier cannot be null");
-        }
-        if (outputBlobReader == null) {
-            throw new InvalidArgumentException("outputBlobReader cannot be null");
-        }
+        InvalidArgumentException.throwIfNull(inputBlobSupplier, "inputBlobSupplier");
+        InvalidArgumentException.throwIfNull(outputBlobReader, "outputBlobReader");
 
         this.inputBlobSupplier = inputBlobSupplier;
         this.outputBlobReader = outputBlobReader;

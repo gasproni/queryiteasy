@@ -10,7 +10,7 @@ public class RuntimeSQLException extends RuntimeException {
         super(message);
     }
 
-    public static void execute(VoidCodeBlock codeBlock) {
+    public static void execute(ThrowingCodeBlock codeBlock) {
         try {
             codeBlock.execute();
         } catch (java.sql.SQLException e) {
@@ -32,7 +32,7 @@ public class RuntimeSQLException extends RuntimeException {
     }
 
     @FunctionalInterface
-    public interface VoidCodeBlock {
+    public interface ThrowingCodeBlock {
         void execute() throws java.sql.SQLException;
     }
 }
