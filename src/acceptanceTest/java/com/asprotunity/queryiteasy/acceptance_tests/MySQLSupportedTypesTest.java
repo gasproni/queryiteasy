@@ -1,8 +1,8 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
 
-import com.asprotunity.queryiteasy.DefaultDataStore;
-import com.asprotunity.queryiteasy.connection.Row;
+import com.asprotunity.queryiteasy.DataStore;
+import com.asprotunity.queryiteasy.connection.ResultSetReaders;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -17,6 +17,7 @@ import java.util.Properties;
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.loadProperties;
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
+import static com.asprotunity.queryiteasy.connection.ResultSetReaders.asString;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -25,14 +26,14 @@ import static org.junit.Assume.assumeTrue;
 
 public class MySQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon {
 
-    private static DefaultDataStore dataStore;
+    private static DataStore dataStore;
     private static String dbName;
 
     @BeforeClass
     public static void setUp() throws Exception {
         DataSource dataSource = configureDataSource();
         assumeTrue("No MySQL JDBC driver found, skipping tests", dataSource != null);
-        dataStore = new DefaultDataStore(dataSource);
+        dataStore = new DataStore(dataSource);
     }
 
     private static DataSource configureDataSource() throws Exception {
@@ -63,7 +64,8 @@ public class MySQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon
     @Test
     public void stores_and_reads_doubles_mapped_to_double() throws SQLException {
         Double value = 10.0;
-        List<Tuple2<Double, Double>> expectedValues = storeAndReadValuesBack("DOUBLE", Row::asDouble, bind((Double) null), bind(value));
+        List<Tuple2<Double, Double>> expectedValues = storeAndReadValuesBack("DOUBLE",
+                ResultSetReaders::asDouble, bind((Double) null), bind(value));
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0)._1, is(nullValue()));
         assertThat(expectedValues.get(0)._2, is(value));
@@ -72,7 +74,8 @@ public class MySQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon
     @Test
     public void stores_and_reads_bytes_as_tinyints() throws SQLException {
         Byte value = 's';
-        List<Tuple2<Byte, Byte>> expectedValues = storeAndReadValuesBack("TINYINT", Row::asByte, bind((Byte) null), bind(value));
+        List<Tuple2<Byte, Byte>> expectedValues = storeAndReadValuesBack("TINYINT",
+                ResultSetReaders::asByte, bind((Byte) null), bind(value));
         assertThat(expectedValues.size(), is(1));
         assertThat(expectedValues.get(0)._1, is(nullValue()));
         assertThat(expectedValues.get(0)._2, is(value));
@@ -82,7 +85,7 @@ public class MySQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon
     protected void cleanup() throws Exception {
         getDataStore().execute(connection -> {
             List<String> dropTableStatements = connection.select(
-                    row -> row.asString("dropTableStatement"),
+                    rs -> asString(rs, "dropTableStatement"),
                     "SELECT CONCAT('DROP TABLE ', table_name, ' CASCADE') as dropTableStatement" +
                             " FROM information_schema.tables WHERE table_schema = ?",
                     bind(dbName)).collect(toList());
@@ -93,7 +96,7 @@ public class MySQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon
     }
 
     @Override
-    protected DefaultDataStore getDataStore() {
+    protected DataStore getDataStore() {
         return dataStore;
     }
 

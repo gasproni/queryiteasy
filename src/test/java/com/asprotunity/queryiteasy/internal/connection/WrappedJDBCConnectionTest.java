@@ -1,7 +1,5 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
-import com.asprotunity.queryiteasy.connection.GenericRow;
-import com.asprotunity.queryiteasy.connection.Row;
 import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
 import org.junit.Before;
@@ -16,6 +14,7 @@ import java.util.Collections;
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bindBlob;
+import static com.asprotunity.queryiteasy.connection.ResultSetReaders.asInteger;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
@@ -23,8 +22,8 @@ public class WrappedJDBCConnectionTest {
 
     private Connection jdbcConnection = mock(Connection.class);
     private AutoCloseableScope connectionScope = mock(AutoCloseableScope.class);
-    private WrappedJDBCConnection<Row> wrappedJDBCConnection =
-            new WrappedJDBCConnection<>(jdbcConnection, connectionScope, GenericRow::new);
+    private WrappedJDBCConnection wrappedJDBCConnection =
+            new WrappedJDBCConnection(jdbcConnection, connectionScope);
 
     @Before
     public void setUp() {
@@ -86,7 +85,7 @@ public class WrappedJDBCConnectionTest {
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(false);
 
-        wrappedJDBCConnection.select(row -> row.asInteger(1), sql).close();
+        wrappedJDBCConnection.select(rs -> asInteger(rs, 1), sql).close();
 
         InOrder order = inOrder(preparedStatement, resultSet);
         order.verify(preparedStatement, times(1)).executeQuery();
@@ -105,7 +104,7 @@ public class WrappedJDBCConnectionTest {
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(false);
 
-        wrappedJDBCConnection.select(row -> row.asInteger(1), sql, bindBlob(() -> blobStream));
+        wrappedJDBCConnection.select(rs -> asInteger(rs, 1), sql, bindBlob(() -> blobStream));
 
         InOrder order = inOrder(preparedStatement, resultSet, blobStream);
         order.verify(preparedStatement, times(1)).executeQuery();
@@ -125,10 +124,9 @@ public class WrappedJDBCConnectionTest {
         when(preparedStatement.executeQuery()).thenThrow(new SQLException());
 
         try {
-            wrappedJDBCConnection.select(row -> row.asInteger(1), sql, bindBlob(() -> blobStream));
+            wrappedJDBCConnection.select(resultSet -> asInteger(resultSet, 1), sql, bindBlob(() -> blobStream));
             fail("RuntimeSQLException expected");
-        }
-        catch (RuntimeSQLException exception) {
+        } catch (RuntimeSQLException exception) {
             InOrder order = inOrder(preparedStatement, blobStream);
             order.verify(preparedStatement, times(1)).executeQuery();
             order.verify(blobStream, times(1)).close();
@@ -147,7 +145,7 @@ public class WrappedJDBCConnectionTest {
         when(callableStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(false);
 
-        wrappedJDBCConnection.call(row -> row.asInteger(1), sql, bindBlob(() -> blobStream));
+        wrappedJDBCConnection.call(rs -> asInteger(rs, 1), sql, bindBlob(() -> blobStream));
 
         InOrder order = inOrder(callableStatement, resultSet, blobStream);
         order.verify(callableStatement, times(1)).executeQuery();
@@ -167,10 +165,9 @@ public class WrappedJDBCConnectionTest {
         when(callableStatement.executeQuery()).thenThrow(new SQLException());
 
         try {
-            wrappedJDBCConnection.call(row -> row.asInteger(1), sql, bindBlob(() -> blobStream));
+            wrappedJDBCConnection.call(resultSet -> asInteger(resultSet, 1), sql, bindBlob(() -> blobStream));
             fail("RuntimeSQLException expected");
-        }
-        catch (RuntimeSQLException exception) {
+        } catch (RuntimeSQLException exception) {
             InOrder order = inOrder(callableStatement, blobStream);
             order.verify(callableStatement, times(1)).executeQuery();
             order.verify(blobStream, times(1)).close();

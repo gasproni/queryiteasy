@@ -1,7 +1,7 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
 
-import com.asprotunity.queryiteasy.DefaultDataStore;
+import com.asprotunity.queryiteasy.DataStore;
 import org.junit.BeforeClass;
 
 import javax.sql.DataSource;
@@ -12,18 +12,19 @@ import java.util.List;
 import java.util.Properties;
 
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
+import static com.asprotunity.queryiteasy.connection.ResultSetReaders.asString;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assume.assumeTrue;
 
 public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
 
-    private static DefaultDataStore dataStore;
+    private static DataStore dataStore;
 
     @BeforeClass
     public static void setUp() throws Exception {
         DataSource dataSource = configureDataSource();
         assumeTrue("No Oracle JDBC driver found, skipping tests", dataSource != null);
-        dataStore = new DefaultDataStore(dataSource);
+        dataStore = new DataStore(dataSource);
     }
 
     private static boolean isNotDropOfSystemOrLobIndex(String statement) {
@@ -53,22 +54,20 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
 
     }
 
-    protected DefaultDataStore getDataStore() {
+    protected DataStore getDataStore() {
         return dataStore;
     }
 
     @Override
     protected void cleanup() throws Exception {
         getDataStore().execute(connection -> {
-            List<String> dropStatements = connection.select(row -> row.asString("dropStatements"),
+            List<String> dropStatements = connection.select(rs -> asString(rs, "dropStatements"),
                     "select 'drop '||object_type||' '|| object_name|| " +
                             "DECODE(OBJECT_TYPE,'TABLE',' CASCADE CONSTRAINTS','') as dropStatements from user_objects"
             ).collect(toList());
-            for (String statement : dropStatements) {
-                if (isNotDropOfSystemOrLobIndex(statement)) {
-                    connection.update(statement);
-                }
-            }
+            dropStatements.stream().filter(OracleSupportedTypesTest::isNotDropOfSystemOrLobIndex).forEach(statement -> {
+                connection.update(statement);
+            });
         });
     }
 

@@ -1,28 +1,24 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
-import com.asprotunity.queryiteasy.connection.Row;
-import com.asprotunity.queryiteasy.connection.RowFactory;
 import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 
 import java.sql.ResultSet;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 
-public class RowSpliterator<RowType extends Row> implements Spliterator<RowType> {
+public class RowSpliterator implements Spliterator<ResultSet> {
 
     private ResultSet resultSet;
-    private RowFactory<RowType> rowFactory;
 
-    public RowSpliterator(ResultSet resultSet, RowFactory<RowType> rowFactory) {
+    public RowSpliterator(ResultSet resultSet) {
         this.resultSet = resultSet;
-        this.rowFactory = rowFactory;
     }
 
     @Override
-    public boolean tryAdvance(Consumer<? super RowType> action) {
+    public boolean tryAdvance(Consumer<? super ResultSet> action) {
         return RuntimeSQLException.executeWithResult(() -> {
             if (resultSet.next()) {
-                action.accept(rowFactory.make(resultSet));
+                action.accept(resultSet);
                 return true;
             }
             return false;
@@ -30,7 +26,7 @@ public class RowSpliterator<RowType extends Row> implements Spliterator<RowType>
     }
 
     @Override
-    public Spliterator<RowType> trySplit() {
+    public Spliterator<ResultSet> trySplit() {
         return null;
     }
 

@@ -17,7 +17,7 @@ public class ShortOutputParameter implements OutputParameter {
     public void bind(CallableStatement statement, int position, Scope queryScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.SMALLINT);
-            queryScope.add(() -> this.value = Parameter.returnValueOrNull(statement, position, CallableStatement::getShort));
+            queryScope.add(() -> this.value = SQLValueReaders.returnValueOrNull(statement, position, CallableStatement::getShort));
         });
     }
 

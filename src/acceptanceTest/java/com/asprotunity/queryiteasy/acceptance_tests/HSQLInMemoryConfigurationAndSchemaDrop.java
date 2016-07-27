@@ -1,6 +1,6 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
-import com.asprotunity.queryiteasy.DefaultDataStore;
+import com.asprotunity.queryiteasy.DataStore;
 import org.hsqldb.jdbc.JDBCDataSource;
 
 import javax.sql.DataSource;
@@ -15,7 +15,7 @@ public interface HSQLInMemoryConfigurationAndSchemaDrop {
 
     }
 
-    static void dropHSQLPublicSchema(DefaultDataStore dataStore) {
+    static void dropHSQLPublicSchema(DataStore dataStore) {
         dataStore.execute(connection -> connection.update("DROP SCHEMA PUBLIC CASCADE"));
     }
 }

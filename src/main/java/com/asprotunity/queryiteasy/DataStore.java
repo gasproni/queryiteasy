@@ -1,8 +1,6 @@
 package com.asprotunity.queryiteasy;
 
 import com.asprotunity.queryiteasy.connection.Connection;
-import com.asprotunity.queryiteasy.connection.Row;
-import com.asprotunity.queryiteasy.connection.RowFactory;
 import com.asprotunity.queryiteasy.exception.InvalidArgumentException;
 import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import com.asprotunity.queryiteasy.internal.connection.WrappedJDBCConnection;
@@ -11,23 +9,20 @@ import javax.sql.DataSource;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class DataStore<RowType extends Row> {
+public class DataStore {
 
     private DataSource dataSource;
-    private RowFactory<RowType> rowFactory;
 
-    public DataStore(DataSource dataSource, RowFactory<RowType> rowFactory) {
-        if (dataSource == null) {
-            throw new InvalidArgumentException("dataSource cannot be null");
-        }
+    public DataStore(DataSource dataSource) {
+        InvalidArgumentException.throwIfNull(dataSource, "dataSource");
         this.dataSource = dataSource;
-        this.rowFactory = rowFactory;
     }
 
-    public void execute(Consumer<Connection<RowType>> transaction) {
+    public void execute(Consumer<Connection> transaction) {
+        InvalidArgumentException.throwIfNull(transaction, "transaction");
         RuntimeSQLException.execute(() -> {
-                    try (WrappedJDBCConnection<RowType> connection =
-                                 new WrappedJDBCConnection<>(dataSource.getConnection(), rowFactory)) {
+                    try (WrappedJDBCConnection connection =
+                                 new WrappedJDBCConnection(dataSource.getConnection())) {
                         transaction.accept(connection);
                         connection.commit();
                     }
@@ -35,10 +30,11 @@ public class DataStore<RowType extends Row> {
         );
     }
 
-    public <ResultType> ResultType executeWithResult(Function<Connection<RowType>, ResultType> transaction) {
+    public <ResultType> ResultType executeWithResult(Function<Connection, ResultType> transaction) {
+        InvalidArgumentException.throwIfNull(transaction, "transaction");
         return RuntimeSQLException.executeWithResult(() -> {
-                    try (WrappedJDBCConnection<RowType> connection =
-                                 new WrappedJDBCConnection<>(dataSource.getConnection(), rowFactory)) {
+                    try (WrappedJDBCConnection connection =
+                                 new WrappedJDBCConnection(dataSource.getConnection())) {
                         ResultType result = transaction.apply(connection);
                         connection.commit();
                         return result;

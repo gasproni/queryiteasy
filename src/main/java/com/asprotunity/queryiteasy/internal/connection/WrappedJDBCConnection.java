@@ -1,6 +1,9 @@
 package com.asprotunity.queryiteasy.internal.connection;
 
-import com.asprotunity.queryiteasy.connection.*;
+import com.asprotunity.queryiteasy.connection.Batch;
+import com.asprotunity.queryiteasy.connection.Connection;
+import com.asprotunity.queryiteasy.connection.InputParameter;
+import com.asprotunity.queryiteasy.connection.Parameter;
 import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
 import com.asprotunity.queryiteasy.scope.DefaultAutoCloseableScope;
@@ -17,21 +20,19 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class WrappedJDBCConnection<RowType extends Row> implements Connection<RowType>, AutoCloseable {
+public class WrappedJDBCConnection implements Connection, AutoCloseable {
     private final java.sql.Connection connection;
     private final AutoCloseableScope connectionScope;
-    private RowFactory<RowType> rowFactory;
 
-    public WrappedJDBCConnection(java.sql.Connection connection, RowFactory<RowType> rowFactory) {
-        this(connection, new DefaultAutoCloseableScope(), rowFactory);
+    public WrappedJDBCConnection(java.sql.Connection connection) {
+        this(connection, new DefaultAutoCloseableScope());
     }
 
     /**
      * This is for testing purposes only
      */
-    WrappedJDBCConnection(java.sql.Connection connection, AutoCloseableScope connectionScope, RowFactory<RowType> rowFactory) {
+    WrappedJDBCConnection(java.sql.Connection connection, AutoCloseableScope connectionScope) {
         this.connection = connection;
-        this.rowFactory = rowFactory;
         this.connectionScope = connectionScope;
         RuntimeSQLException.execute(() -> this.connection.setAutoCommit(false));
     }
@@ -95,7 +96,7 @@ public class WrappedJDBCConnection<RowType extends Row> implements Connection<Ro
     }
 
     @Override
-    public <MappedRowType> Stream<MappedRowType> select(Function<RowType, MappedRowType> rowMapper, String sql,
+    public <MappedRowType> Stream<MappedRowType> select(Function<ResultSet, MappedRowType> rowMapper, String sql,
                                                         InputParameter... parameters) {
         return RuntimeSQLException.executeWithResult(() -> {
             DefaultAutoCloseableScope resultSetAndStatementScope = connectionScope.add(new DefaultAutoCloseableScope(), DefaultAutoCloseableScope::close);
@@ -122,7 +123,7 @@ public class WrappedJDBCConnection<RowType extends Row> implements Connection<Ro
     }
 
     @Override
-    public <MappedRowType> Stream<MappedRowType> call(Function<RowType, MappedRowType> rowMapper, String sql,
+    public <MappedRowType> Stream<MappedRowType> call(Function<ResultSet, MappedRowType> rowMapper, String sql,
                                                       Parameter... parameters) {
         return RuntimeSQLException.executeWithResult(() -> {
             DefaultAutoCloseableScope resultSetAndStatementScope =
@@ -138,11 +139,11 @@ public class WrappedJDBCConnection<RowType extends Row> implements Connection<Ro
         });
     }
 
-    private <MapperRowType> Stream<MapperRowType> executeQuery(Function<RowType, MapperRowType> rowMapper,
+    private <MapperRowType> Stream<MapperRowType> executeQuery(Function<ResultSet, MapperRowType> rowMapper,
                                                                DefaultAutoCloseableScope resultSetAndStatementScope,
                                                                PreparedStatement statement) throws SQLException {
         ResultSet resultSet = resultSetAndStatementScope.add(statement.executeQuery(), ResultSet::close);
-        return StreamSupport.stream(new RowSpliterator<>(resultSet, rowFactory),
+        return StreamSupport.stream(new RowSpliterator(resultSet),
                 false)
                 .onClose(resultSetAndStatementScope::close)
                 .map(rowMapper);

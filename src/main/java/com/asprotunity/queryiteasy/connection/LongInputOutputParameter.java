@@ -6,6 +6,8 @@ import com.asprotunity.queryiteasy.scope.Scope;
 import java.sql.CallableStatement;
 import java.sql.Types;
 
+import static com.asprotunity.queryiteasy.connection.SQLValueReaders.returnValueOrNull;
+
 public class LongInputOutputParameter implements InputOutputParameter {
 
     private Long value = null;
@@ -23,7 +25,7 @@ public class LongInputOutputParameter implements InputOutputParameter {
         RuntimeSQLException.execute(() -> {
             statement.setObject(position, this.value, Types.BIGINT);
             statement.registerOutParameter(position, Types.BIGINT);
-            queryScope.add(() -> this.value = Parameter.returnValueOrNull(statement, position, CallableStatement::getLong));
+            queryScope.add(() -> this.value = returnValueOrNull(statement, position, CallableStatement::getLong));
         });
     }
 

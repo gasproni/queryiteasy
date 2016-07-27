@@ -22,7 +22,7 @@ public class DoubleInputOutputParameter implements InputOutputParameter {
         RuntimeSQLException.execute(() -> {
             statement.setObject(position, this.value, Types.DOUBLE);
             statement.registerOutParameter(position, Types.DOUBLE);
-            queryScope.add(() -> this.value = Parameter.returnValueOrNull(statement, position, CallableStatement::getDouble));
+            queryScope.add(() -> this.value = SQLValueReaders.returnValueOrNull(statement, position, CallableStatement::getDouble));
         });
     }
 

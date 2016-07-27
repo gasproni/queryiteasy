@@ -1,7 +1,7 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
 
-import com.asprotunity.queryiteasy.DefaultDataStore;
+import com.asprotunity.queryiteasy.DataStore;
 import org.junit.BeforeClass;
 
 import javax.sql.DataSource;
@@ -13,18 +13,19 @@ import java.util.Properties;
 
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.loadProperties;
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
+import static com.asprotunity.queryiteasy.connection.ResultSetReaders.asString;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assume.assumeTrue;
 
 public class PostgresSQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon {
 
-    private static DefaultDataStore dataStore;
+    private static DataStore dataStore;
 
     @BeforeClass
     public static void setUp() throws Exception {
         DataSource dataSource = configureDataSource();
         assumeTrue("No Postgresql JDBC driver found, skipping tests", dataSource != null);
-        dataStore = new DefaultDataStore(dataSource);
+        dataStore = new DataStore(dataSource);
     }
 
     private static DataSource configureDataSource() throws Exception {
@@ -56,7 +57,7 @@ public class PostgresSQLSupportedTypesTest extends NonStandardSupportedTypesTest
     @Override
     protected void cleanup() throws Exception {
         getDataStore().execute(connection -> {
-            List<String> dropTableStatements = connection.select(row -> row.asString("dropTableStatement"),
+            List<String> dropTableStatements = connection.select(rs -> asString(rs, "dropTableStatement"),
                     "select 'drop table if exists \"' || tablename || '\" cascade;' as dropTableStatement" +
                             "  from pg_tables " +
                             " where tableowner = 'testuser'"
@@ -68,7 +69,7 @@ public class PostgresSQLSupportedTypesTest extends NonStandardSupportedTypesTest
     }
 
     @Override
-    protected DefaultDataStore getDataStore() {
+    protected DataStore getDataStore() {
         return dataStore;
     }
 

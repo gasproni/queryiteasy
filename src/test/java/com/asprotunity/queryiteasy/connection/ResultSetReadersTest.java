@@ -1,7 +1,6 @@
 package com.asprotunity.queryiteasy.connection;
 
 import com.asprotunity.queryiteasy.exception.InvalidArgumentException;
-import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import org.junit.Test;
 import org.mockito.InOrder;
 
@@ -11,6 +10,7 @@ import java.io.Reader;
 import java.sql.*;
 import java.util.function.Function;
 
+import static com.asprotunity.queryiteasy.connection.ResultSetReaders.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -19,18 +19,16 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
-public class RowDefaultsTest {
+public class ResultSetReadersTest {
 
     private final int columnIndex = 5;
     private final String columnLabel = "columnLabel";
     private final ResultSet resultSet = mock(ResultSet.class);
-    private final RowDefaults row = new RowDefaults(resultSet) {
-    };
     private InputStream inputStream = mock(InputStream.class);
     private Reader reader = mock(Reader.class);
 
     @Test
-    public void reads_columncount_from_resultset_metadata() throws SQLException, IOException {
+    public void columnCount_reads_columncount_from_resultset_metadata() throws SQLException, IOException {
         ResultSetMetaData metadata = mock(ResultSetMetaData.class);
         int columnCount = 13;
         when(metadata.getColumnCount()).thenReturn(columnCount);
@@ -38,27 +36,17 @@ public class RowDefaultsTest {
         ResultSet resultSet = mock(ResultSet.class);
         when(resultSet.getMetaData()).thenReturn(metadata);
 
-        Row row = new RowDefaults(resultSet) {
-        };
-        assertThat(row.columnCount(), is(columnCount));
+        assertThat(columnCount(resultSet), is(columnCount));
         verify(resultSet, times(1)).getMetaData();
         verify(metadata, times(1)).getColumnCount();
     }
 
-    @Test(expected = RuntimeSQLException.class)
-    public void constructor_throws_if_SQLException_thrown_when_reading_metadata() throws SQLException, IOException {
-        ResultSet resultSet = mock(ResultSet.class);
-        when(resultSet.getMetaData()).thenThrow(new SQLException("a message"));
-        new RowDefaults(resultSet) {
-        };
-    }
-
     @Test
-    public void reads_from_binary_stream_using_column_index() throws SQLException, IOException {
+    public void fromBinaryStream_reads_from_binary_stream_using_column_index() throws SQLException, IOException {
         when(resultSet.getBinaryStream(columnIndex)).thenReturn(inputStream);
 
         int expectedValue = 10;
-        Integer result = row.fromBinaryStream(columnIndex, makeFunctionWitResultOrThrowIfInputStreamNull(expectedValue));
+        Integer result = fromBinaryStream(resultSet, columnIndex, makeFunctionWitResultOrThrowIfInputStreamNull(expectedValue));
 
         assertThat(result, is(expectedValue));
         InOrder order = inOrder(inputStream, resultSet);
@@ -67,11 +55,11 @@ public class RowDefaultsTest {
     }
 
     @Test
-    public void reads_from_binary_stream_using_column_label() throws SQLException, IOException {
+    public void fromBinaryStream_reads_from_binary_stream_using_column_label() throws SQLException, IOException {
         when(resultSet.getBinaryStream(columnLabel)).thenReturn(inputStream);
 
         int expectedValue = 10;
-        Integer result = row.fromBinaryStream(columnLabel, makeFunctionWitResultOrThrowIfInputStreamNull(expectedValue));
+        Integer result = fromBinaryStream(resultSet, columnLabel, makeFunctionWitResultOrThrowIfInputStreamNull(expectedValue));
 
         assertThat(result, is(expectedValue));
         InOrder order = inOrder(inputStream, resultSet);
@@ -80,10 +68,10 @@ public class RowDefaultsTest {
     }
 
     @Test
-    public void reads_from_null_binary_stream_using_column_index() throws SQLException, IOException {
+    public void fromBinaryStream_reads_from_null_binary_stream_using_column_index() throws SQLException, IOException {
         when(resultSet.getBinaryStream(columnIndex)).thenReturn(null);
 
-        Integer result = row.fromBinaryStream(columnIndex, makeFunctionAcceptingOnlyNullInputStream());
+        Integer result = fromBinaryStream(resultSet, columnIndex, makeFunctionAcceptingOnlyNullInputStream());
 
         assertThat(result, is(nullValue()));
         verify(resultSet, times(1)).getBinaryStream(columnIndex);
@@ -93,7 +81,7 @@ public class RowDefaultsTest {
     public void reads_from_null_binary_stream_using_column_label() throws SQLException, IOException {
         when(resultSet.getBinaryStream(columnLabel)).thenReturn(null);
 
-        Integer result = row.fromBinaryStream(columnLabel, makeFunctionAcceptingOnlyNullInputStream());
+        Integer result = fromBinaryStream(resultSet, columnLabel, makeFunctionAcceptingOnlyNullInputStream());
 
         assertThat(result, is(nullValue()));
         verify(resultSet, times(1)).getBinaryStream(columnLabel);
@@ -101,16 +89,16 @@ public class RowDefaultsTest {
 
     @Test
     public void fromBinaryStream_throws_InvalidArgumentException_when_stream_reader_parameter_null() {
-        assertThrows(() -> row.fromBinaryStream(columnIndex, null), InvalidArgumentException.class);
-        assertThrows(() -> row.fromBinaryStream(columnLabel, null), InvalidArgumentException.class);
+        assertThrows(() -> fromBinaryStream(resultSet, columnIndex, null), InvalidArgumentException.class);
+        assertThrows(() -> fromBinaryStream(resultSet, columnLabel, null), InvalidArgumentException.class);
     }
 
     @Test
-    public void reads_from_ascii_stream_using_column_index() throws SQLException, IOException {
+    public void fromAsciiStream_reads_from_ascii_stream_using_column_index() throws SQLException, IOException {
         when(resultSet.getAsciiStream(columnIndex)).thenReturn(inputStream);
 
         int expectedValue = 10;
-        Integer result = row.fromAsciiStream(columnIndex, makeFunctionWitResultOrThrowIfInputStreamNull(expectedValue));
+        Integer result = fromAsciiStream(resultSet, columnIndex, makeFunctionWitResultOrThrowIfInputStreamNull(expectedValue));
 
         assertThat(result, is(expectedValue));
         InOrder order = inOrder(inputStream, resultSet);
@@ -119,11 +107,11 @@ public class RowDefaultsTest {
     }
 
     @Test
-    public void reads_from_ascii_stream_using_column_label() throws SQLException, IOException {
+    public void fromAsciiStream_reads_from_ascii_stream_using_column_label() throws SQLException, IOException {
         when(resultSet.getAsciiStream(columnLabel)).thenReturn(inputStream);
 
         int expectedValue = 10;
-        Integer result = row.fromAsciiStream(columnLabel, makeFunctionWitResultOrThrowIfInputStreamNull(expectedValue));
+        Integer result = fromAsciiStream(resultSet, columnLabel, makeFunctionWitResultOrThrowIfInputStreamNull(expectedValue));
 
         assertThat(result, is(expectedValue));
         InOrder order = inOrder(inputStream, resultSet);
@@ -132,20 +120,20 @@ public class RowDefaultsTest {
     }
 
     @Test
-    public void reads_from_null_ascii_stream_using_column_index() throws SQLException, IOException {
+    public void fromAsciiStream_reads_from_null_ascii_stream_using_column_index() throws SQLException, IOException {
         when(resultSet.getAsciiStream(columnIndex)).thenReturn(null);
 
-        Integer result = row.fromAsciiStream(columnIndex, makeFunctionAcceptingOnlyNullInputStream());
+        Integer result = fromAsciiStream(resultSet, columnIndex, makeFunctionAcceptingOnlyNullInputStream());
 
         assertThat(result, is(nullValue()));
         verify(resultSet, times(1)).getAsciiStream(columnIndex);
     }
 
     @Test
-    public void reads_from_null_ascii_stream_using_column_label() throws SQLException, IOException {
+    public void fromAsciiStream_reads_from_null_ascii_stream_using_column_label() throws SQLException, IOException {
         when(resultSet.getAsciiStream(columnLabel)).thenReturn(null);
 
-        Integer result = row.fromAsciiStream(columnLabel, makeFunctionAcceptingOnlyNullInputStream());
+        Integer result = fromAsciiStream(resultSet, columnLabel, makeFunctionAcceptingOnlyNullInputStream());
 
         assertThat(result, is(nullValue()));
         verify(resultSet, times(1)).getAsciiStream(columnLabel);
@@ -153,16 +141,16 @@ public class RowDefaultsTest {
 
     @Test
     public void fromAsciiStream_throws_InvalidArgumentException_when_stream_reader_parameter_null() {
-        assertThrows(() -> row.fromAsciiStream(columnIndex, null), InvalidArgumentException.class);
-        assertThrows(() -> row.fromAsciiStream(columnLabel, null), InvalidArgumentException.class);
+        assertThrows(() -> fromAsciiStream(resultSet, columnIndex, null), InvalidArgumentException.class);
+        assertThrows(() -> fromAsciiStream(resultSet, columnLabel, null), InvalidArgumentException.class);
     }
 
     @Test
-    public void reads_from_character_stream_using_column_index() throws SQLException, IOException {
+    public void fromCharacterStream_reads_from_character_stream_using_column_index() throws SQLException, IOException {
         when(resultSet.getCharacterStream(columnIndex)).thenReturn(reader);
 
         int expectedValue = 10;
-        Integer result = row.fromCharacterStream(columnIndex, makeFunctionWitResultOrThrowIfReaderNull(expectedValue));
+        Integer result = fromCharacterStream(resultSet, columnIndex, makeFunctionWitResultOrThrowIfReaderNull(expectedValue));
 
         assertThat(result, is(expectedValue));
         InOrder order = inOrder(reader, resultSet);
@@ -171,11 +159,11 @@ public class RowDefaultsTest {
     }
 
     @Test
-    public void reads_from_character_stream_using_column_label() throws SQLException, IOException {
+    public void fromCharacterStream_reads_from_character_stream_using_column_label() throws SQLException, IOException {
         when(resultSet.getCharacterStream(columnLabel)).thenReturn(reader);
 
         int expectedValue = 10;
-        Integer result = row.fromCharacterStream(columnLabel, makeFunctionWitResultOrThrowIfReaderNull(expectedValue));
+        Integer result = fromCharacterStream(resultSet, columnLabel, makeFunctionWitResultOrThrowIfReaderNull(expectedValue));
 
         assertThat(result, is(expectedValue));
         InOrder order = inOrder(reader, resultSet);
@@ -184,20 +172,20 @@ public class RowDefaultsTest {
     }
 
     @Test
-    public void reads_from_null_character_stream_using_column_index() throws SQLException, IOException {
+    public void fromCharacterStream_reads_from_null_character_stream_using_column_index() throws SQLException, IOException {
         when(resultSet.getCharacterStream(columnIndex)).thenReturn(null);
 
-        Integer result = row.fromCharacterStream(columnIndex, makeFunctionAcceptingOnlyNullReader());
+        Integer result = fromCharacterStream(resultSet, columnIndex, makeFunctionAcceptingOnlyNullReader());
 
         assertThat(result, is(nullValue()));
         verify(resultSet, times(1)).getCharacterStream(columnIndex);
     }
 
     @Test
-    public void reads_from_null_character_stream_using_column_label() throws SQLException, IOException {
+    public void fromCharacterStream_reads_from_null_character_stream_using_column_label() throws SQLException, IOException {
         when(resultSet.getCharacterStream(columnLabel)).thenReturn(null);
 
-        Integer result = row.fromCharacterStream(columnLabel, makeFunctionAcceptingOnlyNullReader());
+        Integer result = fromCharacterStream(resultSet, columnLabel, makeFunctionAcceptingOnlyNullReader());
 
         assertThat(result, is(nullValue()));
         verify(resultSet, times(1)).getCharacterStream(columnLabel);
@@ -205,16 +193,16 @@ public class RowDefaultsTest {
 
     @Test
     public void fromCharacterStream_throws_InvalidArgumentException_when_stream_reader_parameter_null() {
-        assertThrows(() -> row.fromCharacterStream(columnIndex, null), InvalidArgumentException.class);
-        assertThrows(() -> row.fromCharacterStream(columnLabel, null), InvalidArgumentException.class);
+        assertThrows(() -> fromCharacterStream(resultSet, columnIndex, null), InvalidArgumentException.class);
+        assertThrows(() -> fromCharacterStream(resultSet, columnLabel, null), InvalidArgumentException.class);
     }
 
     @Test
-    public void reads_from_ncharacter_stream_using_column_index() throws SQLException, IOException {
+    public void fromNCharacterStream_reads_from_ncharacter_stream_using_column_index() throws SQLException, IOException {
         when(resultSet.getNCharacterStream(columnIndex)).thenReturn(reader);
 
         int expectedValue = 10;
-        Integer result = row.fromNCharacterStream(columnIndex, makeFunctionWitResultOrThrowIfReaderNull(expectedValue));
+        Integer result = fromNCharacterStream(resultSet, columnIndex, makeFunctionWitResultOrThrowIfReaderNull(expectedValue));
 
         assertThat(result, is(expectedValue));
         InOrder order = inOrder(reader, resultSet);
@@ -223,11 +211,11 @@ public class RowDefaultsTest {
     }
 
     @Test
-    public void reads_from_ncharacter_stream_using_column_label() throws SQLException, IOException {
+    public void fromNCharacterStream_reads_from_ncharacter_stream_using_column_label() throws SQLException, IOException {
         when(resultSet.getNCharacterStream(columnLabel)).thenReturn(reader);
 
         int expectedValue = 10;
-        Integer result = row.fromNCharacterStream(columnLabel, makeFunctionWitResultOrThrowIfReaderNull(expectedValue));
+        Integer result = fromNCharacterStream(resultSet, columnLabel, makeFunctionWitResultOrThrowIfReaderNull(expectedValue));
 
         assertThat(result, is(expectedValue));
         InOrder order = inOrder(reader, resultSet);
@@ -236,20 +224,20 @@ public class RowDefaultsTest {
     }
 
     @Test
-    public void reads_from_null_ncharacter_stream_using_column_index() throws SQLException, IOException {
+    public void fromNCharacterStream_reads_from_null_ncharacter_stream_using_column_index() throws SQLException, IOException {
         when(resultSet.getNCharacterStream(columnIndex)).thenReturn(null);
 
-        Integer result = row.fromNCharacterStream(columnIndex, makeFunctionAcceptingOnlyNullReader());
+        Integer result = fromNCharacterStream(resultSet, columnIndex, makeFunctionAcceptingOnlyNullReader());
 
         assertThat(result, is(nullValue()));
         verify(resultSet, times(1)).getNCharacterStream(columnIndex);
     }
 
     @Test
-    public void reads_from_null_ncharacter_stream_using_column_label() throws SQLException, IOException {
+    public void fromNCharacterStream_reads_from_null_ncharacter_stream_using_column_label() throws SQLException, IOException {
         when(resultSet.getNCharacterStream(columnLabel)).thenReturn(null);
 
-        Integer result = row.fromNCharacterStream(columnLabel, makeFunctionAcceptingOnlyNullReader());
+        Integer result = fromNCharacterStream(resultSet, columnLabel, makeFunctionAcceptingOnlyNullReader());
 
         assertThat(result, is(nullValue()));
         verify(resultSet, times(1)).getNCharacterStream(columnLabel);
@@ -257,18 +245,18 @@ public class RowDefaultsTest {
 
     @Test
     public void fromNCharacterStream_throws_InvalidArgumentException_when_stream_reader_parameter_null() {
-        assertThrows(() -> row.fromNCharacterStream(columnIndex, null), InvalidArgumentException.class);
-        assertThrows(() -> row.fromNCharacterStream(columnLabel, null), InvalidArgumentException.class);
+        assertThrows(() -> fromNCharacterStream(resultSet, columnIndex, null), InvalidArgumentException.class);
+        assertThrows(() -> fromNCharacterStream(resultSet, columnLabel, null), InvalidArgumentException.class);
     }
 
     @Test
-    public void reads_from_blob_using_column_label() throws SQLException, IOException {
+    public void fromBlob_reads_from_blob_using_column_label() throws SQLException, IOException {
         Blob blob = mock(Blob.class);
         when(blob.getBinaryStream()).thenReturn(inputStream);
         when(resultSet.getBlob(columnLabel)).thenReturn(blob);
 
         int expectedValue = 10;
-        Integer result = row.fromBlob(columnLabel, makeFunctionWitResultOrThrowIfInputStreamNull(expectedValue));
+        Integer result = fromBlob(resultSet, columnLabel, makeFunctionWitResultOrThrowIfInputStreamNull(expectedValue));
 
         assertThat(result, is(expectedValue));
         InOrder order = inOrder(blob, inputStream, resultSet);
@@ -279,13 +267,13 @@ public class RowDefaultsTest {
     }
 
     @Test
-    public void reads_from_blob_using_column_index() throws SQLException, IOException {
+    public void fromBlob_reads_from_blob_using_column_index() throws SQLException, IOException {
         Blob blob = mock(Blob.class);
         when(blob.getBinaryStream()).thenReturn(inputStream);
         when(resultSet.getBlob(columnIndex)).thenReturn(blob);
 
         int expectedValue = 10;
-        Integer result = row.fromBlob(columnIndex, makeFunctionWitResultOrThrowIfInputStreamNull(expectedValue));
+        Integer result = fromBlob(resultSet, columnIndex, makeFunctionWitResultOrThrowIfInputStreamNull(expectedValue));
 
         assertThat(result, is(expectedValue));
         InOrder order = inOrder(blob, inputStream, resultSet);
@@ -296,10 +284,10 @@ public class RowDefaultsTest {
     }
 
     @Test
-    public void reads_from_null_blob_using_column_label() throws SQLException, IOException {
+    public void fromBlob_reads_from_null_blob_using_column_label() throws SQLException, IOException {
         when(resultSet.getBlob(columnLabel)).thenReturn(null);
 
-        Integer result = row.fromBlob(columnLabel, makeFunctionAcceptingOnlyNullInputStream());
+        Integer result = fromBlob(resultSet, columnLabel, makeFunctionAcceptingOnlyNullInputStream());
 
         assertThat(result, is(nullValue()));
         InOrder order = inOrder(resultSet);
@@ -307,10 +295,10 @@ public class RowDefaultsTest {
     }
 
     @Test
-    public void reads_from_null_blob_using_column_index() throws SQLException, IOException {
+    public void fromBlob_reads_from_null_blob_using_column_index() throws SQLException, IOException {
         when(resultSet.getBlob(columnIndex)).thenReturn(null);
 
-        Integer result = row.fromBlob(columnIndex, makeFunctionAcceptingOnlyNullInputStream());
+        Integer result = fromBlob(resultSet, columnIndex, makeFunctionAcceptingOnlyNullInputStream());
 
         assertThat(result, is(nullValue()));
         InOrder order = inOrder(resultSet);
@@ -319,18 +307,18 @@ public class RowDefaultsTest {
 
     @Test
     public void fromBlob_throws_InvalidArgumentException_when_stream_reader_parameter_null() {
-        assertThrows(() -> row.fromBlob(columnIndex, null), InvalidArgumentException.class);
-        assertThrows(() -> row.fromBlob(columnLabel, null), InvalidArgumentException.class);
+        assertThrows(() -> fromBlob(resultSet, columnIndex, null), InvalidArgumentException.class);
+        assertThrows(() -> fromBlob(resultSet, columnLabel, null), InvalidArgumentException.class);
     }
 
     @Test
-    public void reads_from_clob_using_column_label() throws SQLException, IOException {
+    public void fromClob_reads_from_clob_using_column_label() throws SQLException, IOException {
         Clob clob = mock(Clob.class);
         when(clob.getCharacterStream()).thenReturn(reader);
         when(resultSet.getClob(columnLabel)).thenReturn(clob);
 
         int expectedValue = 10;
-        Integer result = row.fromClob(columnLabel, makeFunctionWitResultOrThrowIfReaderNull(expectedValue));
+        Integer result = fromClob(resultSet, columnLabel, makeFunctionWitResultOrThrowIfReaderNull(expectedValue));
 
         assertThat(result, is(expectedValue));
         InOrder order = inOrder(clob, reader, resultSet);
@@ -341,13 +329,13 @@ public class RowDefaultsTest {
     }
 
     @Test
-    public void reads_from_clob_using_column_index() throws SQLException, IOException {
+    public void fromClob_reads_from_clob_using_column_index() throws SQLException, IOException {
         Clob clob = mock(Clob.class);
         when(clob.getCharacterStream()).thenReturn(reader);
         when(resultSet.getClob(columnIndex)).thenReturn(clob);
 
         int expectedValue = 10;
-        Integer result = row.fromClob(columnIndex, makeFunctionWitResultOrThrowIfReaderNull(expectedValue));
+        Integer result = fromClob(resultSet, columnIndex, makeFunctionWitResultOrThrowIfReaderNull(expectedValue));
 
         assertThat(result, is(expectedValue));
         InOrder order = inOrder(clob, reader, resultSet);
@@ -358,10 +346,10 @@ public class RowDefaultsTest {
     }
 
     @Test
-    public void reads_from_null_clob_using_column_label() throws SQLException, IOException {
+    public void fromClob_reads_from_null_clob_using_column_label() throws SQLException, IOException {
         when(resultSet.getClob(columnLabel)).thenReturn(null);
 
-        Integer result = row.fromClob(columnLabel, makeFunctionAcceptingOnlyNullReader());
+        Integer result = fromClob(resultSet, columnLabel, makeFunctionAcceptingOnlyNullReader());
 
         assertThat(result, is(nullValue()));
         InOrder order = inOrder(resultSet);
@@ -369,10 +357,10 @@ public class RowDefaultsTest {
     }
 
     @Test
-    public void reads_from_null_clob_using_column_index() throws SQLException, IOException {
+    public void fromClob_reads_from_null_clob_using_column_index() throws SQLException, IOException {
         when(resultSet.getClob(columnIndex)).thenReturn(null);
 
-        Integer result = row.fromClob(columnIndex, makeFunctionAcceptingOnlyNullReader());
+        Integer result = fromClob(resultSet, columnIndex, makeFunctionAcceptingOnlyNullReader());
 
         assertThat(result, is(nullValue()));
         InOrder order = inOrder(resultSet);
@@ -381,209 +369,209 @@ public class RowDefaultsTest {
 
     @Test
     public void fromClob_throws_InvalidArgumentException_when_stream_reader_parameter_null() {
-        assertThrows(() -> row.fromClob(columnIndex, null), InvalidArgumentException.class);
-        assertThrows(() -> row.fromClob(columnLabel, null), InvalidArgumentException.class);
+        assertThrows(() -> fromClob(resultSet, columnIndex, null), InvalidArgumentException.class);
+        assertThrows(() -> fromClob(resultSet, columnLabel, null), InvalidArgumentException.class);
     }
 
     @Test
-    public void reads_byte_arrays() throws SQLException {
-        row.asByteArray(columnLabel);
+    public void asByteArray_reads_byte_arrays() throws SQLException {
+        asByteArray(resultSet, columnLabel);
         verify(resultSet, times(1)).getBytes(columnLabel);
-        row.asByteArray(columnIndex);
+        asByteArray(resultSet, columnIndex);
         verify(resultSet, times(1)).getBytes(columnIndex);
     }
 
     @Test
-    public void reads_strings() throws SQLException {
-        row.asString(columnLabel);
+    public void asString_reads_strings() throws SQLException {
+        asString(resultSet, columnLabel);
         verify(resultSet, times(1)).getString(columnLabel);
-        row.asString(columnIndex);
+        asString(resultSet, columnIndex);
         verify(resultSet, times(1)).getString(columnIndex);
     }
 
     @Test
-    public void reads_valid_shorts() throws SQLException {
+    public void asShort_reads_valid_shorts() throws SQLException {
         when(resultSet.wasNull()).thenReturn(false);
 
-        assertThat(row.asShort(columnLabel), not(nullValue()));
+        assertThat(asShort(resultSet, columnLabel), not(nullValue()));
         verify(resultSet, times(1)).getShort(columnLabel);
 
-        assertThat(row.asShort(columnIndex), not(nullValue()));
+        assertThat(asShort(resultSet, columnIndex), not(nullValue()));
         verify(resultSet, times(1)).getShort(columnIndex);
     }
 
     @Test
-    public void reads_null_shorts() throws SQLException {
+    public void asShort_reads_null_shorts() throws SQLException {
         when(resultSet.wasNull()).thenReturn(true);
 
-        assertThat(row.asShort(columnLabel), is(nullValue()));
+        assertThat(asShort(resultSet, columnLabel), is(nullValue()));
         verify(resultSet, times(1)).getShort(columnLabel);
 
-        assertThat(row.asShort(columnIndex), is(nullValue()));
+        assertThat(asShort(resultSet, columnIndex), is(nullValue()));
         verify(resultSet, times(1)).getShort(columnIndex);
     }
 
     @Test
-    public void reads_valid_integers() throws SQLException {
+    public void asInteger_reads_valid_integers() throws SQLException {
         when(resultSet.wasNull()).thenReturn(false);
 
-        assertThat(row.asInteger(columnLabel), not(nullValue()));
+        assertThat(asInteger(resultSet, columnLabel), not(nullValue()));
         verify(resultSet, times(1)).getInt(columnLabel);
 
-        assertThat(row.asInteger(columnIndex), not(nullValue()));
+        assertThat(asInteger(resultSet, columnIndex), not(nullValue()));
         verify(resultSet, times(1)).getInt(columnIndex);
     }
 
     @Test
-    public void reads_null_integers() throws SQLException {
+    public void asInteger_reads_null_integers() throws SQLException {
         when(resultSet.wasNull()).thenReturn(true);
 
-        assertThat(row.asInteger(columnLabel), is(nullValue()));
+        assertThat(asInteger(resultSet, columnLabel), is(nullValue()));
         verify(resultSet, times(1)).getInt(columnLabel);
 
-        assertThat(row.asInteger(columnIndex), is(nullValue()));
+        assertThat(asInteger(resultSet, columnIndex), is(nullValue()));
         verify(resultSet, times(1)).getInt(columnIndex);
     }
 
     @Test
-    public void reads_valid_longs() throws SQLException {
+    public void asLong_reads_valid_longs() throws SQLException {
         when(resultSet.wasNull()).thenReturn(false);
 
-        assertThat(row.asLong(columnLabel), not(nullValue()));
+        assertThat(asLong(resultSet, columnLabel), not(nullValue()));
         verify(resultSet, times(1)).getLong(columnLabel);
 
-        assertThat(row.asLong(columnIndex), not(nullValue()));
+        assertThat(asLong(resultSet, columnIndex), not(nullValue()));
         verify(resultSet, times(1)).getLong(columnIndex);
     }
 
     @Test
-    public void reads_null_longs() throws SQLException {
+    public void asLong_reads_null_longs() throws SQLException {
         when(resultSet.wasNull()).thenReturn(true);
 
-        assertThat(row.asLong(columnLabel), is(nullValue()));
+        assertThat(asLong(resultSet, columnLabel), is(nullValue()));
         verify(resultSet, times(1)).getLong(columnLabel);
 
-        assertThat(row.asLong(columnIndex), is(nullValue()));
+        assertThat(asLong(resultSet, columnIndex), is(nullValue()));
         verify(resultSet, times(1)).getLong(columnIndex);
     }
 
     @Test
-    public void reads_valid_doubles() throws SQLException {
+    public void asDouble_reads_valid_doubles() throws SQLException {
         when(resultSet.wasNull()).thenReturn(false);
 
-        assertThat(row.asDouble(columnLabel), not(nullValue()));
+        assertThat(asDouble(resultSet, columnLabel), not(nullValue()));
         verify(resultSet, times(1)).getDouble(columnLabel);
 
-        assertThat(row.asDouble(columnIndex), not(nullValue()));
+        assertThat(asDouble(resultSet, columnIndex), not(nullValue()));
         verify(resultSet, times(1)).getDouble(columnIndex);
     }
 
     @Test
-    public void reads_null_doubles() throws SQLException {
+    public void asDouble_reads_null_doubles() throws SQLException {
         when(resultSet.wasNull()).thenReturn(true);
 
-        assertThat(row.asDouble(columnLabel), is(nullValue()));
+        assertThat(asDouble(resultSet, columnLabel), is(nullValue()));
         verify(resultSet, times(1)).getDouble(columnLabel);
 
-        assertThat(row.asDouble(columnIndex), is(nullValue()));
+        assertThat(asDouble(resultSet, columnIndex), is(nullValue()));
         verify(resultSet, times(1)).getDouble(columnIndex);
     }
 
     @Test
-    public void reads_valid_floats() throws SQLException {
+    public void asFloat_reads_valid_floats() throws SQLException {
         when(resultSet.wasNull()).thenReturn(false);
 
-        assertThat(row.asFloat(columnLabel), not(nullValue()));
+        assertThat(asFloat(resultSet, columnLabel), not(nullValue()));
         verify(resultSet, times(1)).getFloat(columnLabel);
 
-        assertThat(row.asFloat(columnIndex), not(nullValue()));
+        assertThat(asFloat(resultSet, columnIndex), not(nullValue()));
         verify(resultSet, times(1)).getFloat(columnIndex);
     }
 
     @Test
-    public void reads_null_floats() throws SQLException {
+    public void asFloat_reads_null_floats() throws SQLException {
         when(resultSet.wasNull()).thenReturn(true);
 
-        assertThat(row.asFloat(columnLabel), is(nullValue()));
+        assertThat(asFloat(resultSet, columnLabel), is(nullValue()));
         verify(resultSet, times(1)).getFloat(columnLabel);
 
-        assertThat(row.asFloat(columnIndex), is(nullValue()));
+        assertThat(asFloat(resultSet, columnIndex), is(nullValue()));
         verify(resultSet, times(1)).getFloat(columnIndex);
     }
 
     @Test
-    public void reads_valid_bytes() throws SQLException {
+    public void asByte_reads_valid_bytes() throws SQLException {
         when(resultSet.wasNull()).thenReturn(false);
 
-        assertThat(row.asByte(columnLabel), not(nullValue()));
+        assertThat(asByte(resultSet, columnLabel), not(nullValue()));
         verify(resultSet, times(1)).getByte(columnLabel);
 
-        assertThat(row.asByte(columnIndex), not(nullValue()));
+        assertThat(asByte(resultSet, columnIndex), not(nullValue()));
         verify(resultSet, times(1)).getByte(columnIndex);
     }
 
     @Test
-    public void reads_null_bytes() throws SQLException {
+    public void asByte_reads_null_bytes() throws SQLException {
         when(resultSet.wasNull()).thenReturn(true);
 
-        assertThat(row.asByte(columnLabel), is(nullValue()));
+        assertThat(asByte(resultSet, columnLabel), is(nullValue()));
         verify(resultSet, times(1)).getByte(columnLabel);
 
-        assertThat(row.asByte(columnIndex), is(nullValue()));
+        assertThat(asByte(resultSet, columnIndex), is(nullValue()));
         verify(resultSet, times(1)).getByte(columnIndex);
     }
 
     @Test
-    public void reads_bigdecimals() throws SQLException {
-        row.asBigDecimal(columnLabel);
+    public void asBigDecimal_reads_bigdecimals() throws SQLException {
+        asBigDecimal(resultSet, columnLabel);
         verify(resultSet, times(1)).getBigDecimal(columnLabel);
-        row.asBigDecimal(columnIndex);
+        asBigDecimal(resultSet, columnIndex);
         verify(resultSet, times(1)).getBigDecimal(columnIndex);
     }
 
     @Test
-    public void reads_valid_booleans() throws SQLException {
+    public void asBoolean_reads_valid_booleans() throws SQLException {
         when(resultSet.wasNull()).thenReturn(false);
 
-        assertThat(row.asBoolean(columnLabel), not(nullValue()));
+        assertThat(asBoolean(resultSet, columnLabel), not(nullValue()));
         verify(resultSet, times(1)).getBoolean(columnLabel);
 
-        assertThat(row.asBoolean(columnIndex), not(nullValue()));
+        assertThat(asBoolean(resultSet, columnIndex), not(nullValue()));
         verify(resultSet, times(1)).getBoolean(columnIndex);
     }
 
     @Test
-    public void reads_null_booleans() throws SQLException {
+    public void asBoolean_reads_null_booleans() throws SQLException {
         when(resultSet.wasNull()).thenReturn(true);
 
-        assertThat(row.asBoolean(columnLabel), is(nullValue()));
+        assertThat(asBoolean(resultSet, columnLabel), is(nullValue()));
         verify(resultSet, times(1)).getBoolean(columnLabel);
 
-        assertThat(row.asBoolean(columnIndex), is(nullValue()));
+        assertThat(asBoolean(resultSet, columnIndex), is(nullValue()));
         verify(resultSet, times(1)).getBoolean(columnIndex);
     }
 
     @Test
-    public void reads_dates() throws SQLException {
-        row.asDate(columnLabel);
+    public void asDate_reads_dates() throws SQLException {
+        asDate(resultSet, columnLabel);
         verify(resultSet, times(1)).getDate(columnLabel);
-        row.asDate(columnIndex);
+        asDate(resultSet, columnIndex);
         verify(resultSet, times(1)).getDate(columnIndex);
     }
 
     @Test
-    public void reads_times() throws SQLException {
-        row.asTime(columnLabel);
+    public void asTime_reads_times() throws SQLException {
+        asTime(resultSet, columnLabel);
         verify(resultSet, times(1)).getTime(columnLabel);
-        row.asTime(columnIndex);
+        asTime(resultSet, columnIndex);
         verify(resultSet, times(1)).getTime(columnIndex);
     }
 
     @Test
-    public void reads_timestamps() throws SQLException {
-        row.asTimestamp(columnLabel);
+    public void asTimestamp_reads_timestamps() throws SQLException {
+        asTimestamp(resultSet, columnLabel);
         verify(resultSet, times(1)).getTimestamp(columnLabel);
-        row.asTimestamp(columnIndex);
+        asTimestamp(resultSet, columnIndex);
         verify(resultSet, times(1)).getTimestamp(columnIndex);
     }
 
@@ -623,19 +611,18 @@ public class RowDefaultsTest {
         };
     }
 
-    @FunctionalInterface
-    private interface CodeBlock {
-        void execute();
-    }
-
     private <T extends RuntimeException> void assertThrows(CodeBlock codeBlock, Class<T> exceptionClass) {
         try {
             codeBlock.execute();
             fail("Exception expected");
-        }
-        catch (RuntimeException exception) {
+        } catch (RuntimeException exception) {
             assertTrue(exception.getClass().equals(exceptionClass));
         }
+    }
+
+    @FunctionalInterface
+    private interface CodeBlock {
+        void execute();
     }
 
 }

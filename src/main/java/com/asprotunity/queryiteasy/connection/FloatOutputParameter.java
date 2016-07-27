@@ -17,7 +17,7 @@ public class FloatOutputParameter implements OutputParameter {
     public void bind(CallableStatement statement, int position, Scope queryScope) {
         RuntimeSQLException.execute(() -> {
             statement.registerOutParameter(position, Types.REAL);
-            queryScope.add(() -> this.value = Parameter.returnValueOrNull(statement, position, CallableStatement::getFloat));
+            queryScope.add(() -> this.value = SQLValueReaders.returnValueOrNull(statement, position, CallableStatement::getFloat));
         });
     }
 

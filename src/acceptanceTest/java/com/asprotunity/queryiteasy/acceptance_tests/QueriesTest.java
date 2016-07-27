@@ -1,6 +1,6 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
-import com.asprotunity.queryiteasy.DefaultDataStore;
+import com.asprotunity.queryiteasy.DataStore;
 import com.asprotunity.queryiteasy.connection.*;
 import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import com.asprotunity.queryiteasy.io.StringIO;
@@ -25,6 +25,7 @@ import java.util.function.Supplier;
 import static com.asprotunity.queryiteasy.acceptance_tests.HSQLInMemoryConfigurationAndSchemaDrop.dropHSQLPublicSchema;
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.*;
+import static com.asprotunity.queryiteasy.connection.ResultSetReaders.*;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -33,12 +34,13 @@ import static org.junit.Assert.fail;
 public class QueriesTest {
 
     private static DataSource dataSource;
-    private static DefaultDataStore dataStore;
+    private static DataStore dataStore;
 
     @BeforeClass
     public static void setUp() throws Exception {
         dataSource = HSQLInMemoryConfigurationAndSchemaDrop.configureHSQLInMemoryDataSource();
-        dataStore = new DefaultDataStore(dataSource);
+        final DataSource dataSource1 = dataSource;
+        dataStore = new DataStore(dataSource1);
     }
 
     @After
@@ -178,7 +180,7 @@ public class QueriesTest {
                 " END");
 
         Date found = dataStore.executeWithResult(connection ->
-                connection.call(row -> row.asDate(1), "{call return_date()}").findFirst().orElse(null));
+                connection.call(rs -> asDate(rs, 1), "{call return_date()}").findFirst().orElse(null));
 
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         Date expected = new Date(df.parse("2016-06-23").getTime());
@@ -273,7 +275,7 @@ public class QueriesTest {
                 "INSERT INTO testtable (first) VALUES (11)");
 
         List<Integer> result = dataStore.executeWithResult(connection ->
-                connection.select(row -> row.asInteger("first"),
+                connection.select(rs -> asInteger(rs, "first"),
                         "SELECT first FROM testtable ORDER BY first ASC").collect(toList())
         );
 
@@ -291,7 +293,7 @@ public class QueriesTest {
                 "INSERT INTO testtable (first, second) VALUES (11, 'asecond11')");
 
         List<Tuple2> result = dataStore.executeWithResult(connection ->
-                connection.select(row -> new Tuple2<>(row.asInteger(1), row.asString(2)),
+                connection.select(rs -> new Tuple2<>(asInteger(rs, 1), asString(rs, 2)),
                         "SELECT first, second FROM testtable WHERE first = ? AND second = ?",
                         bind(10), bind("asecond10")).collect(toList())
         );

@@ -22,7 +22,7 @@ public class ByteInputOutputParameter implements InputOutputParameter {
         RuntimeSQLException.execute(() -> {
             statement.setObject(position, this.value, Types.TINYINT);
             statement.registerOutParameter(position, Types.TINYINT);
-            queryScope.add(() -> this.value = Parameter.returnValueOrNull(statement, position, CallableStatement::getByte));
+            queryScope.add(() -> this.value = SQLValueReaders.returnValueOrNull(statement, position, CallableStatement::getByte));
         });
     }
 
