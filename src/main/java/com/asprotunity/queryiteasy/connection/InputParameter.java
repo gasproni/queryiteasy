@@ -8,10 +8,10 @@ import java.sql.PreparedStatement;
 @FunctionalInterface
 public interface InputParameter extends Parameter {
 
-    void bind(PreparedStatement statement, int position, Scope statementScope);
+    void bind(PreparedStatement statement, int position, Scope queryScope);
 
     /**
-     * Do not reimplement this function. The default is necessary to make the InputParameter
+     * Do not reimplement this method. The default is necessary to make the InputParameter
      * work correctly and keep the interface "functional".
      */
     @Override

@@ -86,9 +86,9 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         }
         RuntimeSQLException.execute(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql);
-                 DefaultAutoCloseableScope statementScope = new DefaultAutoCloseableScope()) {
+                 DefaultAutoCloseableScope queryScope = new DefaultAutoCloseableScope()) {
                 for (Batch batch : batches) {
-                    addBatch(batch, statement, statementScope);
+                    addBatch(batch, statement, queryScope);
                 }
                 statement.executeBatch();
             }
@@ -115,8 +115,8 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     public void call(String sql, Parameter... parameters) {
         RuntimeSQLException.execute(() -> {
             try (CallableStatement statement = connection.prepareCall(sql);
-                 DefaultAutoCloseableScope statementScope = new DefaultAutoCloseableScope()) {
-                bindCallableParameters(parameters, statement, statementScope);
+                 DefaultAutoCloseableScope queryScope = new DefaultAutoCloseableScope()) {
+                bindCallableParameters(parameters, statement, queryScope);
                 statement.execute();
             }
         });
