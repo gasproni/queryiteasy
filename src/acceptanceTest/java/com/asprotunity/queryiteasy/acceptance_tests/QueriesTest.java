@@ -1,8 +1,10 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
 import com.asprotunity.queryiteasy.DataStore;
-import com.asprotunity.queryiteasy.connection.*;
-import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
+import com.asprotunity.queryiteasy.connection.BlobInputOutputParameter;
+import com.asprotunity.queryiteasy.connection.BlobOutputParameter;
+import com.asprotunity.queryiteasy.connection.LongVarBinaryInputOutputParameter;
+import com.asprotunity.queryiteasy.connection.LongVarBinaryOutputParameter;
 import com.asprotunity.queryiteasy.io.StringIO;
 import org.junit.After;
 import org.junit.BeforeClass;
@@ -10,22 +12,19 @@ import org.junit.Test;
 
 import javax.sql.DataSource;
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
 
 import static com.asprotunity.queryiteasy.acceptance_tests.HSQLInMemoryConfigurationAndSchemaDrop.dropHSQLPublicSchema;
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.*;
 import static com.asprotunity.queryiteasy.connection.ResultSetReaders.*;
+import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -49,235 +48,94 @@ public class QueriesTest {
     }
 
     @Test
-    public void calls_stored_procedure_with_input_inputoutput_and_output_parameters() throws SQLException {
-
-        DataSourceInstantiationAndAccess.prepareData(dataSource, "CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
-        DataSourceInstantiationAndAccess.prepareData(dataSource, "CREATE PROCEDURE insert_new_record(in first INTEGER, inout ioparam  VARCHAR(20)," +
-                "                                               in other VARCHAR(20), out res VARCHAR(20))\n" +
-                "MODIFIES SQL DATA\n" +
-                "BEGIN ATOMIC \n" +
-                "   INSERT INTO testtable VALUES (first, other);\n" +
-                "   SET res = ioparam;\n" +
-                "   SET ioparam = 'NewString';\n" +
-                " END");
-
-
-        StringInputOutputParameter inputOutputParameter = new StringInputOutputParameter("OldString");
-        StringOutputParameter outputParameter = new StringOutputParameter();
-        dataStore.execute(connection ->
-                connection.call("{call insert_new_record(?, ?, ?, ?)}", bind(10), inputOutputParameter,
-                        bind("asecond10"), outputParameter)
-        );
-
-        List<FlexibleTuple> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT * FROM testtable");
-
-        assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).at("first"), is(10));
-        assertThat(expectedValues.get(0).at("second"), is("asecond10"));
-        assertThat(inputOutputParameter.value(), is("NewString"));
-        assertThat(outputParameter.value(), is("OldString"));
-    }
-
-
-    @Test
-    public void calls_stored_procedure_with_blob_out_parameter() throws SQLException {
-
-        DataSourceInstantiationAndAccess.prepareData(dataSource, "CREATE PROCEDURE test_blob_out_param(in inparam BLOB, out outparam BLOB)\n" +
-                "MODIFIES SQL DATA\n" +
-                "BEGIN ATOMIC \n" +
-                "   SET outparam = inparam;\n" +
-                " END");
-
-        String blobContent = "this is the content of the blob";
-        Charset charset = Charset.forName("UTF-8");
-        Supplier<InputStream> inputBlobSupplier = () -> new ByteArrayInputStream(blobContent.getBytes(charset));
-
-        BlobOutputParameter<String> outputParameter = new BlobOutputParameter<>(inputStream -> StringIO.readFrom(inputStream, charset));
-
-        dataStore.execute(connection ->
-                connection.call("{call test_blob_out_param(?, ?)}", bindBlob(inputBlobSupplier), outputParameter)
-        );
-
-        assertThat(outputParameter.value(), is(blobContent));
-    }
-
-    @Test
-    public void blob_input_out_parameter_works_correctly() throws SQLException {
-        Charset charset = Charset.forName("UTF-8");
-
-        String blobStoredInDb = "new blob value";
-        dataStore.execute(connection -> {
-            connection.update("CREATE TABLE testtable (first BLOB NOT NULL)");
-            connection.update("INSERT INTO testtable (first) VALUES (?)",
-                    bindBlob(() -> new ByteArrayInputStream(blobStoredInDb.getBytes(charset))));
-            connection.update("CREATE PROCEDURE test_blob_out_param(inout inoutparam BLOB, out outparam BLOB)\n" +
-                    "MODIFIES SQL DATA\n" +
-                    "BEGIN ATOMIC \n" +
-                    "   SET outparam = inoutparam;\n" +
-                    "   SELECT first into inoutparam from testtable;\n" +
-                    " END");
-
-        });
-
-        String ioParamOriginalBlobContent = "this is the content of the blob";
-        BlobInputOutputParameter<String> inputOutputParameter =
-                new BlobInputOutputParameter<>(() -> new ByteArrayInputStream(ioParamOriginalBlobContent.getBytes(charset)),
-                        inputStream -> StringIO.readFrom(inputStream, charset));
-
-        BlobOutputParameter<String> outputParameter = new BlobOutputParameter<>(inputStream -> StringIO.readFrom(inputStream, charset));
-
-        dataStore.execute(connection ->
-                connection.call("{call test_blob_out_param(?, ?)}", inputOutputParameter, outputParameter)
-        );
-
-        assertThat(outputParameter.value(), is(ioParamOriginalBlobContent));
-        assertThat(inputOutputParameter.value(), is(blobStoredInDb));
-    }
-
-
-    @Test
-    public void longvarbinary_input_out_parameter_works_correctly() throws SQLException {
-
-        String binaryStoredInDb = "binary stored in db value";
-        Charset charset = Charset.forName("UTF-8");
-        dataStore.execute(connection -> {
-            connection.update("CREATE TABLE testtable (first LONGVARBINARY NOT NULL)");
-            connection.update("INSERT INTO testtable (first) VALUES (?)",
-                    bindLongVarbinary(() -> new ByteArrayInputStream(binaryStoredInDb.getBytes(charset))));
-            connection.update("CREATE PROCEDURE test_binary_out_param(inout inoutparam LONGVARBINARY, out outparam LONGVARBINARY)\n" +
-                    "MODIFIES SQL DATA\n" +
-                    "BEGIN ATOMIC \n" +
-                    "   SET outparam = inoutparam;\n" +
-                    "   SELECT first into inoutparam from testtable;\n" +
-                    " END");
-
-        });
-
-        String ioParamOriginalBinaryContent = "this is the content of the blob";
-        LongVarBinaryInputOutputParameter inputOutputParameter =
-                new LongVarBinaryInputOutputParameter(
-                        () -> new ByteArrayInputStream(ioParamOriginalBinaryContent.getBytes(charset)));
-
-        LongVarBinaryOutputParameter outputParameter = new LongVarBinaryOutputParameter();
-
-        dataStore.execute(connection ->
-                connection.call("{call test_binary_out_param(?, ?)}", inputOutputParameter, outputParameter)
-        );
-
-        assertThat(outputParameter.value(), is(ioParamOriginalBinaryContent.getBytes(charset)));
-        assertThat(inputOutputParameter.value(), is(binaryStoredInDb.getBytes(charset)));
-    }
-
-
-    @Test
-    public void calls_function_with_no_input_parameters_and_returns_result_correctly() throws SQLException, ParseException {
-
-        DataSourceInstantiationAndAccess.prepareData(dataSource, "CREATE TABLE testtable (first INTEGER NOT NULL)");
-        DataSourceInstantiationAndAccess.prepareData(dataSource, "CREATE FUNCTION return_date()\n" +
-                "RETURNS DATE\n" +
-                "BEGIN ATOMIC \n" +
-                "   RETURN TO_DATE('2016-06-23', 'YYYY-MM-DD');\n" +
-                " END");
-
-        Date found = dataStore.executeWithResult(connection ->
-                connection.call(rs -> asDate(rs, 1), "{call return_date()}").findFirst().orElse(null));
-
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        Date expected = new Date(df.parse("2016-06-23").getTime());
-        assertThat(found, is(expected));
-    }
-
-    @Test
-    public void inserts_with_no_bind_values() throws SQLException {
+    public void updates_with_no_bind_values() {
 
         dataStore.execute(connection -> {
-            connection.update("CREATE TABLE testtable (first INTEGER NOT NULL)");
-            connection.update("INSERT INTO testtable (first) VALUES (10)");
+            connection.update("CREATE TABLE testtable (intvalue INTEGER NOT NULL)");
+            connection.update("INSERT INTO testtable (intvalue) VALUES (10)");
         });
 
-        List<FlexibleTuple> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT first FROM testtable");
-        assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).at("first"), is(10));
+        List<Integer> found =
+                dataStore.executeWithResult(connection -> connection.select(rs -> asInteger(rs, 1),
+                                                                            "SELECT * FROM testtable").collect(toList()));
+        assertThat(found.size(), is(1));
+        assertThat(found.get(0), is(10));
     }
 
     @Test
-    public void rolls_back_transaction_when_exception_thrown() throws SQLException {
+    public void updates_with_bind_values() {
+
+        dataStore.execute(connection -> {
+            connection.update("CREATE TABLE testtable (intvalue INTEGER NOT NULL, textvalue VARCHAR(20) NOT NULL)");
+            connection.update("INSERT INTO testtable (intvalue, textvalue) VALUES (?, ?)",
+                              bind(10), bind("text"));
+        });
+
+        List<Tuple2<Integer, String>> found =
+                dataStore.executeWithResult(connection -> connection.select(rs -> new Tuple2<>(asInteger(rs, 1), asString(rs, 2)),
+                                                                            "SELECT * FROM testtable").collect(toList()));
+        assertThat(found.size(), is(1));
+        assertThat(found.get(0)._1, is(10));
+        assertThat(found.get(0)._2, is("text"));
+    }
+
+    @Test
+    public void rolls_back_transaction_when_exception_thrown() {
 
         try {
             dataStore.execute(connection -> {
-                connection.update("CREATE TABLE testtable (first INTEGER NOT NULL)");
-                connection.update("INSERT INTO testtable (first) VALUES (10)");
+                connection.update("CREATE TABLE testtable (intvalue INTEGER NOT NULL)");
+                connection.update("INSERT INTO testtable (intvalue) VALUES (10)");
                 throw new RuntimeException();
             });
             fail("Exception expected");
         } catch (RuntimeException ex) {
-            List<FlexibleTuple> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT first FROM testtable");
-            assertThat(expectedValues.size(), is(0));
+            List<Integer> found = dataStore.executeWithResult(
+                    connection -> connection.select(rs -> asInteger(rs, "intvalue"),
+                                                    "SELECT intvalue FROM testtable").collect(toList())
+            );
+            assertThat(found.size(), is(0));
         }
     }
 
     @Test
-    public void inserts_with_some_bind_values() throws SQLException {
-
+    public void does_batch_updates() {
         dataStore.execute(connection -> {
-            connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
-            connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
-                    bind(10), bind("asecond"));
+            connection.update("CREATE TABLE testtable (intvalue INTEGER NOT NULL, textvalue VARCHAR(20) NOT NULL)");
+            connection.update("INSERT INTO testtable (intvalue, textvalue) VALUES (?, ?)",
+                              asList(batch(bind(10), bind("text10")),
+                                     batch(bind(11), bind("text11")),
+                                     batch(bind(12), bind("text12"))));
         });
 
-        List<FlexibleTuple> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT * FROM testtable");
-        assertThat(expectedValues.size(), is(1));
-        assertThat(expectedValues.get(0).at("first"), is(10));
-        assertThat(expectedValues.get(0).at("second"), is("asecond"));
-    }
+        List<Tuple2<Integer, String>> found =
+                dataStore.executeWithResult(
+                        connection -> connection.select(rs -> new Tuple2<>(asInteger(rs, 1), asString(rs, 2)),
+                                                        "SELECT * FROM testtable ORDER BY intvalue ASC").collect(toList())
+                );
 
-    @Test
-    public void does_batch_inserts() throws SQLException {
-
-        dataStore.execute(connection -> {
-            connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
-            connection.update("INSERT INTO testtable (first, second) VALUES (?, ?)",
-                    Arrays.asList(batch(bind(10), bind("asecond10")),
-                            batch(bind(11), bind("asecond11")),
-                            batch(bind(12), bind("asecond12"))));
-        });
-
-        List<FlexibleTuple> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT * FROM testtable ORDER BY first ASC");
-        assertThat(expectedValues.size(), is(3));
-        for (int index = 0; index < expectedValues.size(); ++index) {
-            assertThat(expectedValues.get(index).at("first"), is(index + 10));
-            assertThat(expectedValues.get(index).at("second"), is("asecond" + (index + 10)));
-        }
-    }
-
-    @Test
-    public void throws_exception_when_batch_is_empty() throws SQLException {
-
-        try {
-            dataStore.execute(connection -> {
-                connection.update("CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)");
-                connection.update("INSERT INTO testtable (first, second) VALUES (1, 'sometext')",
-                        Collections.emptyList());
-            });
-            fail("RuntimeSQLException expected!");
-        } catch (RuntimeSQLException exception) {
-            List<FlexibleTuple> expectedValues = DataSourceInstantiationAndAccess.query(dataSource, "SELECT * FROM testtable");
-            assertThat(expectedValues.size(), is(0));
-            assertThat(exception.getMessage(), is("Batch is empty."));
+        assertThat(found.size(), is(3));
+        for (int index = 0; index < found.size(); ++index) {
+            assertThat(found.get(index)._1, is(index + 10));
+            assertThat(found.get(index)._2, is("text" + (index + 10)));
         }
     }
 
     @Test
     public void selects_with_no_bind_values() throws SQLException {
 
-        DataSourceInstantiationAndAccess.prepareData(dataSource, "CREATE TABLE testtable (first INTEGER NOT NULL)",
-                "INSERT INTO testtable (first) VALUES (10)",
-                "INSERT INTO testtable (first) VALUES (11)");
+        dataStore.execute(connection -> {
+            connection.update("CREATE TABLE testtable (intvalue INTEGER NOT NULL)");
+            connection.update("INSERT INTO testtable (intvalue) VALUES (?)",
+                              asList(batch(bind(10)),
+                                     batch(bind(11))));
+        });
 
-        List<Integer> result = dataStore.executeWithResult(connection ->
-                connection.select(rs -> asInteger(rs, "first"),
-                        "SELECT first FROM testtable ORDER BY first ASC").collect(toList())
-        );
+        List<Integer> result =
+                dataStore.executeWithResult(
+                        connection -> connection.select(rs -> asInteger(rs, "intvalue"),
+                                                        "SELECT intvalue FROM testtable ORDER BY intvalue ASC").collect(toList())
+                );
 
         assertThat(result.size(), is(2));
         assertThat(result.get(0), is(10));
@@ -287,20 +145,129 @@ public class QueriesTest {
 
     @Test
     public void selects_with_bind_values() throws SQLException {
-        DataSourceInstantiationAndAccess.prepareData(dataSource,
-                "CREATE TABLE testtable (first INTEGER NOT NULL, second VARCHAR(20) NOT NULL)",
-                "INSERT INTO testtable (first, second) VALUES (10, 'asecond10')",
-                "INSERT INTO testtable (first, second) VALUES (11, 'asecond11')");
+        dataStore.execute(connection -> {
+            connection.update("CREATE TABLE testtable (intvalue INTEGER NOT NULL, textvalue VARCHAR(20) NOT NULL)");
+            connection.update("INSERT INTO testtable (intvalue, textvalue) VALUES (?, ?)",
+                              asList(batch(bind(10), bind("text10")),
+                                     batch(bind(11), bind("text11"))));
+        });
 
-        List<Tuple2> result = dataStore.executeWithResult(connection ->
-                connection.select(rs -> new Tuple2<>(asInteger(rs, 1), asString(rs, 2)),
-                        "SELECT first, second FROM testtable WHERE first = ? AND second = ?",
-                        bind(10), bind("asecond10")).collect(toList())
-        );
+        List<Tuple2<Integer, String>> result =
+                dataStore.executeWithResult(
+                        connection -> connection.select(rs -> new Tuple2<>(asInteger(rs, 1), asString(rs, 2)),
+                                                        "SELECT intvalue, textvalue FROM testtable WHERE intvalue = ? AND textvalue = ?",
+                                                        bind(10), bind("text10")).collect(toList())
+                );
 
         assertThat(result.size(), is(1));
         assertThat(result.get(0)._1, is(10));
-        assertThat(result.get(0)._2, is("asecond10"));
+        assertThat(result.get(0)._2, is("text10"));
+    }
+
+    @Test
+    public void calls_stored_procedure_with_blob_in_and_out_parameters() {
+        dataStore.execute(
+                connection -> connection.update("CREATE PROCEDURE test_blob_params(in inparam BLOB, " +
+                                                        "                          out outparam BLOB, " +
+                                                        "                          inout ioparam BLOB)\n" +
+                                                        "MODIFIES SQL DATA\n" +
+                                                        "BEGIN ATOMIC \n" +
+                                                        "   SET outparam = ioparam;\n" +
+                                                        "   SET ioparam = inparam;\n" +
+                                                        " END")
+        );
+
+        String inParamContent = "this is the content of the inparam blob";
+        Charset charset = Charset.forName("UTF-8");
+        BlobOutputParameter<String> outParam = new BlobOutputParameter<>(inputStream -> StringIO.readFrom(inputStream,
+                                                                                                          charset));
+        String ioParamInitialContent = "this is the initial content of the ioParam blob";
+        BlobInputOutputParameter<String> ioParam =
+                new BlobInputOutputParameter<>(() -> new ByteArrayInputStream(ioParamInitialContent.getBytes(charset)),
+                                               inputStream -> StringIO.readFrom(inputStream, charset));
+
+        dataStore.execute(
+                connection -> connection.call("{call test_blob_params(?, ?, ?)}",
+                                              bindBlob(() -> new ByteArrayInputStream(inParamContent.getBytes(charset))),
+                                              outParam,
+                                              ioParam)
+        );
+
+        assertThat(outParam.value(), is(ioParamInitialContent));
+        assertThat(ioParam.value(), is(inParamContent));
+    }
+
+    @Test
+    public void calls_stored_procedure_with_longvarbinary_in_and_out_parameters() {
+        dataStore.execute(
+                connection -> connection.update("CREATE PROCEDURE test_longvarbinary_params(in inparam LONGVARBINARY, " +
+                                                        "                                   out outparam LONGVARBINARY, " +
+                                                        "                                   inout ioparam LONGVARBINARY)\n" +
+                                                        "MODIFIES SQL DATA\n" +
+                                                        "BEGIN ATOMIC \n" +
+                                                        "   SET outparam = ioparam;\n" +
+                                                        "   SET ioparam = inparam;\n" +
+                                                        " END")
+        );
+
+        byte[] inParamContent = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9};
+        byte[] ioParamInitialContent = {10, 11, 12, 13, 14, 15};
+        LongVarBinaryInputOutputParameter ioParam =
+                new LongVarBinaryInputOutputParameter(() -> new ByteArrayInputStream(ioParamInitialContent));
+
+        LongVarBinaryOutputParameter outParam = new LongVarBinaryOutputParameter();
+
+        dataStore.execute(connection ->
+                                  connection.call("{call test_longvarbinary_params(?, ?, ?)}",
+                                                  bindLongVarbinary(() -> new ByteArrayInputStream(inParamContent)),
+                                                  outParam,
+                                                  ioParam)
+        );
+
+        assertThat(outParam.value(), is(ioParamInitialContent));
+        assertThat(ioParam.value(), is(inParamContent));
+    }
+
+
+    @Test
+    public void calls_function_with_no_input_parameters_and_returns_result() throws ParseException {
+
+        dataStore.execute(
+                connection -> connection.update("CREATE FUNCTION return_date()\n" +
+                                                        "RETURNS DATE\n" +
+                                                        "BEGIN ATOMIC \n" +
+                                                        "   RETURN TO_DATE('2016-06-23', 'YYYY-MM-DD');\n" +
+                                                        " END")
+        );
+
+        Date found = dataStore.executeWithResult(
+                connection -> connection.call(rs -> asDate(rs, 1),
+                                              "{call return_date()}").findFirst().orElse(null)
+        );
+
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        Date expected = new Date(df.parse("2016-06-23").getTime());
+        assertThat(found, is(expected));
+    }
+
+    @Test
+    public void calls_function_with_input_parameters_and_returns_result() throws ParseException {
+
+        dataStore.execute(
+                connection -> connection.update("CREATE FUNCTION return_inparam(in inparam VARCHAR(20))\n" +
+                                                        "RETURNS VARCHAR(20)\n" +
+                                                        "BEGIN ATOMIC \n" +
+                                                        "   RETURN inparam;\n" +
+                                                        " END")
+        );
+
+        String expected = "expectedResult";
+        String result = dataStore.executeWithResult(
+                connection -> connection.call(rs -> asString(rs, 1),
+                                              "{call return_inparam(?)}", bind(expected)).findFirst().orElse(null)
+        );
+
+        assertThat(result, is(expected));
     }
 
 

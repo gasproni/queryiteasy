@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Properties;
 
+import static com.asprotunity.queryiteasy.acceptance_tests.DataSourceInstantiationAndAccess.instantiateDataSource;
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.loadProperties;
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
 import static com.asprotunity.queryiteasy.connection.ResultSetReaders.asString;
@@ -36,7 +37,7 @@ public class PostgresSQLSupportedTypesTest extends NonStandardSupportedTypesTest
         }
         Properties properties = loadProperties(path);
 
-        DataSource result = DataSourceInstantiationAndAccess.instantiateDataSource(properties.getProperty("queryiteasy.postgresql.datasource.class"));
+        DataSource result = instantiateDataSource(properties.getProperty("queryiteasy.postgresql.datasource.class"));
 
         String dbName = properties.getProperty("queryiteasy.postgresql.databaseName");
         Method setDbName = result.getClass().getMethod("setDatabaseName", String.class);

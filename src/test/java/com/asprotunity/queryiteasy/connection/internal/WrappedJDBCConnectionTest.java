@@ -1,5 +1,6 @@
 package com.asprotunity.queryiteasy.connection.internal;
 
+import com.asprotunity.queryiteasy.exception.InvalidArgumentException;
 import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
 import org.junit.Before;
@@ -205,6 +206,14 @@ public class WrappedJDBCConnectionTest {
         order.verify(preparedStatement, times(1)).addBatch();
         order.verify(preparedStatement, times(1)).executeBatch();
         order.verify(preparedStatement, times(1)).close();
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void batch_update_throws_exception_when_batch_list_empty() throws Exception {
+        String sql = "INSERT INTO foo VALUES(?)";
+        PreparedStatement preparedStatement = prepareStatement(sql);
+
+        wrappedJDBCConnection.update(sql, Collections.emptyList());
     }
 
     @Test

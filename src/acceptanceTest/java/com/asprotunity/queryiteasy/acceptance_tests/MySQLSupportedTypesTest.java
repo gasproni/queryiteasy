@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
 
+import static com.asprotunity.queryiteasy.acceptance_tests.DataSourceInstantiationAndAccess.instantiateDataSource;
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.loadProperties;
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
@@ -44,7 +45,7 @@ public class MySQLSupportedTypesTest extends NonStandardSupportedTypesTestCommon
         }
         Properties properties = loadProperties(path);
 
-        DataSource result = DataSourceInstantiationAndAccess.instantiateDataSource(properties.getProperty("queryiteasy.mysql.datasource.class"));
+        DataSource result = instantiateDataSource(properties.getProperty("queryiteasy.mysql.datasource.class"));
 
         String dbURL = properties.getProperty("queryiteasy.mysql.datasource.url");
         Method setUrl = result.getClass().getMethod("setURL", String.class);

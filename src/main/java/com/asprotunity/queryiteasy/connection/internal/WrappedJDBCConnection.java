@@ -4,6 +4,7 @@ import com.asprotunity.queryiteasy.connection.Batch;
 import com.asprotunity.queryiteasy.connection.Connection;
 import com.asprotunity.queryiteasy.connection.InputParameter;
 import com.asprotunity.queryiteasy.connection.Parameter;
+import com.asprotunity.queryiteasy.exception.InvalidArgumentException;
 import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
 import com.asprotunity.queryiteasy.scope.DefaultAutoCloseableScope;
@@ -81,9 +82,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
 
     @Override
     public void update(String sql, List<Batch> batches) {
-        if (batches.isEmpty()) {
-            throw new RuntimeSQLException("Batch is empty.");
-        }
+        InvalidArgumentException.throwIf(batches.isEmpty(), "batches cannot be empty.");
         RuntimeSQLException.execute(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql);
                  DefaultAutoCloseableScope queryScope = new DefaultAutoCloseableScope()) {

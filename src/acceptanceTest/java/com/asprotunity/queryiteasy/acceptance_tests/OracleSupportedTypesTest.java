@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Properties;
 
+import static com.asprotunity.queryiteasy.acceptance_tests.DataSourceInstantiationAndAccess.instantiateDataSource;
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
 import static com.asprotunity.queryiteasy.connection.ResultSetReaders.asString;
 import static java.util.stream.Collectors.toList;
@@ -40,7 +41,7 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
         }
         Properties properties = TestPropertiesLoader.loadProperties(path);
 
-        DataSource result = DataSourceInstantiationAndAccess.instantiateDataSource(properties.getProperty("queryiteasy.oracle.datasource.class"));
+        DataSource result = instantiateDataSource(properties.getProperty("queryiteasy.oracle.datasource.class"));
 
         Method setUrl = result.getClass().getMethod("setURL", String.class);
         setUrl.invoke(result, properties.getProperty("queryiteasy.oracle.datasource.url"));
@@ -65,9 +66,9 @@ public class OracleSupportedTypesTest extends SupportedTypesTestCommon {
                     "select 'drop '||object_type||' '|| object_name|| " +
                             "DECODE(OBJECT_TYPE,'TABLE',' CASCADE CONSTRAINTS','') as dropStatements from user_objects"
             ).collect(toList());
-            dropStatements.stream().filter(OracleSupportedTypesTest::isNotDropOfSystemOrLobIndex).forEach(statement -> {
-                connection.update(statement);
-            });
+            dropStatements.stream()
+                    .filter(OracleSupportedTypesTest::isNotDropOfSystemOrLobIndex)
+                    .forEach(statement -> connection.update(statement));
         });
     }
 
