@@ -624,5 +624,4 @@ public class ResultSetReadersTest {
     private interface CodeBlock {
         void execute();
     }
-
 }

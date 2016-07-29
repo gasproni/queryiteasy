@@ -6,10 +6,6 @@ public class RuntimeSQLException extends RuntimeException {
         super(cause);
     }
 
-    public RuntimeSQLException(String message) {
-        super(message);
-    }
-
     public static void execute(ThrowingCodeBlock codeBlock) {
         try {
             codeBlock.execute();
