@@ -63,9 +63,9 @@ public class OracleSupportedTypesTest {
     @After
     public void tearDown() throws Exception {
         dataStore.execute(
-                connection -> connection.select(rs -> asString(rs, "dropStatements"),
+                connection -> connection.select(rs -> asString(rs, 1),
                                                 "select 'drop '||object_type||' '|| object_name|| " +
-                                                        "DECODE(OBJECT_TYPE,'TABLE',' CASCADE CONSTRAINTS','') as dropStatements from user_objects")
+                                                        "DECODE(OBJECT_TYPE,'TABLE',' CASCADE CONSTRAINTS','') from user_objects")
                         .filter(OracleSupportedTypesTest::isNotDropOfSystemOrLobIndex)
                         .forEach(statement -> connection.update(statement)));
     }
@@ -88,6 +88,11 @@ public class OracleSupportedTypesTest {
     @Test
     public void stores_and_reads_clobs() throws SQLException, UnsupportedEncodingException {
         tests.stores_and_reads_clobs("CLOB");
+    }
+
+    @Test
+    public void stores_and_reads_bytes_arrays() throws SQLException {
+        tests.stores_and_reads_bytes_arrays("RAW(1000)");
     }
 
     @Test

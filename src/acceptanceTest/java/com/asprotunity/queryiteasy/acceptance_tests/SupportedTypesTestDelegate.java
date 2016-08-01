@@ -59,6 +59,15 @@ public class SupportedTypesTestDelegate {
         assertThat(foundValues.get(0)._2, is(value));
     }
 
+    public void stores_and_reads_bytes_arrays(String sqlType) throws SQLException {
+        byte[] value = new byte[]{1, 2, 3, 4};
+        List<Tuple2<byte[], byte[]>> foundValues =
+                storeAndReadValuesBack(sqlType, ResultSetReaders::asByteArray, bind((byte[]) null), bind(value));
+        assertThat(foundValues.size(), is(1));
+        assertThat(foundValues.get(0)._1, is(nullValue()));
+        assertThat(foundValues.get(0)._2, is(value));
+    }
+
 
     public void stores_and_reads_blobs_as(String blobSQLType) throws SQLException, UnsupportedEncodingException {
         String blobContent = "this is the content of the blob";

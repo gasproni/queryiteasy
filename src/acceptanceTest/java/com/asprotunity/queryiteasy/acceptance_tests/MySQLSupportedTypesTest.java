@@ -2,6 +2,7 @@ package com.asprotunity.queryiteasy.acceptance_tests;
 
 
 import com.asprotunity.queryiteasy.DataStore;
+import com.asprotunity.queryiteasy.connection.StringOutputParameter;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -12,6 +13,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.Properties;
 
 import static com.asprotunity.queryiteasy.acceptance_tests.DataSourceInstantiationAndAccess.instantiateDataSource;
@@ -19,6 +21,8 @@ import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
 import static com.asprotunity.queryiteasy.connection.ResultSetReaders.asString;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeTrue;
 
 public class MySQLSupportedTypesTest {
@@ -62,12 +66,22 @@ public class MySQLSupportedTypesTest {
 
     @After
     public void tearDown() throws Exception {
-        dataStore.execute(
-                connection -> connection.select(rs -> asString(rs, "dropTableStatement"),
-                                                "SELECT CONCAT('DROP TABLE ', table_name, ' CASCADE') as dropTableStatement" +
-                                                        " FROM information_schema.tables WHERE table_schema = ?",
-                                                bind(dbName))
-                        .forEach(statement -> connection.update(statement)));
+        dataStore.execute(connection -> {
+            connection.select(rs -> asString(rs, 1),
+                              "SELECT CONCAT('DROP TABLE ', table_name, ' CASCADE')" +
+                                      " FROM information_schema.tables WHERE table_schema = ?",
+                              bind(dbName))
+                    .forEach(statement -> connection.update(statement));
+
+            connection.select(rs -> asString(rs, 1),
+                              "SELECT CONCAT('DROP ',routine_type,' `',routine_schema,'`.`',routine_name,'`;')" +
+                                      " FROM information_schema.routines WHERE routine_schema = ?",
+                              bind(dbName))
+                    .forEach(statement -> connection.update(statement));
+
+
+        });
+
     }
 
     @Test
@@ -83,6 +97,11 @@ public class MySQLSupportedTypesTest {
     @Test
     public void stores_and_reads_bytes_as_integers() throws SQLException {
         tests.stores_and_reads_bytes_as("INTEGER");
+    }
+
+    @Test
+    public void stores_and_reads_bytes_arrays() throws SQLException {
+        tests.stores_and_reads_bytes_arrays("LONG VARBINARY");
     }
 
     @Test
@@ -158,5 +177,26 @@ public class MySQLSupportedTypesTest {
     @Test
     public void stores_and_reads_bytes_as_smallints() throws SQLException {
         tests.stores_and_reads_bytes_as_smallints();
+    }
+
+    @Test
+    public void calls_function_with_result_in_output_param() throws ParseException {
+
+        String expected = "result";
+        dataStore.execute(
+                connection -> connection.update("CREATE FUNCTION `return_string`()\n" +
+                                                        "RETURNS VARCHAR(10)\n" +
+                                                        "DETERMINISTIC\n" +
+                                                        "BEGIN\n" +
+                                                        "   RETURN ?;\n" +
+                                                        "END", bind(expected))
+        );
+
+        StringOutputParameter outputParameter = new StringOutputParameter();
+        dataStore.execute(
+                connection -> connection.call("{? = call return_string() }", outputParameter)
+        );
+
+        assertThat(outputParameter.value(), is(expected));
     }
 }

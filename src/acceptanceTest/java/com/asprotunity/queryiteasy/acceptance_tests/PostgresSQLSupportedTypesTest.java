@@ -62,8 +62,8 @@ public class PostgresSQLSupportedTypesTest {
     @After
     public void tearDown() throws Exception {
         dataStore.execute(
-                connection -> connection.select(rs -> asString(rs, "dropTableStatement"),
-                                                "select 'drop table if exists \"' || tablename || '\" cascade;' as dropTableStatement" +
+                connection -> connection.select(rs -> asString(rs, 1),
+                                                "select 'drop table if exists \"' || tablename || '\" cascade;'" +
                                                         "  from pg_tables " +
                                                         " where tableowner = 'testuser'")
                         .forEach(statement -> connection.update(statement)));
@@ -77,6 +77,11 @@ public class PostgresSQLSupportedTypesTest {
     @Test
     public void stores_and_reads_bytes_as_integers() throws SQLException {
         tests.stores_and_reads_bytes_as("INTEGER");
+    }
+
+    @Test
+    public void stores_and_reads_bytes_arrays() throws SQLException {
+        tests.stores_and_reads_bytes_arrays("BYTEA");
     }
 
     @Test

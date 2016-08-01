@@ -121,6 +121,19 @@ public class InputParameterBindersTest {
     }
 
     @Test
+    public void binds_valid_bytearray() throws Exception {
+        byte[] value = new byte[]{1, 2};
+        bind(value).bind(preparedStatement, position, scope);
+        verify(preparedStatement, times(1)).setBytes(position, value);
+    }
+
+    @Test
+    public void binds_null_byte_array() throws Exception {
+        bind((byte[]) null).bind(preparedStatement, position, scope);
+        verify(preparedStatement, times(1)).setBytes(position, null);
+    }
+
+    @Test
     public void binds_valid_blobs() throws Exception {
         InputStream blobStream = mock(InputStream.class);
         InputParameterBinders.bindBlob(() -> blobStream).bind(preparedStatement, position, scope);

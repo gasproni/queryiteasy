@@ -39,6 +39,11 @@ public class HSQLSupportedTypesTest {
     }
 
     @Test
+    public void stores_and_reads_bytes_arrays() throws SQLException {
+        tests.stores_and_reads_bytes_arrays("LONGVARBINARY");
+    }
+
+    @Test
     public void stores_and_reads_bytes_as_integers() throws SQLException {
         tests.stores_and_reads_bytes_as("INTEGER");
     }

@@ -14,7 +14,7 @@ public class InputParameterBinders {
 
     public static InputParameter bind(String value) {
         return (statement, position, queryScope) -> RuntimeSQLException.execute(() ->
-                statement.setString(position, value));
+                                                                                        statement.setString(position, value));
     }
 
     public static InputParameter bind(Short value) {
@@ -45,6 +45,11 @@ public class InputParameterBinders {
     public static InputParameter bind(Byte value) {
         return (statement, position, queryScope) ->
                 setValue(statement, position, value, Types.TINYINT);
+    }
+
+    public static InputParameter bind(byte[] value) {
+        return (statement, position, queryScope) ->
+                RuntimeSQLException.execute(() -> statement.setBytes(position, value));
     }
 
     public static InputParameter bind(Boolean value) {

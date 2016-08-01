@@ -1,8 +1,6 @@
 buildscript {
     repositories {
         mavenCentral()
-        //Needed only for SNAPSHOT versions
-        //maven { url "http://oss.sonatype.org/content/repositories/snapshots/" }
     }
     dependencies {
         classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.1.9'
@@ -42,50 +40,14 @@ task wrapper(type: Wrapper) {
 task acceptanceTest(type: Test, dependsOn: test) {
     description = 'Runs the acceptance tests'
     group = 'verification'
-    testClassesDir = sourceSets.acceptanceTest.output.classesDir
-    classpath += sourceSets.acceptanceTest.runtimeClasspath
+    setTestClassesDir(sourceSets.acceptanceTest.output.classesDir)
+    setClasspath(sourceSets.acceptanceTest.runtimeClasspath)
     reports.junitXml.destination = buildDir.path +'/acceptance-test-results'
     reports.html.destination = buildDir.path +'/reports/acceptanceTest'
 }
 
-// Generates some dummy dirs necessary for the testJar task to work.
-// Not sure how to avoid that.
-task makeDummyDirs << {
-    mkdir(buildDir.path +'/resources/acceptanceTest')
-    mkdir(buildDir.path +'/resources/test')
-    mkdir(buildDir.path +'/resources/main')
-}
-
-task testJar(type: Jar, dependsOn: [build, makeDummyDirs, acceptanceTest]) {
-    manifest.from jar.manifest
-    classifier = 'test'
-    from {
-        configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
-    } {
-        exclude "META-INF/*.SF"
-        exclude "META-INF/*.DSA"
-        exclude "META-INF/*.RSA"
-    }
-    from fileTree(
-            sourceSets.acceptanceTest.output.classesDir
-    ) {
-        exclude "META-INF/*.SF"
-        exclude "META-INF/*.DSA"
-        exclude "META-INF/*.RSA"
-
-    }
-    from {
-        sourceSets.acceptanceTest.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    } {
-        exclude "META-INF/*.SF"
-        exclude "META-INF/*.DSA"
-        exclude "META-INF/*.RSA"
-    }
-    with jar
-}
-
 check {
-    dependsOn(acceptanceTest)
+    dependsOn(tasks.acceptanceTest)
 }
 
 findbugs {
