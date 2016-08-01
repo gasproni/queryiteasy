@@ -5,7 +5,6 @@ import com.asprotunity.queryiteasy.DataStore;
 import com.asprotunity.queryiteasy.connection.InputParameter;
 import com.asprotunity.queryiteasy.connection.ResultSetReaders;
 import com.asprotunity.queryiteasy.io.StringIO;
-import org.junit.After;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -16,7 +15,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.asprotunity.queryiteasy.acceptance_tests.HSQLInMemoryConfigurationAndSchemaDrop.dropHSQLPublicSchema;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.*;
 import static com.asprotunity.queryiteasy.connection.ResultSetReaders.fromBlob;
 import static com.asprotunity.queryiteasy.connection.ResultSetReaders.fromClob;
@@ -33,12 +31,6 @@ public class SupportedTypesTestDelegate {
     public SupportedTypesTestDelegate(DataStore dataStore) {
         this.dataStore = dataStore;
     }
-
-    @After
-    public void tearDown() throws Exception {
-        dropHSQLPublicSchema(dataStore);
-    }
-
 
     public void stores_and_reads_doubles_mapped_to_double(String doubleSQLType) throws SQLException {
         Double value = 10.0;
