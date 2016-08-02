@@ -45,7 +45,7 @@ public class QueriesExample {
                                                     asString(resultSet, "band"),
                                                     asInteger(resultSet, 3)),
                               "SELECT title, band, year from song WHERE year > ?", bind(year))
-                    .forEach(song -> System.out.println(String.join(" ", song.title, song.band, String.valueOf(song.year))));
+                    .forEach(System.out::println);
         });
 
 
@@ -62,7 +62,7 @@ public class QueriesExample {
         // Outside the previous transaction now.
         System.out.println("Songs of unknown year:");
         for (Song song : result) {
-            System.out.println(String.join(" ", song.title, song.band, String.valueOf(song.year)));
+            System.out.println(song);
         }
 
     }

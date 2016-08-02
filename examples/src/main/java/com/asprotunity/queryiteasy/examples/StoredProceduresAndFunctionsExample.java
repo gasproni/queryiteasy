@@ -97,11 +97,7 @@ public class StoredProceduresAndFunctionsExample {
                                                   asInteger(resultSet, "year")),
                             "{call query_band_by_title(?)}",
                             bind(title))
-                    .forEach(song -> {
-                        System.out.println("Title: " + song.title);
-                        System.out.println("Band: " + song.band);
-                        System.out.println("Year: " + song.year);
-                    });
+                    .forEach(System.out::println);
 
         });
 
