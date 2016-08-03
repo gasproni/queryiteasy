@@ -1,16 +1,7 @@
 # Queryiteasy: a Java 8 wrapper to make JDBC easier to use #
 
-Queryiteasy main purposes are the following:
-
-* Reduce the amount of boilerplate code for JDBC queries
-* Make transaction boundaries explicit in code
-* Increase the readability and maintainability of JDBC queries
-* Allow for extensions to handle vendor specific SQL types easily
-
-Queryiteasy achieves its goals using some of the new Java 8 lambda and stream functionality.
-
-
-
+Queryiteasy aims at making JDBC easier to use, less verbose, and easier to maintain by reducing the amount of boilerplate code for JDBC queries.
+Queryiteasy achieves its goals using some of the new Java 8 lambda and streams functionality.
 
 |Name  |SQL Type|
 |:-----|:-------|

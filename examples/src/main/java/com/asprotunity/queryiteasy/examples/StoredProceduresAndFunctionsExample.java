@@ -35,21 +35,16 @@ public class StoredProceduresAndFunctionsExample {
 
 
         System.out.println("-----------------------Begin Stored Procedure Example-----------------------");
-
-        storedProcedureOutputAndIOParametersExample(dataStore);
-
+        storedProcedureOutputAndInputOutputParametersExample(dataStore);
         System.out.println("-----------------------End Stored Procedure Example-----------------------");
-
         System.out.println("-----------------------Begin Stored Function Example-----------------------");
-
         storedFunctionExample(dataStore);
-
         System.out.println("-----------------------End Stored Function Example-----------------------");
 
 
     }
 
-    private static void storedProcedureOutputAndIOParametersExample(DataStore dataStore) {
+    private static void storedProcedureOutputAndInputOutputParametersExample(DataStore dataStore) {
         dataStore.execute(
                 connection ->
                         connection.update("CREATE PROCEDURE return_band_and_change_and_return_year(in ptitle VARCHAR(20), " +
