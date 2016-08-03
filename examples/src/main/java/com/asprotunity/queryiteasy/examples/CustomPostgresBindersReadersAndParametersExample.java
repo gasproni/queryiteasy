@@ -141,9 +141,9 @@ public class CustomPostgresBindersReadersAndParametersExample {
                                                                 "  LANGUAGE 'plpgsql' VOLATILE;"));
 
             PGcircle inparamValue = new PGcircle(1, 2, 3);
-            PGcircle initialIOParamValue = new PGcircle(4, 5, 6);
+            PGcircle initialInoutparamValue = new PGcircle(4, 5, 6);
             PGcircleOutputParameter outparam = new PGcircleOutputParameter();
-            PGcircleInputOutputParameter inoutparam = new PGcircleInputOutputParameter(initialIOParamValue);
+            PGcircleInputOutputParameter inoutparam = new PGcircleInputOutputParameter(initialInoutparamValue);
 
             dataStore.execute(connection -> connection.call("{call swap_input_and_io_values(?, ?, ?)}",
                                                             bindCircle(inparamValue), outparam, inoutparam));
@@ -153,7 +153,7 @@ public class CustomPostgresBindersReadersAndParametersExample {
             System.out.println(String.format("Out param final (x, y, r): (%f, %f, %f)",
                                              outparam.value().center.x, outparam.value().center.y, outparam.value().radius));
             System.out.println(String.format("IO param initial (x, y, r): (%f, %f, %f)",
-                                             initialIOParamValue.center.x, initialIOParamValue.center.y, initialIOParamValue.radius));
+                                             initialInoutparamValue.center.x, initialInoutparamValue.center.y, initialInoutparamValue.radius));
             System.out.println(String.format("IO param final (x, y, r): (%f, %f, %f)",
                                              inoutparam.value().center.x, inoutparam.value().center.y, inoutparam.value().radius));
 
