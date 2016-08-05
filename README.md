@@ -81,12 +81,31 @@ dataStore.execute(connection -> { // The transaction starts here
 
 ## Building the and using the library
 To compile call `gradlew build` (or `gradlew.bat build` if in Windows) from the root folder. That will download the necessary
-gradle packages, compile the project and run all the tests. The jar will be put in the `build/libs` folder.
+gradle packages, compile the project and run all the tests (except for the (non essential) ones requiring MySQL, Postgres, or Oracle, which require some specific configuration, which I still need to document). The jar will be put in the `build/libs` folder.
 To use it, you just need to copy the jar anywhere you like and put it in your classpath.
+
+calling `gradlew build` will also compile all the examples in the [examples](src/main/java/com/asprotunity/queryiteasy/examples) folder.
+
+# Getting started
+
+The main core classes for the library are:
+
+* [com.asprotunity.queryiteasy.datastore.DataStore](src/main/java/com/asprotunity/queryiteasy/datastore/DataStore.java), which has the methods to run transactions
+* [com.asprotunity.queryiteasy.connection.Connection](src/main/java/com/asprotunity/queryiteasy/connection/Connection.java), which has the methods to execute database queries
+* [com.asprotunity.queryiteasy.connection.InputParameterBinders](src/main/java/com/asprotunity/queryiteasy/connection/InputParameterBinders.java), which has the functions to bind positional parameters to queries
+* [com.asprotunity.queryiteasy.connection.ResultSetReaders](src/main/java/com/asprotunity/queryiteasy/connection/ResultSetReaders.java), which has the functions to read `ResultSets`
+
+Have a look at the examples [here](src/main/java/com/asprotunity/queryiteasy/examples/) to see how to use them. 
+
+All the classes named `<XXX>InputOutputParameter` and `<XXX>OutputParameter` implement the functionality to support output and input-output parameters for stored functions and procedures. Have a look [here](src/main/java/com/asprotunity/queryiteasy/examples/StoredProceduresAndFunctionsExample.java) for some usage examples.
+
+## Supporting custom database types
+
+Until I write some better documentation, have a look at [this example](src/main/java/com/asprotunity/queryiteasy/examples/CustomPostgresBindersReadersAndParametersExample.java) to see how to support custom database types.
 
 ## Databases used for testing
 
-Queryiteasy has been tested with:
+Queryiteasy doesn't depend only on JDBC, not on any specific database, but it has been tested with the following ones to spot potential issues (each of them comes with its own quirks):
 
  * HSQLDB 2.3.3
  * MySQL 5.7.10
