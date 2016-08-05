@@ -95,7 +95,7 @@ The most important classes of the library are:
 * [com.asprotunity.queryiteasy.connection.InputParameterBinders](src/main/java/com/asprotunity/queryiteasy/connection/InputParameterBinders.java), which has the functions to bind positional parameters to queries
 * [com.asprotunity.queryiteasy.connection.ResultSetReaders](src/main/java/com/asprotunity/queryiteasy/connection/ResultSetReaders.java), which has the functions to read `ResultSets`
 
-Have a look at the examples [here](src/main/java/com/asprotunity/queryiteasy/examples/) to see how to use them. 
+Have a look at the examples [here](examples/src/main/java/com/asprotunity/queryiteasy/examples/) to see how to use them. 
 
 All the classes named `<XXX>InputOutputParameter` and `<XXX>OutputParameter` implement the functionality to support output and input-output parameters for stored functions and procedures. Have a look [here](examples/src/main/java/com/asprotunity/queryiteasy/examples/StoredProceduresAndFunctionsExample.java) for some usage examples.
 
