@@ -90,7 +90,7 @@ calling `gradlew build` will also compile all the examples in the [examples](exa
 
 The main core classes for the library are:
 
-* [com.asprotunity.queryiteasy.datastore.DataStore](src/main/java/com/asprotunity/queryiteasy/datastore/DataStore.java), which has the methods to run transactions
+* [com.asprotunity.queryiteasy.datastore.DataStore](src/main/java/com/asprotunity/queryiteasy/datastore/DataStore.java), which has the methods to execute transactions
 * [com.asprotunity.queryiteasy.connection.Connection](src/main/java/com/asprotunity/queryiteasy/connection/Connection.java), which has the methods to execute database queries
 * [com.asprotunity.queryiteasy.connection.InputParameterBinders](src/main/java/com/asprotunity/queryiteasy/connection/InputParameterBinders.java), which has the functions to bind positional parameters to queries
 * [com.asprotunity.queryiteasy.connection.ResultSetReaders](src/main/java/com/asprotunity/queryiteasy/connection/ResultSetReaders.java), which has the functions to read `ResultSets`
