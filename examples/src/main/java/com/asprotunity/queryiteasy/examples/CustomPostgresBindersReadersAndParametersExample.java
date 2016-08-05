@@ -20,6 +20,13 @@ import java.sql.Types;
  */
 public class CustomPostgresBindersReadersAndParametersExample {
 
+    // Before compiling put the information corresponding to your Postgres setup in the following
+    // fields.
+    private static final String serverName = "localhost";
+    private static final String databaseName = "testdb";
+    private static final String user = "testuser";
+    private static final String password = "testpassword";
+
     /**
      * Example of custom binder function.
      */
@@ -85,13 +92,11 @@ public class CustomPostgresBindersReadersAndParametersExample {
 
 
     public static void main(String[] args) {
-        // Before compiling put the information corresponding to your Postgres setup.
         PGSimpleDataSource dataSource = new PGSimpleDataSource();
-        dataSource.setServerName("localhost");
-        dataSource.setDatabaseName("testdb");
-        String user = "testuser";
+        dataSource.setServerName(serverName);
+        dataSource.setDatabaseName(databaseName);
         dataSource.setUser(user);
-        dataSource.setPassword("testpassword");
+        dataSource.setPassword(password);
 
         DataStore dataStore = new DataStore(dataSource);
 

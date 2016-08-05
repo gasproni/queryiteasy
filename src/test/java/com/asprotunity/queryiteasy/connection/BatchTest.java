@@ -12,13 +12,13 @@ public class BatchTest {
 
     @Test(expected = InvalidArgumentException.class)
     public void throws_exception_when_other_parameters_array_is_null() {
-        Batch.batch(InputParameterBinders.bind("astring"), (InputParameter[]) null);
+        Batch.batch(InputParameterBinders.bindString("astring"), (InputParameter[]) null);
     }
 
 
     @Test(expected = InvalidArgumentException.class)
     public void throws_exception_when_a_parameter_in_the_array_is_null() {
-        Batch.batch(InputParameterBinders.bind("astring"), (InputParameter) null);
+        Batch.batch(InputParameterBinders.bindString("astring"), (InputParameter) null);
     }
 
 }

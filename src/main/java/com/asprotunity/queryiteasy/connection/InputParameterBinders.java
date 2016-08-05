@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 
 public class InputParameterBinders {
 
-
     /**
      * Creates a new {@code InputParameter instance} to be used to store a string; a null value
      * will set the corresponding column to {@code NULL};
@@ -20,7 +19,7 @@ public class InputParameterBinders {
      * @return A new {@link InputParameter} instance.
      * @throws RuntimeSQLException if a {@link java.sql.SQLException} is thrown during the call.
      */
-    public static InputParameter bind(String value) {
+    public static InputParameter bindString(String value) {
         return (statement, position, queryScope) ->
                 RuntimeSQLException.execute(() -> statement.setString(position, value));
     }
@@ -33,7 +32,7 @@ public class InputParameterBinders {
      * @return A new {@link InputParameter} instance.
      * @throws RuntimeSQLException if a {@link java.sql.SQLException} is thrown during the call.
      */
-    public static InputParameter bind(Short value) {
+    public static InputParameter bindShort(Short value) {
         return (statement, position, queryScope) ->
                 setValue(statement, position, value, Types.SMALLINT);
     }
@@ -46,7 +45,7 @@ public class InputParameterBinders {
      * @return A new {@link InputParameter} instance.
      * @throws RuntimeSQLException if a {@link java.sql.SQLException} is thrown during the call.
      */
-    public static InputParameter bind(Integer value) {
+    public static InputParameter bindInteger(Integer value) {
         return (statement, position, queryScope) ->
                 setValue(statement, position, value, Types.INTEGER);
     }
@@ -59,7 +58,7 @@ public class InputParameterBinders {
      * @return A new {@link InputParameter} instance.
      * @throws RuntimeSQLException if a {@link java.sql.SQLException} is thrown during the call.
      */
-    public static InputParameter bind(Long value) {
+    public static InputParameter bindLong(Long value) {
         return (statement, position, queryScope) ->
                 setValue(statement, position, value, Types.BIGINT);
     }
@@ -72,7 +71,7 @@ public class InputParameterBinders {
      * @return A new {@link InputParameter} instance.
      * @throws RuntimeSQLException if a {@link java.sql.SQLException} is thrown during the call.
      */
-    public static InputParameter bind(Double value) {
+    public static InputParameter bindDouble(Double value) {
         return (statement, position, queryScope) ->
                 setValue(statement, position, value, Types.DOUBLE);
     }
@@ -85,7 +84,7 @@ public class InputParameterBinders {
      * @return A new {@link InputParameter} instance.
      * @throws RuntimeSQLException if a {@link java.sql.SQLException} is thrown during the call.
      */
-    public static InputParameter bind(Float value) {
+    public static InputParameter bindFloat(Float value) {
         return (statement, position, queryScope) ->
                 setValue(statement, position, value, Types.REAL);
     }
@@ -98,7 +97,7 @@ public class InputParameterBinders {
      * @return A new {@link InputParameter} instance.
      * @throws RuntimeSQLException if a {@link java.sql.SQLException} is thrown during the call.
      */
-    public static InputParameter bind(Byte value) {
+    public static InputParameter bindByte(Byte value) {
         return (statement, position, queryScope) ->
                 setValue(statement, position, value, Types.TINYINT);
     }
@@ -111,7 +110,7 @@ public class InputParameterBinders {
      * @return A new {@link InputParameter} instance.
      * @throws RuntimeSQLException if a {@link java.sql.SQLException} is thrown during the call.
      */
-    public static InputParameter bind(byte[] value) {
+    public static InputParameter bindByteArray(byte[] value) {
         return (statement, position, queryScope) ->
                 RuntimeSQLException.execute(() -> statement.setBytes(position, value));
     }
@@ -124,7 +123,7 @@ public class InputParameterBinders {
      * @return A new {@link InputParameter} instance.
      * @throws RuntimeSQLException if a {@link java.sql.SQLException} is thrown during the call.
      */
-    public static InputParameter bind(Boolean value) {
+    public static InputParameter bindBoolean(Boolean value) {
         return (statement, position, queryScope) ->
                 setValue(statement, position, value, Types.BOOLEAN);
     }
@@ -137,7 +136,7 @@ public class InputParameterBinders {
      * @return A new {@link InputParameter} instance.
      * @throws RuntimeSQLException if a {@link java.sql.SQLException} is thrown during the call.
      */
-    public static InputParameter bind(BigDecimal value) {
+    public static InputParameter bindBigDecimal(BigDecimal value) {
         return (statement, position, queryScope) ->
                 RuntimeSQLException.execute(() -> statement.setBigDecimal(position, value));
     }
@@ -150,7 +149,7 @@ public class InputParameterBinders {
      * @return A new {@link InputParameter} instance.
      * @throws RuntimeSQLException if a {@link java.sql.SQLException} is thrown during the call.
      */
-    public static InputParameter bind(Date value) {
+    public static InputParameter bindDate(Date value) {
         return (statement, position, queryScope) ->
                 RuntimeSQLException.execute(() -> statement.setDate(position, value));
     }
@@ -163,7 +162,7 @@ public class InputParameterBinders {
      * @return A new {@link InputParameter} instance.
      * @throws RuntimeSQLException if a {@link java.sql.SQLException} is thrown during the call.
      */
-    public static InputParameter bind(Time value) {
+    public static InputParameter bindTime(Time value) {
         return (statement, position, queryScope) ->
                 RuntimeSQLException.execute(() -> statement.setTime(position, value));
     }
@@ -176,7 +175,7 @@ public class InputParameterBinders {
      * @return A new {@link InputParameter} instance.
      * @throws RuntimeSQLException if a {@link java.sql.SQLException} is thrown during the call.
      */
-    public static InputParameter bind(Timestamp value) {
+    public static InputParameter bindTimestamp(Timestamp value) {
         return (statement, position, queryScope) ->
                 RuntimeSQLException.execute(() -> statement.setTimestamp(position, value));
     }

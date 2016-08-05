@@ -6,7 +6,8 @@ import org.hsqldb.jdbc.JDBCDataSource;
 import java.util.List;
 
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
-import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
+import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bindInteger;
+import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bindString;
 import static com.asprotunity.queryiteasy.connection.ResultSetReaders.asInteger;
 import static com.asprotunity.queryiteasy.connection.ResultSetReaders.asString;
 import static java.util.Arrays.asList;
@@ -30,9 +31,9 @@ public class QueriesExample {
 
             // Do a batch insert.
             connection.update("INSERT INTO song (title, band, year) VALUES (?, ?, ?)",
-                              asList(batch(bind("Smoke on the Water"), bind("Deep Purple"), bind(1973)),
-                                     batch(bind("I Got the Blues"), bind("Rolling Stones"), bind((Integer) null)),
-                                     batch(bind("Hey Jude"), bind("Beatles"), bind(1968))));
+                              asList(batch(bindString("Smoke on the Water"), bindString("Deep Purple"), bindInteger(1973)),
+                                     batch(bindString("I Got the Blues"), bindString("Rolling Stones"), bindInteger(null)),
+                                     batch(bindString("Hey Jude"), bindString("Beatles"), bindInteger(1968))));
 
         }); // The transaction ends here. It commits (or rolls back, in case of errors) automatically.
 
@@ -44,7 +45,7 @@ public class QueriesExample {
             connection.select(resultSet -> new Song(asString(resultSet, "title"),
                                                     asString(resultSet, "band"),
                                                     asInteger(resultSet, 3)),
-                              "SELECT title, band, year from song WHERE year > ?", bind(year))
+                              "SELECT title, band, year from song WHERE year > ?", bindInteger(year))
                     .forEach(System.out::println);
         });
 

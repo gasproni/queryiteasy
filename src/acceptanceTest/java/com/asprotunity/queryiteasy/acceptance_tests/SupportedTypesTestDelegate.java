@@ -35,7 +35,7 @@ public class SupportedTypesTestDelegate {
     public void stores_and_reads_doubles_mapped_to_double(String doubleSQLType) throws SQLException {
         Double value = 10.0;
         List<Tuple2<Double, Double>> foundValues =
-                storeAndReadValuesBack(doubleSQLType, ResultSetReaders::asDouble, bind((Double) null), bind(value));
+                storeAndReadValuesBack(doubleSQLType, ResultSetReaders::asDouble, bindDouble(null), bindDouble(value));
         assertThat(foundValues.size(), is(1));
         assertThat(foundValues.get(0)._1, is(nullValue()));
         assertThat(foundValues.get(0)._2, is(value));
@@ -45,7 +45,7 @@ public class SupportedTypesTestDelegate {
     public void stores_and_reads_bytes_as(String sqlType) throws SQLException {
         Byte value = 's';
         List<Tuple2<Byte, Byte>> foundValues =
-                storeAndReadValuesBack(sqlType, ResultSetReaders::asByte, bind((Byte) null), bind(value));
+                storeAndReadValuesBack(sqlType, ResultSetReaders::asByte, bindByte(null), bindByte(value));
         assertThat(foundValues.size(), is(1));
         assertThat(foundValues.get(0)._1, is(nullValue()));
         assertThat(foundValues.get(0)._2, is(value));
@@ -54,7 +54,7 @@ public class SupportedTypesTestDelegate {
     public void stores_and_reads_bytes_arrays(String sqlType) throws SQLException {
         byte[] value = new byte[]{1, 2, 3, 4};
         List<Tuple2<byte[], byte[]>> foundValues =
-                storeAndReadValuesBack(sqlType, ResultSetReaders::asByteArray, bind((byte[]) null), bind(value));
+                storeAndReadValuesBack(sqlType, ResultSetReaders::asByteArray, bindByteArray(null), bindByteArray(value));
         assertThat(foundValues.size(), is(1));
         assertThat(foundValues.get(0)._1, is(nullValue()));
         assertThat(foundValues.get(0)._2, is(value));
@@ -118,7 +118,7 @@ public class SupportedTypesTestDelegate {
     public void stores_and_reads_longs_as_bigints() throws SQLException {
         Long value = 10L;
         List<Tuple2<Long, Long>> foundValues =
-                storeAndReadValuesBack("BIGINT", ResultSetReaders::asLong, bind((Long) null), bind(value));
+                storeAndReadValuesBack("BIGINT", ResultSetReaders::asLong, bindLong(null), bindLong(value));
         assertThat(foundValues.size(), is(1));
         assertThat(foundValues.get(0)._1, is(nullValue()));
         assertThat(foundValues.get(0)._2, is(value));
@@ -127,7 +127,7 @@ public class SupportedTypesTestDelegate {
 
     public void stores_and_reads_booleans() throws SQLException {
         List<Tuple2<Boolean, Boolean>> foundValues =
-                storeAndReadValuesBack("BOOLEAN", ResultSetReaders::asBoolean, bind((Boolean) null), bind(true));
+                storeAndReadValuesBack("BOOLEAN", ResultSetReaders::asBoolean, bindBoolean(null), bindBoolean(true));
         assertThat(foundValues.size(), is(1));
         assertThat(foundValues.get(0)._1, is(nullValue()));
         assertTrue(foundValues.get(0)._2);
@@ -140,7 +140,7 @@ public class SupportedTypesTestDelegate {
         // and the assert will fail.
         Time value = new Time(36672000L);
         List<Tuple2<Time, Time>> foundValues =
-                storeAndReadValuesBack(timeSQLType, ResultSetReaders::asTime, bind((Time) null), bind(value));
+                storeAndReadValuesBack(timeSQLType, ResultSetReaders::asTime, bindTime(null), bindTime(value));
         assertThat(foundValues.size(), is(1));
         assertThat(foundValues.get(0)._1, is(nullValue()));
         assertThat(foundValues.get(0)._2, is(value));
@@ -151,7 +151,7 @@ public class SupportedTypesTestDelegate {
         // Tue, 12 Jan 2016 10:11:12.000 GMT. Note that some DBs support the milliseconds.
         Timestamp value = new Timestamp(1452593472000L);
         List<Tuple2<Timestamp, Timestamp>> foundValues =
-                storeAndReadValuesBack("TIMESTAMP", ResultSetReaders::asTimestamp, bind((Timestamp) null), bind(value));
+                storeAndReadValuesBack("TIMESTAMP", ResultSetReaders::asTimestamp, bindTimestamp(null), bindTimestamp(value));
         assertThat(foundValues.size(), is(1));
         assertThat(foundValues.get(0)._1, is(nullValue()));
         assertThat(foundValues.get(0)._2, is(value));
@@ -161,7 +161,7 @@ public class SupportedTypesTestDelegate {
     public void stores_and_reads_integers() throws SQLException {
         Integer value = 10;
         List<Tuple2<Integer, Integer>> foundValues =
-                storeAndReadValuesBack("INTEGER", ResultSetReaders::asInteger, bind((Integer) null), bind(value));
+                storeAndReadValuesBack("INTEGER", ResultSetReaders::asInteger, bindInteger(null), bindInteger(value));
         assertThat(foundValues.size(), is(1));
         assertThat(foundValues.get(0)._1, is(nullValue()));
         assertThat(foundValues.get(0)._2, is(value));
@@ -171,7 +171,7 @@ public class SupportedTypesTestDelegate {
     public void stores_and_reads_strings() throws SQLException {
         String value = "this is the text";
         List<Tuple2<String, String>> foundValues =
-                storeAndReadValuesBack("VARCHAR(250)", ResultSetReaders::asString, bind((String) null), bind(value));
+                storeAndReadValuesBack("VARCHAR(250)", ResultSetReaders::asString, bindString(null), bindString(value));
         assertThat(foundValues.size(), is(1));
         assertThat(foundValues.get(0)._1, is(nullValue()));
         assertThat(foundValues.get(0)._2, is(value));
@@ -181,7 +181,7 @@ public class SupportedTypesTestDelegate {
     public void stores_and_reads_short_integers() throws SQLException {
         Short value = 10;
         List<Tuple2<Short, Short>> foundValues =
-                storeAndReadValuesBack("SMALLINT", ResultSetReaders::asShort, bind((Short) null), bind(value));
+                storeAndReadValuesBack("SMALLINT", ResultSetReaders::asShort, bindShort(null), bindShort(value));
         assertThat(foundValues.size(), is(1));
         assertThat(foundValues.get(0)._1, is(nullValue()));
         assertThat(foundValues.get(0)._2, is(value));
@@ -191,7 +191,7 @@ public class SupportedTypesTestDelegate {
     public void stores_and_reads_doubles_as_floats() throws SQLException {
         Double value = 10.0;
         List<Tuple2<Double, Double>> foundValues =
-                storeAndReadValuesBack("FLOAT", ResultSetReaders::asDouble, bind((Double) null), bind(value));
+                storeAndReadValuesBack("FLOAT", ResultSetReaders::asDouble, bindDouble(null), bindDouble(value));
         assertThat(foundValues.size(), is(1));
         assertThat(foundValues.get(0)._1, is(nullValue()));
         assertThat(foundValues.get(0)._2, is(value));
@@ -201,7 +201,7 @@ public class SupportedTypesTestDelegate {
     public void stores_and_reads_floats() throws SQLException {
         Float value = 10.0F;
         List<Tuple2<Float, Float>> foundValues =
-                storeAndReadValuesBack("REAL", ResultSetReaders::asFloat, bind((Float) null), bind(value));
+                storeAndReadValuesBack("REAL", ResultSetReaders::asFloat, bindFloat(null), bindFloat(value));
         assertThat(foundValues.size(), is(1));
         assertThat(foundValues.get(0)._1, is(nullValue()));
         assertThat(foundValues.get(0)._2, is(value));
@@ -211,7 +211,7 @@ public class SupportedTypesTestDelegate {
     public void stores_and_reads_big_decimals_as_decimal() throws SQLException {
         BigDecimal value = BigDecimal.TEN;
         List<Tuple2<BigDecimal, BigDecimal>> foundValues =
-                storeAndReadValuesBack("DECIMAL", ResultSetReaders::asBigDecimal, bind((BigDecimal) null), bind(value));
+                storeAndReadValuesBack("DECIMAL", ResultSetReaders::asBigDecimal, bindBigDecimal(null), bindBigDecimal(value));
         assertThat(foundValues.size(), is(1));
         assertThat(foundValues.get(0)._1, is(nullValue()));
         assertThat(foundValues.get(0)._2, is(value));
@@ -221,7 +221,7 @@ public class SupportedTypesTestDelegate {
     public void stores_and_reads_big_decimals_as_numeric() throws SQLException {
         BigDecimal value = BigDecimal.TEN;
         List<Tuple2<BigDecimal, BigDecimal>> foundValues =
-                storeAndReadValuesBack("NUMERIC", ResultSetReaders::asBigDecimal, bind((BigDecimal) null), bind(value));
+                storeAndReadValuesBack("NUMERIC", ResultSetReaders::asBigDecimal, bindBigDecimal(null), bindBigDecimal(value));
         assertThat(foundValues.size(), is(1));
         assertThat(foundValues.get(0)._1, is(nullValue()));
         assertThat(foundValues.get(0)._2, is(value));
@@ -234,7 +234,7 @@ public class SupportedTypesTestDelegate {
         // and the assert will fail.
         Date value = new Date(1451606400000L);
         List<Tuple2<Date, Date>> foundValues =
-                storeAndReadValuesBack("DATE", ResultSetReaders::asDate, bind((Date) null), bind(value));
+                storeAndReadValuesBack("DATE", ResultSetReaders::asDate, bindDate(null), bindDate(value));
         assertThat(foundValues.size(), is(1));
         assertThat(foundValues.get(0)._1, is(nullValue()));
         assertThat(foundValues.get(0)._2, is(value));
@@ -244,7 +244,7 @@ public class SupportedTypesTestDelegate {
     public void stores_and_reads_bytes_as_smallints() throws SQLException {
         Byte value = 's';
         List<Tuple2<Byte, Byte>> foundValues =
-                storeAndReadValuesBack("SMALLINT", ResultSetReaders::asByte, bind((Byte) null), bind(value));
+                storeAndReadValuesBack("SMALLINT", ResultSetReaders::asByte, bindByte(null), bindByte(value));
         assertThat(foundValues.size(), is(1));
         assertThat(foundValues.get(0)._1, is(nullValue()));
         assertThat(foundValues.get(0)._2, is(value));

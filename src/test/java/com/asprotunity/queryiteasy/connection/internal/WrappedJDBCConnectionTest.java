@@ -1,5 +1,6 @@
 package com.asprotunity.queryiteasy.connection.internal;
 
+import com.asprotunity.queryiteasy.connection.InputParameterBinders;
 import com.asprotunity.queryiteasy.exception.InvalidArgumentException;
 import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
@@ -13,7 +14,6 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
-import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bindBlob;
 import static com.asprotunity.queryiteasy.connection.ResultSetReaders.asInteger;
 import static org.junit.Assert.fail;
@@ -197,7 +197,7 @@ public class WrappedJDBCConnectionTest {
         String sql = "INSERT INTO foo VALUES(?)";
         PreparedStatement preparedStatement = prepareStatement(sql);
 
-        wrappedJDBCConnection.update(sql, Arrays.asList(batch(bind(10)), batch(bind(20))));
+        wrappedJDBCConnection.update(sql, Arrays.asList(batch(InputParameterBinders.bindInteger(10)), batch(InputParameterBinders.bindInteger(20))));
 
         InOrder order = inOrder(preparedStatement);
         order.verify(preparedStatement, times(1)).setObject(1, 10, Types.INTEGER);

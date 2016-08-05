@@ -12,7 +12,6 @@ import java.io.Reader;
 import java.sql.PreparedStatement;
 import java.sql.Types;
 
-import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
@@ -38,98 +37,98 @@ public class InputParameterBindersTest {
     @Test
     public void binds_strings() throws Exception {
         String value = "astring";
-        bind(value).bind(preparedStatement, position, scope);
+        InputParameterBinders.bindString(value).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setString(position, value);
     }
 
     @Test
     public void binds_valid_shorts() throws Exception {
         short value = 10;
-        bind(value).bind(preparedStatement, position, scope);
+        InputParameterBinders.bindShort(value).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, value, Types.SMALLINT);
     }
 
     @Test
     public void binds_null_shorts() throws Exception {
-        bind((Short) null).bind(preparedStatement, position, scope);
+        InputParameterBinders.bindShort(null).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, null, Types.SMALLINT);
     }
 
     @Test
     public void binds_valid_integers() throws Exception {
         int value = 10;
-        bind(value).bind(preparedStatement, position, scope);
+        InputParameterBinders.bindInteger(value).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, value, Types.INTEGER);
     }
 
     @Test
     public void binds_null_integers() throws Exception {
-        bind((Integer) null).bind(preparedStatement, position, scope);
+        InputParameterBinders.bindInteger(null).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, null, Types.INTEGER);
     }
 
     @Test
     public void binds_valid_longs() throws Exception {
         long value = 10;
-        bind(value).bind(preparedStatement, position, scope);
+        InputParameterBinders.bindLong(value).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, value, Types.BIGINT);
     }
 
     @Test
     public void binds_null_longs() throws Exception {
-        bind((Long) null).bind(preparedStatement, position, scope);
+        InputParameterBinders.bindLong(null).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, null, Types.BIGINT);
     }
 
     @Test
     public void binds_valid_doubles() throws Exception {
         double value = 10;
-        bind(value).bind(preparedStatement, position, scope);
+        InputParameterBinders.bindDouble(value).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, value, Types.DOUBLE);
     }
 
     @Test
     public void binds_null_doubles() throws Exception {
-        bind((Double) null).bind(preparedStatement, position, scope);
+        InputParameterBinders.bindDouble(null).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, null, Types.DOUBLE);
     }
 
     @Test
     public void binds_valid_floats() throws Exception {
         float value = 10;
-        bind(value).bind(preparedStatement, position, scope);
+        InputParameterBinders.bindFloat(value).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, value, Types.REAL);
     }
 
     @Test
     public void binds_null_floats() throws Exception {
-        bind((Float) null).bind(preparedStatement, position, scope);
+        InputParameterBinders.bindFloat(null).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, null, Types.REAL);
     }
 
     @Test
     public void binds_valid_bytes() throws Exception {
         byte value = 10;
-        bind(value).bind(preparedStatement, position, scope);
+        InputParameterBinders.bindByte(value).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, value, Types.TINYINT);
     }
 
     @Test
     public void binds_null_bytes() throws Exception {
-        bind((Byte) null).bind(preparedStatement, position, scope);
+        InputParameterBinders.bindByte(null).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setObject(position, null, Types.TINYINT);
     }
 
     @Test
     public void binds_valid_bytearray() throws Exception {
         byte[] value = new byte[]{1, 2};
-        bind(value).bind(preparedStatement, position, scope);
+        InputParameterBinders.bindByteArray(value).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setBytes(position, value);
     }
 
     @Test
     public void binds_null_byte_array() throws Exception {
-        bind((byte[]) null).bind(preparedStatement, position, scope);
+        InputParameterBinders.bindByteArray(null).bind(preparedStatement, position, scope);
         verify(preparedStatement, times(1)).setBytes(position, null);
     }
 

@@ -1,7 +1,8 @@
-# Queryiteasy: a Java 8 wrapper to make JDBC easier to use #
+# Queryiteasy: a Java 8 wrapper to make JDBC easier to use
 
-Queryiteasy aims at making JDBC easier to use, less verbose, and easier to maintain by reducing the amount of boilerplate code for JDBC queries.
-Queryiteasy achieves its goals using some of the new Java 8 lambda and streams functionality.
+Queryiteasy makes the use of JDBC less verbose, and easier to use and maintain, by using the functional programming constructs in Java 8.
+
+Here is an example, if we have the table below:
 
 |Name  |SQL Type|
 |:-----|:-------|
@@ -9,24 +10,24 @@ Queryiteasy achieves its goals using some of the new Java 8 lambda and streams f
 |Band  |VARCHAR |
 |Year  |INTEGER |
 
-To query all songs from "Rolling Stones" published in 1975 we could do the following:
+To print all song titles from "Rolling Stones" published in 1975 we could do the following:
 
 With JDBC:
 ```java
 DataSource dataSource = ...;
 try (Connection connection = dataSource.getConnection();
-     PreparedStatement statement = connection.prepareStatement("SELECT title FROM song WHERE band = ? and year = ?")) {
+     PreparedStatement statement = 
+            connection.prepareStatement("SELECT title FROM song WHERE band = ? and year = ?")) {
      statement.setString(1, "Rolling Stones");
      statement.setInt(2, 1975);
      try (ResultSet rs = statement.executeQuery()) {
         while (rs.next()) {
-            // process result set
+            System.out.println(rs.getString("title"))
         }
      }
      
 } catch (SQLException e) {
-   // This is checked so either you manage it or declare it in 
-   // the throws clause of the surrounding method.
+   // Do something with the exception.
 }
 ```
 
@@ -35,23 +36,55 @@ With Queryiteasy:
 DataSource dataSource = ...;
 // The dataStore is created once and passed around in your code.
 Datastore dataStore = new DataStore(dataSource);
-dataStore.execute(connection -> connection.select(rowMapper,
-                                                  "SELECT title FROM song WHERE band = ? and year = ?", 
-                                                  bind("Rolling Stones"), bind(1975)));
-
+dataStore.execute(connection -> 
+       connection.select(resultSet->asString(resultSet, "title"),
+                         "SELECT title FROM song WHERE band = ? and year = ?", 
+                         bindString("Rolling Stones"), bindInteger(1975)).forEach(System.out::println)
+);
 ```
 
-`rowMapper` in the code above is a function that will map each row to a user defined class. The select then returns a stream for further processing—basically doing what the while loop does in the JDBC example.
-The method `Datastore.execute` defines also the transaction boundary—if any call inside the function passed as parameter throws an exception the transaction will be rolled back, otherwise, if everything goes well, it will be committed, eliminating the need for explicit calls to commit and rollback. The connection is always closed at the end of `execute`, eliminating the need for an explicit call to `Connection.close`.
-The SQLException checked exception has been wrapped in a runtime exception, RuntimeSQLException, so it won't interfere with the use of lambdas.
+Things to notice:
 
-To see other examples, have a look at the acceptance test classes in 
-[src/acceptanceTest/java/com/asprotunity/queryiteasy/acceptance_tests](src/acceptanceTest/java/com/asprotunity/queryiteasy/acceptance_tests).
- 
-To compile execute the "gradlew build" (or "gradlew.bat build" if in Windows) script. That will download the necessary
-gradle packages, compile the project and run all the tests.
+* The indexed parameters are bound by the `bindString` and `bindInteger` methods in the call itself, making it easier to spot potential mistakes
+* SQLException is wrapped in the unchecked [com.asprotunity.queryiteasy.exception.RuntimeSQLException](src/acceptanceTest/java/com/asprotunity/queryiteasy/exception/RuntimeSQLException.java), removing the need for lots of unnecessary try-catch blocks and throws clauses
+* The method `Datastore::execute` defines the transaction boundary—if any call inside the lambda passed as parameter throws an exception the transaction will be rolled back, otherwise, if everything goes well, it will be committed, eliminating the need for explicit commit and rollbacks
+* The connection is always closed automatically at the end of `execute`
 
-## Databases used for testing ##
+In addition to calls to `connection`, you can execute any other code you want inside the transaction. Here is another example:
+```java
+dataStore.execute(connection -> { // The transaction starts here
+    System.out.println("Starting the transaction!")
+    
+    // Do a batch insert.
+    connection.update("INSERT INTO song (title, band, year) VALUES (?, ?, ?)",
+                      asList(batch(bindString("Smoke on the Water"), bindString("Deep Purple"), bindInteger(1973)),
+                             batch(bindString("I Got the Blues"), bindString("Rolling Stones"), bindInteger(null)),
+                             batch(bindString("Hey Jude"), bindString("Beatles"), bindInteger(1968))));
+
+    System.out.println("About to commit the transaction!")
+}); // The transaction ends here. It commits (or rolls back, in case of errors) automatically.
+```
+
+[Here are some more examples](src/main/java/com/asprotunity/queryiteasy/examples), or you can also have a look at the acceptance tests 
+[here](src/acceptanceTest/java/com/asprotunity/queryiteasy/acceptance_tests/QueriesTest.java).
+
+## Main features ##
+
+* Almost no boilerplate code—e.g., connections, statements and result sets are closed automatically, no need for explicit call to commit or rollback.
+* Transactions boundaries clearly visible in code
+* Wraps SQLException with the unchecked exception [com.asprotunity.queryiteasy.exception.RuntimeSQLException](src/acceptanceTest/java/com/asprotunity/queryiteasy/exception/RuntimeSQLException.java), removing the need for lots of unnecessary try-catch blocks and throws clauses
+* Supports input, output and input-output parameters for queries (input only), and stored procedures and functions, in a clean and consistent way
+* Allows for easy customizations to support vendor specific SQL types
+* No special configuration—just put the jar in the classpath.
+* No dependencies on external libraries and frameworks
+
+
+## Building the and using the library
+To compile call `gradlew build` (or `gradlew.bat build` if in Windows) from the root folder. That will download the necessary
+gradle packages, compile the project and run all the tests. The jar will be put in the `build/libs` folder.
+To use it, you just need to copy the jar anywhere you like and put it in your classpath.
+
+## Databases used for testing
 
 Queryiteasy has been tested with:
 

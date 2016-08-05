@@ -19,7 +19,7 @@ import java.util.Properties;
 import static com.asprotunity.queryiteasy.acceptance_tests.DataSourceInstantiationAndAccess.instantiateDataSource;
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.loadProperties;
 import static com.asprotunity.queryiteasy.acceptance_tests.TestPropertiesLoader.prependTestDatasourcesConfigFolderPath;
-import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bind;
+import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bindString;
 import static com.asprotunity.queryiteasy.connection.ResultSetReaders.asString;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -70,13 +70,13 @@ public class MySQLSupportedTypesTest {
             connection.select(rs -> asString(rs, 1),
                               "SELECT CONCAT('DROP TABLE ', table_name, ' CASCADE')" +
                                       " FROM information_schema.tables WHERE table_schema = ?",
-                              bind(dbName))
+                              bindString(dbName))
                     .forEach(statement -> connection.update(statement));
 
             connection.select(rs -> asString(rs, 1),
                               "SELECT CONCAT('DROP ',routine_type,' `',routine_schema,'`.`',routine_name,'`;')" +
                                       " FROM information_schema.routines WHERE routine_schema = ?",
-                              bind(dbName))
+                              bindString(dbName))
                     .forEach(statement -> connection.update(statement));
 
 
@@ -189,7 +189,7 @@ public class MySQLSupportedTypesTest {
                                                         "DETERMINISTIC\n" +
                                                         "BEGIN\n" +
                                                         "   RETURN ?;\n" +
-                                                        "END", bind(expected))
+                                                        "END", bindString(expected))
         );
 
         StringOutputParameter outputParameter = new StringOutputParameter();

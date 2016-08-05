@@ -68,7 +68,7 @@ public class QueriesTest {
         dataStore.execute(connection -> {
             connection.update("CREATE TABLE testtable (intvalue INTEGER NOT NULL, textvalue VARCHAR(20) NOT NULL)");
             connection.update("INSERT INTO testtable (intvalue, textvalue) VALUES (?, ?)",
-                              bind(10), bind("text"));
+                              bindInteger(10), bindString("text"));
         });
 
         List<Tuple2<Integer, String>> found =
@@ -103,9 +103,9 @@ public class QueriesTest {
         dataStore.execute(connection -> {
             connection.update("CREATE TABLE testtable (intvalue INTEGER NOT NULL, textvalue VARCHAR(20) NOT NULL)");
             connection.update("INSERT INTO testtable (intvalue, textvalue) VALUES (?, ?)",
-                              asList(batch(bind(10), bind("text10")),
-                                     batch(bind(11), bind("text11")),
-                                     batch(bind(12), bind("text12"))));
+                              asList(batch(bindInteger(10), bindString("text10")),
+                                     batch(bindInteger(11), bindString("text11")),
+                                     batch(bindInteger(12), bindString("text12"))));
         });
 
         List<Tuple2<Integer, String>> found =
@@ -127,8 +127,8 @@ public class QueriesTest {
         dataStore.execute(connection -> {
             connection.update("CREATE TABLE testtable (intvalue INTEGER NOT NULL)");
             connection.update("INSERT INTO testtable (intvalue) VALUES (?)",
-                              asList(batch(bind(10)),
-                                     batch(bind(11))));
+                              asList(batch(bindInteger(10)),
+                                     batch(bindInteger(11))));
         });
 
         List<Integer> result =
@@ -148,15 +148,15 @@ public class QueriesTest {
         dataStore.execute(connection -> {
             connection.update("CREATE TABLE testtable (intvalue INTEGER NOT NULL, textvalue VARCHAR(20) NOT NULL)");
             connection.update("INSERT INTO testtable (intvalue, textvalue) VALUES (?, ?)",
-                              asList(batch(bind(10), bind("text10")),
-                                     batch(bind(11), bind("text11"))));
+                              asList(batch(bindInteger(10), bindString("text10")),
+                                     batch(bindInteger(11), bindString("text11"))));
         });
 
         List<Tuple2<Integer, String>> result =
                 dataStore.executeWithResult(
                         connection -> connection.select(rs -> new Tuple2<>(asInteger(rs, 1), asString(rs, 2)),
                                                         "SELECT intvalue, textvalue FROM testtable WHERE intvalue = ? AND textvalue = ?",
-                                                        bind(10), bind("text10")).collect(toList())
+                                                        bindInteger(10), bindString("text10")).collect(toList())
                 );
 
         assertThat(result.size(), is(1));
@@ -264,7 +264,7 @@ public class QueriesTest {
         String expected = "expectedResult";
         String result = dataStore.executeWithResult(
                 connection -> connection.call(rs -> asString(rs, 1),
-                                              "{call return_inparam(?)}", bind(expected)).findFirst().orElse(null)
+                                              "{call return_inparam(?)}", bindString(expected)).findFirst().orElse(null)
         );
 
         assertThat(result, is(expected));
