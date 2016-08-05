@@ -1,8 +1,8 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
 
-import com.asprotunity.queryiteasy.DataStore;
 import com.asprotunity.queryiteasy.connection.StringOutputParameter;
+import com.asprotunity.queryiteasy.datastore.DataStore;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;

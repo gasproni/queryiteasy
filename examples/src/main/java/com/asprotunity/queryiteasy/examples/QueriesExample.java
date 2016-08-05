@@ -1,6 +1,6 @@
 package com.asprotunity.queryiteasy.examples;
 
-import com.asprotunity.queryiteasy.DataStore;
+import com.asprotunity.queryiteasy.datastore.DataStore;
 import org.hsqldb.jdbc.JDBCDataSource;
 
 import java.util.List;

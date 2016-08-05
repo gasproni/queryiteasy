@@ -1,4 +1,4 @@
-package com.asprotunity.queryiteasy;
+package com.asprotunity.queryiteasy.datastore;
 
 import com.asprotunity.queryiteasy.connection.Connection;
 import com.asprotunity.queryiteasy.connection.internal.WrappedJDBCConnection;

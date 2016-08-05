@@ -1,4 +1,4 @@
-package com.asprotunity.queryiteasy;
+package com.asprotunity.queryiteasy.datastore;
 
 import com.asprotunity.queryiteasy.exception.InvalidArgumentException;
 import org.junit.Before;

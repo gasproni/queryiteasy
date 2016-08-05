@@ -1,9 +1,9 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
 
-import com.asprotunity.queryiteasy.DataStore;
 import com.asprotunity.queryiteasy.connection.InputParameter;
 import com.asprotunity.queryiteasy.connection.ResultSetReaders;
+import com.asprotunity.queryiteasy.datastore.DataStore;
 import com.asprotunity.queryiteasy.io.StringIO;
 
 import java.io.*;

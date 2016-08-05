@@ -1,6 +1,6 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
-import com.asprotunity.queryiteasy.DataStore;
+import com.asprotunity.queryiteasy.datastore.DataStore;
 import org.hsqldb.jdbc.JDBCDataSource;
 
 import javax.sql.DataSource;

@@ -1,7 +1,7 @@
 package com.asprotunity.queryiteasy.examples;
 
-import com.asprotunity.queryiteasy.DataStore;
 import com.asprotunity.queryiteasy.connection.InputParameter;
+import com.asprotunity.queryiteasy.datastore.DataStore;
 import com.asprotunity.queryiteasy.exception.RuntimeIOException;
 import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;

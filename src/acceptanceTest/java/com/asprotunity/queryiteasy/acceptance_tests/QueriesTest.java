@@ -1,10 +1,10 @@
 package com.asprotunity.queryiteasy.acceptance_tests;
 
-import com.asprotunity.queryiteasy.DataStore;
 import com.asprotunity.queryiteasy.connection.BlobInputOutputParameter;
 import com.asprotunity.queryiteasy.connection.BlobOutputParameter;
 import com.asprotunity.queryiteasy.connection.LongVarBinaryInputOutputParameter;
 import com.asprotunity.queryiteasy.connection.LongVarBinaryOutputParameter;
+import com.asprotunity.queryiteasy.datastore.DataStore;
 import com.asprotunity.queryiteasy.io.StringIO;
 import org.junit.After;
 import org.junit.BeforeClass;

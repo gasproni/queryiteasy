@@ -1,9 +1,9 @@
 package com.asprotunity.queryiteasy.examples;
 
-import com.asprotunity.queryiteasy.DataStore;
 import com.asprotunity.queryiteasy.connection.InputOutputParameter;
 import com.asprotunity.queryiteasy.connection.InputParameter;
 import com.asprotunity.queryiteasy.connection.OutputParameter;
+import com.asprotunity.queryiteasy.datastore.DataStore;
 import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import com.asprotunity.queryiteasy.scope.Scope;
 import org.postgresql.ds.PGSimpleDataSource;

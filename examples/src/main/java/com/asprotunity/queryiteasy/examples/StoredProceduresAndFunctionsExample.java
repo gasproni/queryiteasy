@@ -1,8 +1,8 @@
 package com.asprotunity.queryiteasy.examples;
 
-import com.asprotunity.queryiteasy.DataStore;
 import com.asprotunity.queryiteasy.connection.IntegerInputOutputParameter;
 import com.asprotunity.queryiteasy.connection.StringOutputParameter;
+import com.asprotunity.queryiteasy.datastore.DataStore;
 import org.hsqldb.jdbc.JDBCDataSource;
 
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
