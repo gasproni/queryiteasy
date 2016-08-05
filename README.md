@@ -46,7 +46,7 @@ dataStore.execute(connection ->
 Things to notice:
 
 * The positional parameters are bound by the `bindString` and `bindInteger` methods in the call itself, making it easier to spot potential mistakes
-* SQLException is wrapped in the unchecked [com.asprotunity.queryiteasy.exception.RuntimeSQLException](src/acceptanceTest/java/com/asprotunity/queryiteasy/exception/RuntimeSQLException.java), removing the need for lots of unnecessary try-catch blocks and throws clauses
+* SQLException is wrapped in the unchecked [com.asprotunity.queryiteasy.exception.RuntimeSQLException](src/main/java/com/asprotunity/queryiteasy/exception/RuntimeSQLException.java), removing the need for lots of unnecessary try-catch blocks and throws clauses
 * The method `Datastore::execute` defines the transaction boundary—if any call inside the lambda passed as parameter throws an exception the transaction will be rolled back, otherwise, if everything goes well, it will be committed, eliminating the need for explicit commit and rollbacks
 * The connection is always closed automatically at the end of `execute`
 
@@ -72,7 +72,7 @@ dataStore.execute(connection -> { // The transaction starts here
 
 * Almost no boilerplate code—e.g., connections, statements and result sets are closed automatically, no need for explicit call to commit or rollback.
 * Transactions boundaries clearly visible in code
-* Wraps SQLException with the unchecked exception [com.asprotunity.queryiteasy.exception.RuntimeSQLException](src/acceptanceTest/java/com/asprotunity/queryiteasy/exception/RuntimeSQLException.java), removing the need for lots of unnecessary try-catch blocks and throws clauses
+* Wraps SQLException with the unchecked exception [com.asprotunity.queryiteasy.exception.RuntimeSQLException](src/main/java/com/asprotunity/queryiteasy/exception/RuntimeSQLException.java), removing the need for lots of unnecessary try-catch blocks and throws clauses
 * Supports input, output and input-output parameters for queries (input only), and stored procedures and functions, in a clean and consistent way
 * Allows for easy customizations to support vendor specific SQL types
 * No special configuration—just put the jar in the classpath.
