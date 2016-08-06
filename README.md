@@ -70,7 +70,7 @@ dataStore.execute(connection -> { // The transaction starts here
 
 ## Main features ##
 
-* Almost no boilerplate code—e.g., connections, statements and result sets are closed automatically, no need for explicit call to commit or rollback.
+* Almost no boilerplate code—e.g., connections, statements and result sets are closed automatically, no need for explicit calls to commit or rollback.
 * Transactions boundaries clearly visible in code
 * Wraps SQLException with the unchecked exception [com.asprotunity.queryiteasy.exception.RuntimeSQLException](src/main/java/com/asprotunity/queryiteasy/exception/RuntimeSQLException.java), removing the need for lots of unnecessary try-catch blocks and throws clauses
 * Supports input, output and input-output parameters for queries (input only), and stored procedures and functions, in a clean and consistent way
