@@ -133,6 +133,26 @@ public class WrappedJDBCConnectionTest {
         verify(preparedStatement, times(0)).close();
     }
 
+    @Test(expected = InvalidArgumentException.class)
+    public void select_throws_exception_when_rowMapper_null() throws Exception {
+        wrappedJDBCConnection.select(null, "SELECT * FROM foo");
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void select_throws_exception_when_sql_null() throws Exception {
+        wrappedJDBCConnection.select(rs -> 1, null);
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void select_throws_exception_when_sql_empty() throws Exception {
+        wrappedJDBCConnection.select(rs -> 1, "");
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void select_throws_exception_when_parameters_null() throws Exception {
+        wrappedJDBCConnection.select(rs -> 1, "SELECT * FROM foo", (InputParameter[])null);
+    }
+
     @Test
     public void select_closes_query_scope_if_query_throws_exception() throws Exception {
         String sql = "SELECT * FROM foo where blob = ?";
