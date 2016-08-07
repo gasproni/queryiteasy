@@ -25,9 +25,10 @@ public class DataStore {
 
     /**
      * Executes the code inside the {@code transaction} lambda in a database transaction. If there are no exceptions the
-     * transaction is committed, otherwise it is rolled back and the exception re-thrown.
+     * transaction is committed and closed, otherwise it is rolled back and closed, and the exception re-thrown.
      * @param transaction The transaction to execute.
      * @throws InvalidArgumentException if {@code transaction == null}.
+     * @throws RuntimeSQLException If a {@link java.sql.SQLException} is thrown during the call.
      */
     public void execute(Consumer<Connection> transaction) {
         InvalidArgumentException.throwIfNull(transaction, "transaction");
@@ -43,10 +44,12 @@ public class DataStore {
 
     /**
      * Executes the transaction and returns {@code the result of transaction.apply(connection)}.
-     * If there are no errors the transaction is committed, otherwise it is rolled back and the exception re-thrown.
+     * If there are no exceptions the transaction is committed and closed, otherwise it is rolled back and closed,
+     * and the exception re-thrown.
      * @param transaction The transaction to execute.
      * @param <ResultType> A type provided by the caller.
      * @throws InvalidArgumentException if {@code transaction == null}.
+     * @throws RuntimeSQLException If a {@link java.sql.SQLException} is thrown during the call.
      */
     public <ResultType> ResultType executeWithResult(Function<Connection, ResultType> transaction) {
         InvalidArgumentException.throwIfNull(transaction, "transaction");
