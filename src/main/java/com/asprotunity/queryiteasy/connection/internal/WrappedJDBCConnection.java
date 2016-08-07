@@ -71,6 +71,9 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
 
     @Override
     public void update(String sql, InputParameter... parameters) {
+        InvalidArgumentException.throwIfNull(sql, "sql");
+        InvalidArgumentException.throwIf(sql.isEmpty(), "sql cannot be empty.");
+        InvalidArgumentException.throwIfNull(parameters, "parameters");
         RuntimeSQLException.execute(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql);
                  DefaultAutoCloseableScope scope = new DefaultAutoCloseableScope()) {
@@ -82,6 +85,9 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
 
     @Override
     public void update(String sql, List<Batch> batches) {
+        InvalidArgumentException.throwIfNull(sql, "sql");
+        InvalidArgumentException.throwIf(sql.isEmpty(), "sql cannot be empty.");
+        InvalidArgumentException.throwIfNull(batches, "batches");
         InvalidArgumentException.throwIf(batches.isEmpty(), "batches cannot be empty.");
         RuntimeSQLException.execute(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql);

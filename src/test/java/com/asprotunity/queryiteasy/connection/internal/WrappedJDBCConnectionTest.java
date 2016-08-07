@@ -1,5 +1,7 @@
 package com.asprotunity.queryiteasy.connection.internal;
 
+import com.asprotunity.queryiteasy.connection.Batch;
+import com.asprotunity.queryiteasy.connection.InputParameter;
 import com.asprotunity.queryiteasy.connection.InputParameterBinders;
 import com.asprotunity.queryiteasy.exception.InvalidArgumentException;
 import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
@@ -10,12 +12,13 @@ import org.mockito.InOrder;
 
 import java.io.InputStream;
 import java.sql.*;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bindBlob;
 import static com.asprotunity.queryiteasy.connection.ResultSetReaders.asInteger;
+import static java.util.Arrays.asList;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
@@ -75,6 +78,21 @@ public class WrappedJDBCConnectionTest {
         order.verify(preparedStatement, times(1)).execute();
         order.verify(blobStream, times(1)).close();
         order.verify(preparedStatement, times(1)).close();
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void update_throws_exception_when_parameter_array_null() throws Exception {
+        wrappedJDBCConnection.update("INSERT INTO foo VALUES(?)", (InputParameter[]) null);
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void update_throws_exception_when_sql_null() throws Exception {
+        wrappedJDBCConnection.update(null);
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void update_throws_exception_when_sql_empty() throws Exception {
+        wrappedJDBCConnection.update("");
     }
 
     @Test
@@ -197,7 +215,9 @@ public class WrappedJDBCConnectionTest {
         String sql = "INSERT INTO foo VALUES(?)";
         PreparedStatement preparedStatement = prepareStatement(sql);
 
-        wrappedJDBCConnection.update(sql, Arrays.asList(batch(InputParameterBinders.bindInteger(10)), batch(InputParameterBinders.bindInteger(20))));
+        wrappedJDBCConnection.update(sql,
+                                     asList(batch(InputParameterBinders.bindInteger(10)),
+                                            batch(InputParameterBinders.bindInteger(20))));
 
         InOrder order = inOrder(preparedStatement);
         order.verify(preparedStatement, times(1)).setObject(1, 10, Types.INTEGER);
@@ -210,10 +230,24 @@ public class WrappedJDBCConnectionTest {
 
     @Test(expected = InvalidArgumentException.class)
     public void batch_update_throws_exception_when_batch_list_empty() throws Exception {
-        String sql = "INSERT INTO foo VALUES(?)";
-        PreparedStatement preparedStatement = prepareStatement(sql);
+        wrappedJDBCConnection.update("INSERT INTO foo VALUES(?)", Collections.emptyList());
+    }
 
-        wrappedJDBCConnection.update(sql, Collections.emptyList());
+    @Test(expected = InvalidArgumentException.class)
+    public void batch_update_throws_exception_when_sql_empty() throws Exception {
+        wrappedJDBCConnection.update("", asList(batch(InputParameterBinders.bindInteger(10)),
+                                                batch(InputParameterBinders.bindInteger(20))));
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void batch_update_throws_exception_when_sql_null() throws Exception {
+        wrappedJDBCConnection.update(null, asList(batch(InputParameterBinders.bindInteger(10)),
+                                                batch(InputParameterBinders.bindInteger(20))));
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void batch_update_throws_exception_when_batch_list_null() throws Exception {
+        wrappedJDBCConnection.update("INSERT INTO foo VALUES(?)", (List<Batch>) null);
     }
 
     @Test
