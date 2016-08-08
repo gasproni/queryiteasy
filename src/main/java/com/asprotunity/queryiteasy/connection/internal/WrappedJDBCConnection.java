@@ -166,7 +166,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
 
     private void checkNoNullParameters(Parameter[] parameters) {
         for (int index = 0; index < parameters.length; ++index) {
-            InvalidArgumentException.throwIfNull(parameters[index], "parameters[" + index + 1 + "]");
+            InvalidArgumentException.throwIfNull(parameters[index], "parameters[" + (index + 1) + "]");
         }
     }
 
@@ -176,7 +176,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
             Parameter parameter = parameters[index];
             InvalidArgumentException.throwIf(
                     !(parameter instanceof InputParameter) && !foundParameters.add(parameter),
-                    "Output parameters cannot appear more than once. Found duplicate at: " + index + 1
+                    "Output parameters cannot appear more than once. Found duplicate at: " + (index + 1)
             );
 
         }

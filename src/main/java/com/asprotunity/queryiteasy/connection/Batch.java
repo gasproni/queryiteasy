@@ -20,7 +20,7 @@ public class Batch {
         InvalidArgumentException.throwIfNull(parameters, "parameters");
 
         for (int position = 0; position < parameters.length; ++position) {
-            InvalidArgumentException.throwIfNull(parameters[position], "parameters[" + position + 2 + "]");
+            InvalidArgumentException.throwIfNull(parameters[position], "parameters[" + (position + 2) + "]");
         }
         return new Batch(firstParameter, parameters);
     }
