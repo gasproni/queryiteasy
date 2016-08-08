@@ -4,13 +4,9 @@ import com.asprotunity.queryiteasy.connection.InputParameter;
 import com.asprotunity.queryiteasy.datastore.DataStore;
 import com.asprotunity.queryiteasy.exception.RuntimeIOException;
 import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import org.hsqldb.jdbc.JDBCDataSource;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.sql.ResultSet;
 
 
@@ -23,11 +19,11 @@ public class UserDefinedTypesExample {
     public static InputParameter bindSong(Song song) {
         return (statement, position, queryScope) -> {
             try {
-                ByteOutputStream baos = queryScope.add(new ByteOutputStream(), ByteOutputStream::close);
+                ByteArrayOutputStream baos = queryScope.add(new ByteArrayOutputStream(), ByteArrayOutputStream::close);
                 ObjectOutputStream oos = queryScope.add(new ObjectOutputStream(baos), ObjectOutputStream::close);
                 oos.writeObject(song);
                 oos.flush();
-                RuntimeSQLException.execute(() -> statement.setBytes(position, baos.getBytes()));
+                RuntimeSQLException.execute(() -> statement.setBytes(position, baos.toByteArray()));
             } catch (IOException exception) {
                 throw new RuntimeIOException(exception);
             }
