@@ -124,6 +124,9 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
 
     @Override
     public void call(String sql, Parameter... parameters) {
+        InvalidArgumentException.throwIfNull(sql, "sql");
+        InvalidArgumentException.throwIf(sql.isEmpty(), "sql cannot be empty.");
+        InvalidArgumentException.throwIfNull(parameters, "parameters");
         RuntimeSQLException.execute(() -> {
             try (CallableStatement statement = connection.prepareCall(sql);
                  DefaultAutoCloseableScope queryScope = new DefaultAutoCloseableScope()) {
@@ -136,6 +139,10 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
     @Override
     public <MappedRowType> Stream<MappedRowType> call(Function<ResultSet, MappedRowType> rowMapper, String sql,
                                                       Parameter... parameters) {
+        InvalidArgumentException.throwIfNull(rowMapper, "rowMapper");
+        InvalidArgumentException.throwIfNull(sql, "sql");
+        InvalidArgumentException.throwIf(sql.isEmpty(), "sql cannot be empty.");
+        InvalidArgumentException.throwIfNull(parameters, "parameters");
         return RuntimeSQLException.executeWithResult(() -> {
             DefaultAutoCloseableScope resultSetAndStatementScope =
                     connectionScope.add(new DefaultAutoCloseableScope(), DefaultAutoCloseableScope::close);

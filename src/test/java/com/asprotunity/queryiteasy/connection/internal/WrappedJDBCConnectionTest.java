@@ -3,6 +3,7 @@ package com.asprotunity.queryiteasy.connection.internal;
 import com.asprotunity.queryiteasy.connection.Batch;
 import com.asprotunity.queryiteasy.connection.InputParameter;
 import com.asprotunity.queryiteasy.connection.InputParameterBinders;
+import com.asprotunity.queryiteasy.connection.Parameter;
 import com.asprotunity.queryiteasy.exception.InvalidArgumentException;
 import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
@@ -214,6 +215,26 @@ public class WrappedJDBCConnectionTest {
         }
     }
 
+    @Test(expected = InvalidArgumentException.class)
+    public void call_with_results_throws_exception_when_rowMapper_null() throws Exception {
+        wrappedJDBCConnection.call(null, "{call someproc()}");
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void call_with_results_throws_exception_when_sql_null() throws Exception {
+        wrappedJDBCConnection.call(resultSet -> 1, null);
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void call_with_results_throws_exception_when_sql_empty() throws Exception {
+        wrappedJDBCConnection.call(resultSet -> 1, "");
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void call_with_results_throws_exception_when_parameters_null() throws Exception {
+        wrappedJDBCConnection.call(resultSet -> 1, "{call someproc()}", (Parameter[])null);
+    }
+
     @Test
     public void call_with_no_results_closes_query_scope_and_statement() throws Exception {
         String sql = "{call foo_func(?)}";
@@ -228,6 +249,21 @@ public class WrappedJDBCConnectionTest {
         order.verify(callableStatement, times(1)).execute();
         order.verify(blobStream, times(1)).close();
         verify(callableStatement, times(1)).close();
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void call_with_no_results_throws_exception_when_sql_null() throws Exception {
+        wrappedJDBCConnection.call(null);
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void call_with_no_results_throws_exception_when_sql_empty() throws Exception {
+        wrappedJDBCConnection.call("");
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void call_with_no_results_throws_exception_when_parameters_null() throws Exception {
+        wrappedJDBCConnection.call("{call someproc()}", (Parameter[]) null);
     }
 
     @Test
