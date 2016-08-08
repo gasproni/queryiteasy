@@ -48,9 +48,9 @@ public class StoredProceduresAndFunctionsExample {
     private static void storedProcedureOutputAndInputOutputParametersExample(DataStore dataStore) {
         dataStore.execute(
                 connection ->
-                        connection.update("CREATE PROCEDURE return_band_and_change_and_return_year(in ptitle VARCHAR(20), " +
-                                                  "                                                out pband VARCHAR(100), " +
-                                                  "                                                inout pyear INTEGER)\n" +
+                        connection.update("CREATE PROCEDURE change_year_and_return_band_and_previous_year_value(in ptitle VARCHAR(20), " +
+                                                  "                                                             out pband VARCHAR(100), " +
+                                                  "                                                             inout pyear INTEGER)\n" +
                                                   "MODIFIES SQL DATA\n" +
                                                   "BEGIN ATOMIC \n" +
                                                   "   DECLARE temp_year INTEGER;\n" +
@@ -64,7 +64,7 @@ public class StoredProceduresAndFunctionsExample {
         StringOutputParameter bandNameOutParam = new StringOutputParameter();
         IntegerInputOutputParameter yearInOutParam = new IntegerInputOutputParameter(2016);
         String title = "Hey Jude";
-        dataStore.execute(connection -> connection.call("{call return_band_and_change_and_return_year(?, ?, ?)}",
+        dataStore.execute(connection -> connection.call("{call change_year_and_return_band_and_previous_year_value(?, ?, ?)}",
                                                         bindString(title), bandNameOutParam, yearInOutParam));
 
         Integer newYearValue = dataStore.executeWithResult(

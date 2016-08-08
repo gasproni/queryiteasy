@@ -36,11 +36,17 @@ With Queryiteasy:
 DataSource dataSource = ...;
 // The dataStore is created once and passed around in your code.
 Datastore dataStore = new DataStore(dataSource);
-dataStore.execute(connection -> 
+dataStore.execute(connection -> { // The transactions starts here
+       // Any code here is executed inside the transaction.
+       System.out.println("Inside the transaction!");
+
        connection.select(resultSet->asString(resultSet, "title"),
                          "SELECT title FROM song WHERE band = ? and year = ?", 
-                         bindString("Rolling Stones"), bindInteger(1975)).forEach(System.out::println)
-);
+                         bindString("Rolling Stones"), bindInteger(1975)).forEach(System.out::println);
+
+       System.out.println("About to commit and leave the transaction!");
+
+}); // The transaction ends here. If no exceptions it will be committed automatically.
 ```
 
 Things to notice:
@@ -50,19 +56,18 @@ Things to notice:
 * The method `Datastore::execute` defines the transaction boundary—if any call inside the lambda passed as parameter throws an exception the transaction will be rolled back, otherwise, if everything goes well, it will be committed, eliminating the need for explicit commit and rollbacks
 * The connection is always closed automatically at the end of `execute`
 
-In addition to calls to `connection`, you can execute any other code you want inside the transaction. Here is another example:
-```java
-dataStore.execute(connection -> { // The transaction starts here
-    System.out.println("Starting the transaction!")
-    
-    // Do a batch insert.
-    connection.update("INSERT INTO song (title, band, year) VALUES (?, ?, ?)",
-                      asList(batch(bindString("Smoke on the Water"), bindString("Deep Purple"), bindInteger(1973)),
-                             batch(bindString("I Got the Blues"), bindString("Rolling Stones"), bindInteger(null)),
-                             batch(bindString("Hey Jude"), bindString("Beatles"), bindInteger(1968))));
+In addition to calls to `connection`, you can execute any other code you want inside the transaction. 
 
-    System.out.println("About to commit the transaction!")
-}); // The transaction ends here. It commits (or rolls back, in case of errors) automatically.
+Here is another example—this time a call to a stored procedure with input and input-output parameters:
+```java
+StringOutputParameter bandNameOutParam = new StringOutputParameter();
+IntegerInputOutputParameter yearInOutParam = new IntegerInputOutputParameter(2016);
+String title = "Hey Jude";
+dataStore.execute(connection -> connection.call("{call change_year_and_return_band_and_previous_year_value(?, ?, ?)}",
+                                                bindString(title), bandNameOutParam, yearInOutParam));
+ System.out.println("Title: " + title);
+ System.out.println("Band: " + bandNameOutParam.value()); // print the output value.
+ System.out.println("Previous year value: " + yearInOutParam.value()); // this prints the new value in the input-output parameter
 ```
 
 [Here are some more examples](examples/src/main/java/com/asprotunity/queryiteasy/examples), or you can also have a look at the acceptance tests 
@@ -72,7 +77,7 @@ dataStore.execute(connection -> { // The transaction starts here
 
 * Almost no boilerplate code—e.g., connections, statements and result sets are closed automatically, no need for explicit calls to commit or rollback.
 * Transactions boundaries clearly visible in code
-* Wraps SQLException with the unchecked exception [com.asprotunity.queryiteasy.exception.RuntimeSQLException](src/main/java/com/asprotunity/queryiteasy/exception/RuntimeSQLException.java), removing the need for lots of unnecessary try-catch blocks and throws clauses
+* Wraps `java.sql.SQLException` with the unchecked exception [`com.asprotunity.queryiteasy.exception.RuntimeSQLException`](src/main/java/com/asprotunity/queryiteasy/exception/RuntimeSQLException.java), removing the need for lots of unnecessary try-catch blocks and throws clauses
 * Supports input, output and input-output parameters for queries (input only), and stored procedures and functions, in a clean and consistent way
 * Allows for easy customizations to support vendor specific SQL types
 * No special configuration—just put the jar in the classpath.
