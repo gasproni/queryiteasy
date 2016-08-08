@@ -51,7 +51,8 @@ public interface Connection {
      * After the call, the input-output and output parameters passed to it will contain the new values set by the stored procedure / function.
      * @param sql The call code to execute. It may contain positional parameters (denoted by question marks).
      * @param parameters The values to bind to the positional parameters in the {@code sql} parameter.
-     * @throws InvalidArgumentException if any of the arguments is null or if {@code sql} is empty.
+     * @throws InvalidArgumentException if any of the arguments is null, if {@code sql} is empty,
+     *                                  or if any input-output or output parameters are used more than once.
      * @throws RuntimeSQLException If a {@link java.sql.SQLException} is thrown during the call.
      */
     void call(String sql, Parameter... parameters);
@@ -66,7 +67,8 @@ public interface Connection {
      * @return A lazy {@link java.util.stream.Stream} containing the results of {@code rowMapper} applied to each result
      *        in the {@link java.sql.ResultSet} returned by the underlying JDBC query.
      *        The stream must be consumed inside the transaction in which the select has been called.
-     * @throws InvalidArgumentException if any of the arguments is null or if {@code sql} is empty.
+     * @throws InvalidArgumentException if any of the arguments is null or if {@code sql} is empty,
+     *                                  or if any input-output or output parameters are used more than once.
      * @throws RuntimeSQLException If a {@link java.sql.SQLException} is thrown during the call.
      */
     <MappedRowType> Stream<MappedRowType> call(Function<ResultSet, MappedRowType> rowMapper, String sql,

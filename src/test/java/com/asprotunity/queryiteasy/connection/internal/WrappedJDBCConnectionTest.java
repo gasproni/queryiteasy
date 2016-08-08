@@ -1,9 +1,6 @@
 package com.asprotunity.queryiteasy.connection.internal;
 
-import com.asprotunity.queryiteasy.connection.Batch;
-import com.asprotunity.queryiteasy.connection.InputParameter;
-import com.asprotunity.queryiteasy.connection.InputParameterBinders;
-import com.asprotunity.queryiteasy.connection.Parameter;
+import com.asprotunity.queryiteasy.connection.*;
 import com.asprotunity.queryiteasy.exception.InvalidArgumentException;
 import com.asprotunity.queryiteasy.exception.RuntimeSQLException;
 import com.asprotunity.queryiteasy.scope.AutoCloseableScope;
@@ -13,11 +10,13 @@ import org.mockito.InOrder;
 
 import java.io.InputStream;
 import java.sql.*;
+import java.sql.Connection;
 import java.util.Collections;
 import java.util.List;
 
 import static com.asprotunity.queryiteasy.connection.Batch.batch;
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bindBlob;
+import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bindInteger;
 import static com.asprotunity.queryiteasy.connection.ResultSetReaders.asInteger;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.fail;
@@ -235,6 +234,32 @@ public class WrappedJDBCConnectionTest {
         wrappedJDBCConnection.call(resultSet -> 1, "{call someproc()}", (Parameter[])null);
     }
 
+    @Test(expected = InvalidArgumentException.class)
+    public void call_with_results_throws_exception_when_same_output_parameter_used_multiple_times() throws Exception {
+        StringOutputParameter parameter = new StringOutputParameter();
+        wrappedJDBCConnection.call(resultSet -> 1,
+                                   "{call someproc(?, ?, ?)}",
+                                   parameter, bindInteger(1), parameter);
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void call_with_results_throws_exception_when_same_input_output_parameter_used_multiple_times() throws Exception {
+        StringInputOutputParameter parameter = new StringInputOutputParameter("doesn't matter.");
+        wrappedJDBCConnection.call(resultSet -> 1,
+                                   "{call someproc(?, ?, ?)}",
+                                   parameter, bindInteger(1), parameter);
+    }
+
+    @Test
+    public void call_with_results_doesnt_throw_when_same_input_parameter_used_multiple_times() throws Exception {
+        InputParameter parameter = bindInteger(10);
+        prepareCall("{call someproc(?, ?, ?)}");
+        wrappedJDBCConnection.call(resultSet -> 1,
+                                   "{call someproc(?, ?, ?)}",
+                                   parameter, parameter, parameter);
+        // OK if no exception.
+    }
+
     @Test
     public void call_with_no_results_closes_query_scope_and_statement() throws Exception {
         String sql = "{call foo_func(?)}";
@@ -266,14 +291,37 @@ public class WrappedJDBCConnectionTest {
         wrappedJDBCConnection.call("{call someproc()}", (Parameter[]) null);
     }
 
+    @Test(expected = InvalidArgumentException.class)
+    public void call_with_no_results_throws_exception_when_same_output_parameter_used_multiple_times() throws Exception {
+        StringOutputParameter parameter = new StringOutputParameter();
+        wrappedJDBCConnection.call("{call someproc(?, ?, ?)}",
+                                   parameter, bindInteger(1), parameter);
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void call_with_no_results_throws_exception_when_same_input_output_parameter_used_multiple_times() throws Exception {
+        StringInputOutputParameter parameter = new StringInputOutputParameter("doesn't matter.");
+        wrappedJDBCConnection.call("{call someproc(?, ?, ?)}",
+                                   parameter, bindInteger(1), parameter);
+    }
+
+    @Test
+    public void call_with_no_results_doesnt_throw_when_same_input_parameter_used_multiple_times() throws Exception {
+        InputParameter parameter = bindInteger(10);
+        prepareCall("{call someproc(?, ?, ?)}");
+        wrappedJDBCConnection.call("{call someproc(?, ?, ?)}",
+                                   parameter, parameter, parameter);
+        // OK if no exception.
+    }
+
     @Test
     public void batch_update_executes_batch_and_closes_statement_correctly() throws Exception {
         String sql = "INSERT INTO foo VALUES(?)";
         PreparedStatement preparedStatement = prepareStatement(sql);
 
         wrappedJDBCConnection.update(sql,
-                                     asList(batch(InputParameterBinders.bindInteger(10)),
-                                            batch(InputParameterBinders.bindInteger(20))));
+                                     asList(batch(bindInteger(10)),
+                                            batch(bindInteger(20))));
 
         InOrder order = inOrder(preparedStatement);
         order.verify(preparedStatement, times(1)).setObject(1, 10, Types.INTEGER);
@@ -291,14 +339,14 @@ public class WrappedJDBCConnectionTest {
 
     @Test(expected = InvalidArgumentException.class)
     public void batch_update_throws_exception_when_sql_empty() throws Exception {
-        wrappedJDBCConnection.update("", asList(batch(InputParameterBinders.bindInteger(10)),
-                                                batch(InputParameterBinders.bindInteger(20))));
+        wrappedJDBCConnection.update("", asList(batch(bindInteger(10)),
+                                                batch(bindInteger(20))));
     }
 
     @Test(expected = InvalidArgumentException.class)
     public void batch_update_throws_exception_when_sql_null() throws Exception {
-        wrappedJDBCConnection.update(null, asList(batch(InputParameterBinders.bindInteger(10)),
-                                                batch(InputParameterBinders.bindInteger(20))));
+        wrappedJDBCConnection.update(null, asList(batch(bindInteger(10)),
+                                                batch(bindInteger(20))));
     }
 
     @Test(expected = InvalidArgumentException.class)
@@ -320,6 +368,8 @@ public class WrappedJDBCConnectionTest {
         order.verify(blobStream, times(1)).close();
         order.verify(preparedStatement, times(1)).close();
     }
+
+
 
     private PreparedStatement prepareStatement(String sql) throws SQLException {
         PreparedStatement result = mock(PreparedStatement.class);

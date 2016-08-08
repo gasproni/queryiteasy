@@ -14,6 +14,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -127,6 +128,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         InvalidArgumentException.throwIfNull(sql, "sql");
         InvalidArgumentException.throwIf(sql.isEmpty(), "sql cannot be empty.");
         InvalidArgumentException.throwIfNull(parameters, "parameters");
+        checkNoDuplicateOutputParameters(parameters);
         RuntimeSQLException.execute(() -> {
             try (CallableStatement statement = connection.prepareCall(sql);
                  DefaultAutoCloseableScope queryScope = new DefaultAutoCloseableScope()) {
@@ -143,6 +145,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         InvalidArgumentException.throwIfNull(sql, "sql");
         InvalidArgumentException.throwIf(sql.isEmpty(), "sql cannot be empty.");
         InvalidArgumentException.throwIfNull(parameters, "parameters");
+        checkNoDuplicateOutputParameters(parameters);
         return RuntimeSQLException.executeWithResult(() -> {
             DefaultAutoCloseableScope resultSetAndStatementScope =
                     connectionScope.add(new DefaultAutoCloseableScope(), DefaultAutoCloseableScope::close);
@@ -157,12 +160,25 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         });
     }
 
+    private void checkNoDuplicateOutputParameters(Parameter[] parameters) {
+        HashSet<Parameter> foundParameters = new HashSet<>();
+        for (int index = 0; index < parameters.length; ++index) {
+            Parameter parameter = parameters[index];
+            InvalidArgumentException.throwIf(
+                    !(parameter instanceof InputParameter) && !foundParameters.add(parameter),
+                    "Output parameters cannot appear more than once. Found duplicate at: " + index + 1
+            );
+
+        }
+    }
+
+
     private <MapperRowType> Stream<MapperRowType> executeQuery(Function<ResultSet, MapperRowType> rowMapper,
                                                                DefaultAutoCloseableScope resultSetAndStatementScope,
                                                                PreparedStatement statement) throws SQLException {
         ResultSet resultSet = resultSetAndStatementScope.add(statement.executeQuery(), ResultSet::close);
         return StreamSupport.stream(new ResultSetSpliterator(resultSet),
-                false)
+                                    false)
                 .onClose(resultSetAndStatementScope::close)
                 .map(rowMapper);
     }
