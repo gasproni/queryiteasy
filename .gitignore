@@ -3,4 +3,4 @@
 build/*
 jdbclibs/*
 test_datasources_config/*
-
+examples/build/*
