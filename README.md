@@ -2,6 +2,17 @@
 
 Queryiteasy makes the use of JDBC less verbose, and easier to use and maintain, by using the functional programming constructs in Java 8.
 
+## Main features
+
+* Almost no boilerplate code—e.g., connections, statements and result sets are closed automatically, no need for explicit calls to commit or rollback.
+* Transactions boundaries clearly visible in code
+* Wraps `java.sql.SQLException` with the unchecked exception [`com.asprotunity.queryiteasy.exception.RuntimeSQLException`](src/main/java/com/asprotunity/queryiteasy/exception/RuntimeSQLException.java), removing the need for lots of unnecessary try-catch blocks and throws clauses
+* Supports input, output and input-output parameters for queries (input only), and stored procedures and functions, in a clean and consistent way
+* Allows for easy customizations to support vendor specific SQL types. See example [here](examples/src/main/java/com/asprotunity/queryiteasy/examples/CustomPostgresBindersReadersAndParametersExample.java)
+* No special configuration—just put the jar in the classpath
+* No dependencies on external libraries and frameworks
+* Thoroughly tested (including mutation testing with [Pitest](http://pitest.org); to try it run `"gradlew pitest"` from the project root and the reports will be generated in `"build/reports/pitest"`)
+
 Here is an example, if we have the table below:
 
 |Name  |SQL Type|
@@ -46,7 +57,7 @@ dataStore.execute(connection -> { // The transactions starts here
 
        System.out.println("About to commit and leave the transaction!");
 
-}); // The transaction ends here. If no exceptions it will be committed automatically.
+}); // The transaction ends here. If no exceptions it will be committed automatically, otherwise it will be rolled back.
 ```
 
 Things to notice:
@@ -73,19 +84,8 @@ dataStore.execute(connection -> connection.call("{call change_year_and_return_ba
 [Here are some more examples](examples/src/main/java/com/asprotunity/queryiteasy/examples), or you can also have a look at the acceptance tests 
 [here](src/acceptanceTest/java/com/asprotunity/queryiteasy/acceptance_tests/QueriesTest.java).
 
-## Main features ##
-
-* Almost no boilerplate code—e.g., connections, statements and result sets are closed automatically, no need for explicit calls to commit or rollback.
-* Transactions boundaries clearly visible in code
-* Wraps `java.sql.SQLException` with the unchecked exception [`com.asprotunity.queryiteasy.exception.RuntimeSQLException`](src/main/java/com/asprotunity/queryiteasy/exception/RuntimeSQLException.java), removing the need for lots of unnecessary try-catch blocks and throws clauses
-* Supports input, output and input-output parameters for queries (input only), and stored procedures and functions, in a clean and consistent way
-* Allows for easy customizations to support vendor specific SQL types
-* No special configuration—just put the jar in the classpath.
-* No dependencies on external libraries and frameworks
-
-
 ## Building the and using the library
-To compile call `gradlew build` (or `gradlew.bat build` if in Windows) from the root folder. That will download the necessary
+To compile run `"gradlew build"` (or `"gradlew.bat build"` if in Windows) from the project root. That will download the necessary
 gradle packages, compile the project and run all the tests (except for the (non essential) ones requiring MySQL, Postgres, or Oracle, which require some specific configuration, which I still need to document). The jar will be put in the `build/libs` folder.
 To use it, you just need to copy the jar anywhere you like and put it in your classpath.
 

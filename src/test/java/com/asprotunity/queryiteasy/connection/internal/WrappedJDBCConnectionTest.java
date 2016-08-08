@@ -20,6 +20,8 @@ import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bindI
 import static com.asprotunity.queryiteasy.connection.ResultSetReaders.asInteger;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
@@ -307,9 +309,15 @@ public class WrappedJDBCConnectionTest {
         wrappedJDBCConnection.call("{call someproc()}", (Parameter[]) null);
     }
 
-    @Test(expected = InvalidArgumentException.class)
+    @Test
     public void call_with_no_results_throws_exception_when_parameters_array_has_null_values() throws Exception {
-        wrappedJDBCConnection.call("{call someproc(?, ?)}", bindInteger(10), null);
+        try {
+            wrappedJDBCConnection.call("{call someproc(?, ?)}", bindInteger(10), null);
+            fail("InvalidArgumentException expected.");
+        }
+        catch (InvalidArgumentException exception) {
+            assertThat(exception.getMessage(), is("parameters[2] cannot be null."));
+        }
     }
 
     @Test(expected = InvalidArgumentException.class)
@@ -319,11 +327,17 @@ public class WrappedJDBCConnectionTest {
                                    parameter, bindInteger(1), parameter);
     }
 
-    @Test(expected = InvalidArgumentException.class)
+    @Test
     public void call_with_no_results_throws_exception_when_same_input_output_parameter_used_multiple_times() throws Exception {
-        StringInputOutputParameter parameter = new StringInputOutputParameter("doesn't matter.");
-        wrappedJDBCConnection.call("{call someproc(?, ?, ?)}",
-                                   parameter, bindInteger(1), parameter);
+        try {
+            StringInputOutputParameter parameter = new StringInputOutputParameter("doesn't matter.");
+            wrappedJDBCConnection.call("{call someproc(?, ?, ?)}",
+                                       parameter, bindInteger(1), parameter);
+            fail("InvalidArgumentException expected.");
+        }
+        catch (InvalidArgumentException exception) {
+            assertThat(exception.getMessage(), is("Output parameters cannot appear more than once. Found duplicate at: 3"));
+        }
     }
 
     @Test
@@ -364,9 +378,14 @@ public class WrappedJDBCConnectionTest {
                                                 batch(bindInteger(20))));
     }
 
-    @Test(expected = InvalidArgumentException.class)
+    @Test
     public void batch_update_throws_exception_when_batch_has_null_parameter_array_values() throws Exception {
-        wrappedJDBCConnection.update("", singletonList(batch(bindInteger(10), (InputParameter) null)));
+        try {
+            wrappedJDBCConnection.update("", singletonList(batch(bindInteger(10), (InputParameter) null)));
+            fail("InvalidArgumentException expected");
+        } catch (InvalidArgumentException exception) {
+            assertThat(exception.getMessage(), is("parameters[2] cannot be null."));
+        }
     }
 
     @Test(expected = InvalidArgumentException.class)
