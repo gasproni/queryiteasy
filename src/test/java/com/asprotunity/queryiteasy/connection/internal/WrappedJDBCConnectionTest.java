@@ -19,6 +19,7 @@ import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bindB
 import static com.asprotunity.queryiteasy.connection.InputParameterBinders.bindInteger;
 import static com.asprotunity.queryiteasy.connection.ResultSetReaders.asInteger;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
@@ -86,6 +87,11 @@ public class WrappedJDBCConnectionTest {
     }
 
     @Test(expected = InvalidArgumentException.class)
+    public void update_throws_exception_when_parameter_array_has_null_values() throws Exception {
+        wrappedJDBCConnection.update("INSERT INTO foo VALUES(?, ?)", bindInteger(10), null);
+    }
+
+    @Test(expected = InvalidArgumentException.class)
     public void update_throws_exception_when_sql_null() throws Exception {
         wrappedJDBCConnection.update(null);
     }
@@ -149,8 +155,13 @@ public class WrappedJDBCConnectionTest {
     }
 
     @Test(expected = InvalidArgumentException.class)
-    public void select_throws_exception_when_parameters_null() throws Exception {
-        wrappedJDBCConnection.select(rs -> 1, "SELECT * FROM foo", (InputParameter[])null);
+    public void select_throws_exception_when_parameters_array_null() throws Exception {
+        wrappedJDBCConnection.select(rs -> 1, "SELECT * FROM foo", (InputParameter[]) null);
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void select_throws_exception_when_parameters_array_has_null_values() throws Exception {
+        wrappedJDBCConnection.select(rs -> 1, "SELECT * FROM foo where x = ?", bindInteger(10), null);
     }
 
     @Test
@@ -230,8 +241,13 @@ public class WrappedJDBCConnectionTest {
     }
 
     @Test(expected = InvalidArgumentException.class)
-    public void call_with_results_throws_exception_when_parameters_null() throws Exception {
-        wrappedJDBCConnection.call(resultSet -> 1, "{call someproc()}", (Parameter[])null);
+    public void call_with_results_throws_exception_when_parameters_array_null() throws Exception {
+        wrappedJDBCConnection.call(resultSet -> 1, "{call someproc()}", (Parameter[]) null);
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void call_with_results_throws_exception_when_parameters_array_has_null_values() throws Exception {
+        wrappedJDBCConnection.call(resultSet -> 1, "{call someproc(?, ?)}", bindInteger(10), null);
     }
 
     @Test(expected = InvalidArgumentException.class)
@@ -287,8 +303,13 @@ public class WrappedJDBCConnectionTest {
     }
 
     @Test(expected = InvalidArgumentException.class)
-    public void call_with_no_results_throws_exception_when_parameters_null() throws Exception {
+    public void call_with_no_results_throws_exception_when_parameters_array_null() throws Exception {
         wrappedJDBCConnection.call("{call someproc()}", (Parameter[]) null);
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void call_with_no_results_throws_exception_when_parameters_array_has_null_values() throws Exception {
+        wrappedJDBCConnection.call("{call someproc(?, ?)}", bindInteger(10), null);
     }
 
     @Test(expected = InvalidArgumentException.class)
@@ -344,9 +365,19 @@ public class WrappedJDBCConnectionTest {
     }
 
     @Test(expected = InvalidArgumentException.class)
+    public void batch_update_throws_exception_when_batch_has_null_parameter_array_values() throws Exception {
+        wrappedJDBCConnection.update("", singletonList(batch(bindInteger(10), (InputParameter) null)));
+    }
+
+    @Test(expected = InvalidArgumentException.class)
+    public void batch_update_throws_exception_when_batch_has_null_parameters() throws Exception {
+        wrappedJDBCConnection.update("", singletonList(batch(bindInteger(10), (InputParameter[])null)));
+    }
+
+    @Test(expected = InvalidArgumentException.class)
     public void batch_update_throws_exception_when_sql_null() throws Exception {
         wrappedJDBCConnection.update(null, asList(batch(bindInteger(10)),
-                                                batch(bindInteger(20))));
+                                                  batch(bindInteger(20))));
     }
 
     @Test(expected = InvalidArgumentException.class)
@@ -361,14 +392,13 @@ public class WrappedJDBCConnectionTest {
 
         InputStream blobStream = mock(InputStream.class);
 
-        wrappedJDBCConnection.update(sql, Collections.singletonList(batch(bindBlob(() -> blobStream))));
+        wrappedJDBCConnection.update(sql, singletonList(batch(bindBlob(() -> blobStream))));
 
         InOrder order = inOrder(preparedStatement, blobStream);
         order.verify(preparedStatement, times(1)).executeBatch();
         order.verify(blobStream, times(1)).close();
         order.verify(preparedStatement, times(1)).close();
     }
-
 
 
     private PreparedStatement prepareStatement(String sql) throws SQLException {

@@ -75,6 +75,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         InvalidArgumentException.throwIfNull(sql, "sql");
         InvalidArgumentException.throwIf(sql.isEmpty(), "sql cannot be empty.");
         InvalidArgumentException.throwIfNull(parameters, "parameters");
+        checkNoNullParameters(parameters);
         RuntimeSQLException.execute(() -> {
             try (PreparedStatement statement = connection.prepareStatement(sql);
                  DefaultAutoCloseableScope scope = new DefaultAutoCloseableScope()) {
@@ -108,6 +109,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         InvalidArgumentException.throwIfNull(sql, "sql");
         InvalidArgumentException.throwIf(sql.isEmpty(), "sql cannot be empty.");
         InvalidArgumentException.throwIfNull(parameters, "parameters");
+        checkNoNullParameters(parameters);
         return RuntimeSQLException.executeWithResult(() -> {
             DefaultAutoCloseableScope resultSetAndStatementScope = connectionScope.add(new DefaultAutoCloseableScope(),
                                                                                        DefaultAutoCloseableScope::close);
@@ -128,6 +130,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         InvalidArgumentException.throwIfNull(sql, "sql");
         InvalidArgumentException.throwIf(sql.isEmpty(), "sql cannot be empty.");
         InvalidArgumentException.throwIfNull(parameters, "parameters");
+        checkNoNullParameters(parameters);
         checkNoDuplicateOutputParameters(parameters);
         RuntimeSQLException.execute(() -> {
             try (CallableStatement statement = connection.prepareCall(sql);
@@ -145,6 +148,7 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
         InvalidArgumentException.throwIfNull(sql, "sql");
         InvalidArgumentException.throwIf(sql.isEmpty(), "sql cannot be empty.");
         InvalidArgumentException.throwIfNull(parameters, "parameters");
+        checkNoNullParameters(parameters);
         checkNoDuplicateOutputParameters(parameters);
         return RuntimeSQLException.executeWithResult(() -> {
             DefaultAutoCloseableScope resultSetAndStatementScope =
@@ -158,6 +162,12 @@ public class WrappedJDBCConnection implements Connection, AutoCloseable {
                 throw ex;
             }
         });
+    }
+
+    private void checkNoNullParameters(Parameter[] parameters) {
+        for (int index = 0; index < parameters.length; ++index) {
+            InvalidArgumentException.throwIfNull(parameters[index], "parameters[" + index + 1 + "]");
+        }
     }
 
     private void checkNoDuplicateOutputParameters(Parameter[] parameters) {
