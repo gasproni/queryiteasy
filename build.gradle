@@ -19,6 +19,8 @@ apply plugin: "info.solidsoft.pitest"
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'findbugs'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
 sourceSets {
     acceptanceTest {
@@ -46,8 +48,69 @@ task acceptanceTest(type: Test, dependsOn: test) {
     reports.html.destination = buildDir.path +'/reports/acceptanceTest'
 }
 
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from tasks.javadoc.destinationDir
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
 check {
     dependsOn(tasks.acceptanceTest)
+}
+
+artifacts {
+    archives jar
+
+    archives javadocJar
+    archives sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: sonatypeUsername, password: sonatypePassword)
+            }
+
+            pom.project {
+                name 'queryiteasy'
+                packaging 'jar'
+                description 'A Java 8 wrapper to make JDBC easier to use'
+                url repositoryUrl
+
+                scm {
+                    url 'scm:git:https://github.com/gasproni/queryiteasy.git'
+                    connection 'scm:git:https://github.com/gasproni/queryiteasy.git'
+                    developerConnection 'scm:git:https://github.com/gasproni/queryiteasy.git'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'https://www.apache.org/licenses/LICENSE-2.0'
+                        distribution 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'gasproni'
+                        name 'Giovanni Asproni'
+                    }
+                }
+            }
+        }
+    }
 }
 
 findbugs {

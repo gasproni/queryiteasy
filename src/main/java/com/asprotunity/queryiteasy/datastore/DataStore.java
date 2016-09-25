@@ -50,6 +50,7 @@ public class DataStore {
      * @param <ResultType> A type provided by the caller.
      * @throws InvalidArgumentException if {@code transaction == null}.
      * @throws RuntimeSQLException If a {@link java.sql.SQLException} is thrown during the call.
+     * @return The result of the transaction.
      */
     public <ResultType> ResultType executeWithResult(Function<Connection, ResultType> transaction) {
         InvalidArgumentException.throwIfNull(transaction, "transaction");
