@@ -2,6 +2,9 @@
 
 Queryiteasy makes the use of JDBC less verbose, and easier to use and maintain, by using the functional programming constructs in Java 8.
 
+The binaries are available for download from maven central with group id "asprotunity.com"
+and artifact id "queryiteasy".
+
 ## Main features
 
 * Almost no boilerplate code—e.g., connections, statements and result sets are closed automatically, no need for explicit calls to commit or rollback.
