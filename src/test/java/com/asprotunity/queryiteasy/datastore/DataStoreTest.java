@@ -11,9 +11,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 public class DataStoreTest {
@@ -62,7 +66,7 @@ public class DataStoreTest {
     @Test
     public void when_exception_thrown_rollbacks_and_closes_transaction_in_this_order_and_doesnt_commit()
             throws java.sql.SQLException {
-        assertRollbackAndCloseCalledInThisOrderAndCommitNeverCalled(() -> dataStore.execute(connection -> {
+        assertRollbackAndCloseCalledInThisOrderAndCommitNeverCalledWhenExceptionThrown(() -> dataStore.execute(connection -> {
             throw new RuntimeException();
         }));
     }
@@ -70,7 +74,7 @@ public class DataStoreTest {
     @Test
     public void when_exception_thrown_rollbacks_and_closes_transaction_in_this_order_and_doesnt_commit_query()
             throws java.sql.SQLException {
-        assertRollbackAndCloseCalledInThisOrderAndCommitNeverCalled(() -> dataStore.executeWithResult(connection -> {
+        assertRollbackAndCloseCalledInThisOrderAndCommitNeverCalledWhenExceptionThrown(() -> dataStore.executeWithResult(connection -> {
             throw new RuntimeException();
         }));
 
@@ -96,6 +100,67 @@ public class DataStoreTest {
         assertThat(queryResult, is(result));
     }
 
+    @Test
+    public void executes_and_commits_transaction_and_returns_result_asynchronously() throws SQLException {
+        AtomicBoolean transactionStarted = new AtomicBoolean(false);
+        AtomicBoolean continueTransaction = new AtomicBoolean(false);
+        String transactionResult = "this is the result";
+
+        CompletableFuture<String> futureResult = dataStore.executeWithResultAsync(connection -> {
+            transactionStarted.set(true);
+            while (!continueTransaction.get());
+            return transactionResult;
+        });
+
+        while (!transactionStarted.get());
+        assertThat(futureResult.isDone(), is(false));
+        continueTransaction.set(true);
+
+        assertThat(futureResult.join(), is(transactionResult));
+        assertCommitRollbackAndCloseCalledInThisOrder();
+    }
+
+    @Test
+    public void executes_and_commits_transaction_with_no_results_asynchronously() throws SQLException {
+        AtomicBoolean transactionStarted = new AtomicBoolean(false);
+        AtomicBoolean transactionEnded = new AtomicBoolean(false);
+        AtomicBoolean continueTransaction = new AtomicBoolean(false);
+
+        CompletableFuture<Void> futureResult = dataStore.executeAsync(connection -> {
+            transactionStarted.set(true);
+            while (!continueTransaction.get());
+            transactionEnded.set(true);
+        });
+
+        while (!transactionStarted.get());
+        assertThat(futureResult.isDone(), is(false));
+        assertThat(transactionEnded.get(), is(false));
+        continueTransaction.set(true);
+
+        futureResult.join();
+        assertThat(transactionEnded.get(), is(true));
+        assertCommitRollbackAndCloseCalledInThisOrder();
+    }
+
+    @Test
+    public void asynchronous_execution_rolls_back_transaction_correctly_when_exception_thrown()
+            throws ExecutionException, InterruptedException, SQLException {
+
+        assertRollbackAndCloseCalledInThisOrderAndCommitNeverCalledWhenExceptionThrown(() -> {
+            CompletableFuture<String> futureResult = dataStore.executeWithResultAsync(connection -> {
+                throw new RuntimeException();
+            });
+            futureResult.get();
+        });
+
+        assertRollbackAndCloseCalledInThisOrderAndCommitNeverCalledWhenExceptionThrown(() -> {
+            CompletableFuture<Void> futureResult = dataStore.executeAsync(connection -> {
+                throw new RuntimeException();
+            });
+            futureResult.get();
+        });
+    }
+
     private void assertCommitRollbackAndCloseCalledInThisOrder() throws SQLException {
         InOrder order = inOrder(jdbcConnection);
         order.verify(jdbcConnection, times(1)).commit();
@@ -103,20 +168,20 @@ public class DataStoreTest {
         order.verify(jdbcConnection, times(1)).close();
     }
 
-    private void assertRollbackAndCloseCalledInThisOrderAndCommitNeverCalled(VoidCodeBlock codeBlock) throws SQLException {
+    private void assertRollbackAndCloseCalledInThisOrderAndCommitNeverCalledWhenExceptionThrown(VoidCodeBlock codeBlock) throws SQLException {
         try {
             codeBlock.execute();
+            fail("Exception expected!");
         } catch (Exception ignored) {
+            verify(jdbcConnection, times(0)).commit();
+            InOrder order = inOrder(jdbcConnection);
+            order.verify(jdbcConnection, times(1)).rollback();
+            order.verify(jdbcConnection, times(1)).close();
         }
-
-        verify(jdbcConnection, times(0)).commit();
-        InOrder order = inOrder(jdbcConnection);
-        order.verify(jdbcConnection, times(1)).rollback();
-        order.verify(jdbcConnection, times(1)).close();
     }
 
     @FunctionalInterface
     public interface VoidCodeBlock {
-        void execute();
+        void execute() throws Exception;
     }
 }
